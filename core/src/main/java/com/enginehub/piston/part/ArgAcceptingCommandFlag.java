@@ -13,10 +13,10 @@ public abstract class ArgAcceptingCommandFlag<T> implements CommandFlag, ArgAcce
                                          String description,
                                          ArgumentConverter<T> converter) {
         return new AutoValue_ArgAcceptingCommandFlag.Builder<>()
-                .named(name)
-                .describedBy(description)
-                .convertedBy(converter)
-                .defaultsTo(ImmutableList.of());
+            .named(name)
+            .describedBy(description)
+            .convertedBy(converter)
+            .defaultsTo(ImmutableList.of());
     }
 
     @AutoValue.Builder
@@ -66,6 +66,6 @@ public abstract class ArgAcceptingCommandFlag<T> implements CommandFlag, ArgAcce
     @Override
     public String getTextRepresentation() {
         return "[-" + getName() +
-                " <" + getConverter().describeAcceptableArguments() + ">]";
+            " <" + getConverter().describeAcceptableArguments() + ">]";
     }
 }

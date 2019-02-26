@@ -24,8 +24,8 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
      * @return a converter using the given function and description
      */
     public static <T> SimpleArgumentConverter<T> from(
-            Function<String, Collection<T>> converter,
-            String description
+        Function<String, Collection<T>> converter,
+        String description
     ) {
         return new SimpleArgumentConverter<>(converter, description);
     }
@@ -42,8 +42,8 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
      * @return a converter using the given function and description
      */
     public static <T> SimpleArgumentConverter<T> fromSingle(
-            Function<String, T> converter,
-            String description
+        Function<String, T> converter,
+        String description
     ) {
         return from(x -> singleton(converter.apply(x)), description);
     }

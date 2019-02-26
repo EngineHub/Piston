@@ -21,11 +21,11 @@ abstract class CommandImpl implements Command {
 
     static Builder builder(String name) {
         return new AutoValue_CommandImpl.Builder()
-                .footer(null)
-                .condition(Condition.TRUE)
-                .name(name)
-                .parts(ImmutableList.of())
-                .action(NULL_ACTION);
+            .footer(null)
+            .condition(Condition.TRUE)
+            .name(name)
+            .parts(ImmutableList.of())
+            .action(NULL_ACTION);
     }
 
     @AutoValue.Builder
@@ -33,6 +33,9 @@ abstract class CommandImpl implements Command {
 
         @Override
         Builder name(String name);
+
+        @Override
+        Builder aliases(Collection<String> aliases);
 
         @Override
         Builder description(String description);
@@ -116,9 +119,9 @@ abstract class CommandImpl implements Command {
 
     private void appendArguments(StringBuilder builder) {
         List<CommandArgument<?>> args = getParts().stream()
-                .filter(x -> x instanceof CommandArgument)
-                .map(x -> (CommandArgument<?>) x)
-                .collect(Collectors.toList());
+            .filter(x -> x instanceof CommandArgument)
+            .map(x -> (CommandArgument<?>) x)
+            .collect(Collectors.toList());
         if (args.size() > 0) {
             builder.append("Arguments:\n");
             for (CommandArgument<?> arg : args) {
@@ -139,15 +142,15 @@ abstract class CommandImpl implements Command {
 
     private void appendFlags(StringBuilder builder) {
         List<CommandFlag> flags = getParts().stream()
-                .filter(x -> x instanceof CommandFlag)
-                .map(x -> (CommandFlag) x)
-                .collect(Collectors.toList());
+            .filter(x -> x instanceof CommandFlag)
+            .map(x -> (CommandFlag) x)
+            .collect(Collectors.toList());
         if (flags.size() > 0) {
             builder.append("Flags:\n");
             for (CommandFlag flag : flags) {
                 // produces text like "-f: Some description"
                 builder.append("  ").append(flag.getTextRepresentation())
-                        .append(": ").append(flag.getDescription()).append('\n');
+                    .append(": ").append(flag.getDescription()).append('\n');
             }
         }
     }

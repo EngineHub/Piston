@@ -22,10 +22,10 @@ public class PartHelper {
             }
         }
         Stream<String> flagsString = Stream.of(flags)
-                .filter(x -> !x.isEmpty())
-                .map(f -> f.stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.joining("", "[-", "]")));
+            .filter(x -> !x.isEmpty())
+            .map(f -> f.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining("", "[-", "]")));
         return Stream.concat(flagsString, other.build());
     }
 

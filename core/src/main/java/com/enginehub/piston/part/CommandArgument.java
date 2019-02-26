@@ -13,11 +13,11 @@ public abstract class CommandArgument<T> implements ArgAcceptingCommandPart<T> {
                                          String description,
                                          ArgumentConverter<T> converter) {
         return new AutoValue_CommandArgument.Builder<>()
-                .named(name)
-                .describedBy(description)
-                .convertedBy(converter)
-                .required()
-                .defaultsTo(ImmutableList.of());
+            .named(name)
+            .describedBy(description)
+            .convertedBy(converter)
+            .required()
+            .defaultsTo(ImmutableList.of());
     }
 
     @AutoValue.Builder

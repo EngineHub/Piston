@@ -1,10 +1,6 @@
 package com.enginehub.piston;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
@@ -43,6 +39,13 @@ public interface CommandManager {
         Command.Builder builder = newCommand(name);
         registrationProcess.accept(builder);
         register(builder.build());
+    }
+
+    /**
+     * Register an entire manager with this one, inheriting all of its commands.
+     */
+    default void registerManager(CommandManager manager) {
+        manager.getAllCommands().forEach(this::register);
     }
 
     /**

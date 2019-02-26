@@ -16,7 +16,7 @@ public class CaseHelper {
     // letter or start of a word
     // (?=\p{Lu}) -- positive lookahead for uppercase letters, according to Unicode.
     private static final Splitter CAPITAL_SPLITTER = Splitter.onPattern("(?<!^|\\s)(?=\\p{Lu})")
-            .omitEmptyStrings();
+        .omitEmptyStrings();
 
     /**
      * Convert a string from title case to spaced lower case.
@@ -30,14 +30,14 @@ public class CaseHelper {
      */
     public static String titleToSpacedLower(String titleCase) {
         return stream(CAPITAL_SPLITTER.split(titleCase))
-                .map(x -> {
-                    int firstCp = Character.toLowerCase(x.codePointAt(0));
-                    IntStream restCp = x.codePoints().skip(1);
-                    return concat(IntStream.of(firstCp), restCp)
-                            .collect(() -> new StringBuilder(x.length()),
-                                    StringBuilder::appendCodePoint,
-                                    StringBuilder::append);
-                }).collect(joining(" "));
+            .map(x -> {
+                int firstCp = Character.toLowerCase(x.codePointAt(0));
+                IntStream restCp = x.codePoints().skip(1);
+                return concat(IntStream.of(firstCp), restCp)
+                    .collect(() -> new StringBuilder(x.length()),
+                        StringBuilder::appendCodePoint,
+                        StringBuilder::append);
+            }).collect(joining(" "));
     }
 
 }

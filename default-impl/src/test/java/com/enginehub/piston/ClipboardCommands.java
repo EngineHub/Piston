@@ -12,19 +12,19 @@ import static com.enginehub.piston.part.CommandParts.flag;
 public class ClipboardCommands {
 
     private static final CommandArgument<Object> LEAVE_ID =
-            arg("leaveId", "Leaves this block in place of removed blocks")
-                    .convertedBy(SimpleArgumentConverter.fromSingle(x -> (Object) x, "pattern"))
-                    .defaultsTo(ImmutableList.of("air"))
-                    .build();
+        arg("leaveId", "Leaves this block in place of removed blocks")
+            .convertedBy(SimpleArgumentConverter.fromSingle(x -> (Object) x, "pattern"))
+            .defaultsTo(ImmutableList.of("air"))
+            .build();
     private static final CommandFlag COPY_ENTITIES =
-            flag('e', "Also copy entities").build();
+        flag('e', "Also copy entities").build();
     private static final CommandFlag CUT_ENTITIES =
-            flag('e', "Also cut entities").build();
+        flag('e', "Also cut entities").build();
     private static final ArgAcceptingCommandFlag<Object> MASK =
-            flag('m', "Add a source mask, excluded blocks become air in the paste")
-                    .withRequiredArg()
-                    .convertedBy(SimpleArgumentConverter.fromSingle(x -> (Object) x, "mask"))
-                    .build();
+        flag('m', "Add a source mask, excluded blocks become air in the paste")
+            .withRequiredArg()
+            .convertedBy(SimpleArgumentConverter.fromSingle(x -> (Object) x, "mask"))
+            .build();
 
     public static void main(String[] args) {
         CommandManager manager = DefaultCommandManangerService.getInstance().newCommandManager();
@@ -34,15 +34,15 @@ public class ClipboardCommands {
 
     public void register(CommandManager manager) {
         manager.register("/copy", cmd ->
-                cmd.description("Copy the selection to the clipboard")
-                        .footer("WARNING: Pasting entities cannot yet be undone!")
-                        .addParts(COPY_ENTITIES, MASK)
-                        .action(this::copy));
+            cmd.description("Copy the selection to the clipboard")
+                .footer("WARNING: Pasting entities cannot yet be undone!")
+                .addParts(COPY_ENTITIES, MASK)
+                .action(this::copy));
         manager.register("/cut", cmd ->
-                cmd.description("Cut the selection to the clipboard")
-                        .footer("WARNING: Cutting and pasting entities cannot yet be undone!")
-                        .addParts(CUT_ENTITIES, MASK, LEAVE_ID)
-                        .action(this::cut));
+            cmd.description("Cut the selection to the clipboard")
+                .footer("WARNING: Cutting and pasting entities cannot yet be undone!")
+                .addParts(CUT_ENTITIES, MASK, LEAVE_ID)
+                .action(this::cut));
     }
 
     private int copy(CommandParameters params) {

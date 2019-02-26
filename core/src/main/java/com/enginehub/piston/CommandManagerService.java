@@ -4,7 +4,8 @@ package com.enginehub.piston;
  * Service for providing {@link CommandManager}s.
  *
  * <p>
- * If registered as specified in {@link java.util.ServiceLoader}, {@link DefaultCommandManangerService} will automatically
+ * If registered as specified in {@link java.util.ServiceLoader}, {@link
+ * DefaultCommandManangerService} will automatically
  * load the service and use it for providing {@link CommandManager}s.
  * </p>
  */

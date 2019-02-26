@@ -81,6 +81,8 @@ public interface Command {
 
         Builder name(String name);
 
+        Builder aliases(Collection<String> aliases);
+
         Builder description(String description);
 
         Builder footer(@Nullable String footer);
@@ -102,6 +104,8 @@ public interface Command {
     }
 
     String getName();
+
+    ImmutableList<String> getAliases();
 
     String getDescription();
 

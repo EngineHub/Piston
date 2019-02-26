@@ -9,8 +9,8 @@ public abstract class NoArgCommandFlag implements CommandFlag {
     public static NoArgCommandFlag.Builder builder(char name,
                                                    String description) {
         return new AutoValue_NoArgCommandFlag.Builder()
-                .named(name)
-                .describedBy(description);
+            .named(name)
+            .describedBy(description);
     }
 
     @AutoValue.Builder
@@ -31,9 +31,9 @@ public abstract class NoArgCommandFlag implements CommandFlag {
         public final ArgAcceptingCommandFlag.Builder<String> withRequiredArg() {
             NoArgCommandFlag flag = build();
             return ArgAcceptingCommandFlag.builder(
-                    flag.getName(),
-                    flag.getDescription(),
-                    ArgumentConverters.forString()
+                flag.getName(),
+                flag.getDescription(),
+                ArgumentConverters.forString()
             );
         }
 

@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class ArgumentConverters {
 
     private static final ArgumentConverter<String> STRING_ARGUMENT_CONVERTER =
-            SimpleArgumentConverter.fromSingle(Function.identity(), "any text");
+        SimpleArgumentConverter.fromSingle(Function.identity(), "any text");
 
     public static ArgumentConverter<String> forString() {
         return STRING_ARGUMENT_CONVERTER;
@@ -33,7 +33,7 @@ public class ArgumentConverters {
         MethodHandle handle;
         try {
             handle = MethodHandles.publicLookup().findStatic(
-                    c, "valueOf", MethodType.methodType(c, String.class)
+                c, "valueOf", MethodType.methodType(c, String.class)
             );
         } catch (NoSuchMethodException | IllegalAccessException e) {
             return Optional.empty();
@@ -51,7 +51,7 @@ public class ArgumentConverters {
         MethodHandle handle;
         try {
             handle = MethodHandles.publicLookup().findConstructor(
-                    c, MethodType.methodType(void.class, String.class)
+                c, MethodType.methodType(void.class, String.class)
             );
         } catch (NoSuchMethodException | IllegalAccessException e) {
             return Optional.empty();
@@ -62,19 +62,19 @@ public class ArgumentConverters {
 
     private static <T> SimpleArgumentConverter<T> converterForHandle(MethodHandle handle, Class<?> type) {
         return SimpleArgumentConverter.fromSingle(
-                arg -> {
-                    try {
-                        // safe, the handle has a return type of `c`.
-                        // `c`'s type is T.
-                        @SuppressWarnings("unchecked")
-                        T result = (T) handle.invokeExact(arg);
-                        return result;
-                    } catch (Throwable throwable) {
-                        Throwables.throwIfUnchecked(throwable);
-                        throw new RuntimeException(throwable);
-                    }
-                },
-                "any " + CaseHelper.titleToSpacedLower(type.getSimpleName())
+            arg -> {
+                try {
+                    // safe, the handle has a return type of `c`.
+                    // `c`'s type is T.
+                    @SuppressWarnings("unchecked")
+                    T result = (T) handle.invokeExact(arg);
+                    return result;
+                } catch (Throwable throwable) {
+                    Throwables.throwIfUnchecked(throwable);
+                    throw new RuntimeException(throwable);
+                }
+            },
+            "any " + CaseHelper.titleToSpacedLower(type.getSimpleName())
         );
     }
 
@@ -83,8 +83,8 @@ public class ArgumentConverters {
     }
 
     private static final List<ACProvider<Object>> PROVIDERS = ImmutableList.of(
-            ArgumentConverters::valueOfConverters,
-            ArgumentConverters::constructorConverters
+        ArgumentConverters::valueOfConverters,
+        ArgumentConverters::constructorConverters
     );
 
     public static <T> ArgumentConverter<T> get(TypeToken<T> type) {
@@ -99,11 +99,11 @@ public class ArgumentConverters {
         // `type` was originally T, so the converter will provide T.
         @SuppressWarnings("unchecked")
         ArgumentConverter<T> result = (ArgumentConverter<T>) PROVIDERS.stream()
-                .map(x -> x.provideAc(raw))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("No built-in converters for " + type));
+            .map(x -> x.provideAc(raw))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("No built-in converters for " + type));
         return result;
     }
 

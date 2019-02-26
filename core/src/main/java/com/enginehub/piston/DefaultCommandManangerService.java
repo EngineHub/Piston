@@ -27,8 +27,8 @@ public class DefaultCommandManangerService implements CommandManagerService {
     private static CommandManagerService getDefaultService() {
         ServiceLoader<CommandManagerService> loader = ServiceLoader.load(CommandManagerService.class);
         return stream(loader.iterator())
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No default service available."));
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No default service available."));
     }
 
     private final Lock sealLock = new ReentrantLock();
