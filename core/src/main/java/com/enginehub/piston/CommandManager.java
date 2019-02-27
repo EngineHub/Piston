@@ -19,7 +19,10 @@
 
 package com.enginehub.piston;
 
+import com.google.inject.Key;
+
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -66,6 +69,16 @@ public interface CommandManager {
     default void registerManager(CommandManager manager) {
         manager.getAllCommands().forEach(this::register);
     }
+
+    /**
+     * Inject a value into this manager. It will be provided by
+     * {@link CommandParameters#injectedValue(Key)}.
+     *
+     * @param key the key for the value
+     * @param supplier the supplier of the value
+     * @param <T> the type of the value
+     */
+    <T> void injectValue(Key<T> key, Supplier<T> supplier);
 
     /**
      * Retrieve all commands that are registered.

@@ -30,7 +30,8 @@ import java.util.Collection;
 public abstract class RequiredVariable {
 
     public static Builder builder() {
-        return new AutoValue_RequiredVariable.Builder();
+        return new AutoValue_RequiredVariable.Builder()
+            .annotations(ImmutableList.of());
     }
 
     @AutoValue.Builder

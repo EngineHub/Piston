@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 
 import javax.annotation.Nullable;
+import javax.lang.model.element.ExecutableElement;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -40,6 +41,9 @@ public abstract class CommandInfo {
 
     @AutoValue.Builder
     public interface Builder {
+
+        Builder commandMethod(ExecutableElement method);
+
         Builder name(String name);
 
         Builder aliases(Collection<String> aliases);
@@ -64,6 +68,8 @@ public abstract class CommandInfo {
 
     CommandInfo() {
     }
+
+    public abstract ExecutableElement getCommandMethod();
 
     public abstract String getName();
 

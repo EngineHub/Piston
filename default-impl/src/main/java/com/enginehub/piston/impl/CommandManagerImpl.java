@@ -21,13 +21,17 @@ package com.enginehub.piston.impl;
 
 import com.enginehub.piston.Command;
 import com.enginehub.piston.CommandManager;
+import com.google.inject.Key;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class CommandManagerImpl implements CommandManager {
-    private final Map<String, Command> commands = new HashMap<>();
+    private final Map<String, Command> commands = new ConcurrentHashMap<>();
+    private final Map<Key<?>, Supplier<?>> injectedValues = new ConcurrentHashMap<>();
 
     @Override
     public Command.Builder newCommand(String name) {
@@ -44,4 +48,8 @@ public class CommandManagerImpl implements CommandManager {
         return commands.values().stream();
     }
 
+    @Override
+    public <T> void injectValue(Key<T> key, Supplier<T> supplier) {
+        injectedValues.put(key, supplier);
+    }
 }

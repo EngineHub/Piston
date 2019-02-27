@@ -21,11 +21,11 @@ package com.enginehub.piston;
 
 import com.enginehub.piston.part.ArgAcceptingCommandPart;
 import com.enginehub.piston.part.CommandPart;
+import com.google.inject.Key;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-public interface CommandParameters<C> {
+public interface CommandParameters {
 
     /**
      * Determine if the execution will also include a sub-command.
@@ -60,9 +60,7 @@ public interface CommandParameters<C> {
     <T> List<T> valuesOf(ArgAcceptingCommandPart<T> part);
 
     /**
-     * Get the command context.
+     * Get an injected value. Provide value injectors to the manager.
      */
-    @Nullable
-    C getContext();
-
+    <T> T injectedValue(Key<T> key);
 }

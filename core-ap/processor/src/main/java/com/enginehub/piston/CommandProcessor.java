@@ -32,14 +32,17 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
+import com.squareup.javapoet.ClassName;
 
+import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -94,6 +97,7 @@ public class CommandProcessor extends BasicAnnotationProcessor {
     }
 
     private Set<Element> doProcess(Set<Element> elements) {
+        ClassName javaxInjectClassName = findJavaxInject();
         for (Element element : elements) {
             TypeElement type = asType(element);
             ImmutableList<CommandInfo> info = type.getEnclosedElements().stream()
@@ -103,7 +107,14 @@ public class CommandProcessor extends BasicAnnotationProcessor {
                 .map(this::getCommandInfo)
                 .collect(toImmutableList());
             try {
-                new CommandRegistrationGenerator(type.getSimpleName() + "Registration", info)
+                new CommandRegistrationGenerator(
+                    RegistrationInfo.builder()
+                        .name(type.getSimpleName() + "Registration")
+                        .targetClassName(ClassName.get(type))
+                        .classVisibility(visibility(type.getModifiers()))
+                        .commands(info)
+                        .javaxInjectClassName(javaxInjectClassName)
+                        .build())
                     .generate(element,
                         getPackage(element).getQualifiedName().toString(),
                         processingEnv.getFiler());
@@ -113,6 +124,26 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             }
         }
         return ImmutableSet.of();
+    }
+
+    private static final ImmutableSet<Modifier> VISIBILITY_MODIFIERS = Sets.immutableEnumSet(
+        Modifier.PUBLIC,
+        Modifier.PROTECTED,
+        Modifier.PRIVATE
+    );
+
+    @Nullable
+    private Modifier visibility(Set<Modifier> modifiers) {
+        return modifiers.stream()
+            .filter(VISIBILITY_MODIFIERS::contains)
+            .findAny().orElse(null);
+    }
+
+    @Nullable
+    private ClassName findJavaxInject() {
+        return Optional.ofNullable(processingEnv.getElementUtils().getTypeElement("javax.inject.Inject"))
+            .map(ClassName::get)
+            .orElse(null);
     }
 
     private CommandInfo getCommandInfo(ExecutableElement method) {
@@ -140,6 +171,7 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         List<CommandPartInfo> parts = new CommandParameterInterpreter(method)
             .getParts();
         return builder
+            .commandMethod(method)
             .name(name)
             .aliases(aliases)
             .description(desc)

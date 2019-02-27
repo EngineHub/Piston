@@ -26,9 +26,16 @@ import com.google.common.collect.Multiset;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 
+import static com.enginehub.piston.ReservedVariables.COMMAND_MANANGER;
+
 class CommandInfoDependencySupport implements DependencySupport {
     private final Multiset<String> nameMemory = HashMultiset.create();
     private final CommandInfo.Builder builder;
+
+    // initialize reserved field names
+    {
+        nameMemory.add(COMMAND_MANANGER);
+    }
 
     public CommandInfoDependencySupport(CommandInfo.Builder builder) {
         this.builder = builder;

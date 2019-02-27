@@ -19,16 +19,16 @@
 
 package com.enginehub.piston;
 
-import com.google.common.collect.ImmutableList;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
@@ -36,6 +36,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.enginehub.piston.ReservedVariables.COMMAND_MANANGER;
+import static com.enginehub.piston.ReservedVariables.CONTAINER_INSTANCE;
+import static com.google.common.collect.Streams.concat;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -50,24 +53,56 @@ import static java.util.stream.Collectors.toList;
  * </p>
  */
 class CommandRegistrationGenerator {
-    private final String name;
-    private final List<CommandInfo> info;
+    private static final ParameterSpec COMMAND_PARAMETERS_SPEC
+        = ParameterSpec.builder(CommandParameters.class, "parameters").build();
+    private final RegistrationInfo info;
+    private final List<RequiredVariable> requiredVariables;
 
-    CommandRegistrationGenerator(String name, List<CommandInfo> info) {
-        this.name = name;
-        this.info = ImmutableList.copyOf(info);
+    CommandRegistrationGenerator(RegistrationInfo info) {
+        this.info = info;
+        this.requiredVariables = concat(
+            info.getCommands().stream().flatMap(i -> i.getRequiredVariables().stream()),
+            additionalVariables(info)
+        ).collect(toList());
+    }
+
+    private static Stream<RequiredVariable> additionalVariables(RegistrationInfo info) {
+        Stream.Builder<RequiredVariable> b = Stream.builder();
+        b.add(RequiredVariable.builder()
+            .type(ClassName.get(CommandManager.class))
+            .name(COMMAND_MANANGER)
+            .build());
+        if (!info.getCommands().stream()
+            .allMatch(CommandRegistrationGenerator::isCommandStatic)) {
+            // we need the instance too
+            b.add(RequiredVariable.builder()
+                .type(info.getTargetClassName())
+                .name(CONTAINER_INSTANCE)
+                .build());
+        }
+        return b.build();
     }
 
     private Stream<RequiredVariable> getRequiredVars() {
-        return info.stream().flatMap(info -> info.getRequiredVariables().stream());
+        return requiredVariables.stream();
     }
 
-    public void generate(Element originalElement, String pkgName, Filer filer) throws IOException {
-        TypeSpec.Builder spec = TypeSpec.classBuilder(name)
+    private static boolean isCommandStatic(CommandInfo info) {
+        return info.getCommandMethod().getModifiers().contains(Modifier.STATIC);
+    }
+
+    void generate(Element originalElement, String pkgName, Filer filer) throws IOException {
+        TypeSpec.Builder spec = TypeSpec.classBuilder(info.getName())
             .addOriginatingElement(originalElement);
+
+        if (info.getClassVisibility() != null) {
+            spec.addModifiers(info.getClassVisibility());
+        }
 
         spec.addFields(generateFields());
         spec.addMethod(generateConstructor());
+        spec.addMethods(generateConditionMethods());
+        spec.addMethods(generateCommandBindings());
 
         JavaFile.builder(pkgName, spec.build())
             .indent("    ")
@@ -94,10 +129,71 @@ class CommandRegistrationGenerator {
         CodeBlock body = getRequiredVars()
             .map(var -> CodeBlock.of("this.$1L = $1L;\n", var.getName()))
             .reduce(CodeBlock.of(""), (a, b) -> a.toBuilder().add(b).build());
-        return MethodSpec.constructorBuilder()
-            .addAnnotation(Inject.class)
+        MethodSpec.Builder constr = MethodSpec.constructorBuilder();
+        if (info.getJavaxInjectClassName() != null) {
+            constr.addAnnotation(info.getJavaxInjectClassName());
+        }
+
+        if (info.getClassVisibility() != null) {
+            constr.addModifiers(info.getClassVisibility());
+        }
+        return constr
             .addParameters(params)
             .addCode(body)
             .build();
+    }
+
+    private Iterable<MethodSpec> generateConditionMethods() {
+        return info.getCommands().stream()
+            .filter(c -> c.getCondition().isPresent())
+            .map(c -> MethodSpec.methodBuilder(c.getName() + "Condition")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(boolean.class)
+                .addCode(c.getCondition().get())
+                .build()
+            )
+            .collect(toList());
+    }
+
+    private Iterable<MethodSpec> generateCommandBindings() {
+        return info.getCommands().stream()
+            .map(this::generateCommandBinding)
+            .collect(toList());
+    }
+
+    private MethodSpec generateCommandBinding(CommandInfo commandInfo) {
+        MethodSpec.Builder spec = MethodSpec.methodBuilder(commandInfo.getName())
+            .addModifiers(Modifier.PRIVATE)
+            .returns(int.class)
+            .addParameter(COMMAND_PARAMETERS_SPEC);
+
+        CodeBlock callCommandMethod = generateCallCommandMethod(commandInfo);
+        TypeName rawReturnType = TypeName.get(commandInfo.getCommandMethod().getReturnType()).unbox();
+        if (TypeName.INT.equals(rawReturnType)) {
+            // call the method, return what it does
+            spec.addCode(CodeBlock.builder()
+                .addStatement("return $L", callCommandMethod)
+                .build());
+        } else {
+            // call the method, return 1
+            spec.addCode(CodeBlock.builder()
+                .addStatement(callCommandMethod)
+                .addStatement("return 1")
+                .build());
+        }
+        return spec.build();
+    }
+
+    private CodeBlock generateCallCommandMethod(CommandInfo commandInfo) {
+        if (commandInfo.getCommandMethod().getModifiers().contains(Modifier.STATIC)) {
+            // easy, just call it statically
+            return CodeBlock.of("$T.$L()",
+                info.getTargetClassName(),
+                commandInfo.getCommandMethod().getSimpleName());
+        }
+        // we use the command as a parameter in this case
+        return CodeBlock.of("$L.$L()",
+            CONTAINER_INSTANCE,
+            commandInfo.getCommandMethod().getSimpleName());
     }
 }

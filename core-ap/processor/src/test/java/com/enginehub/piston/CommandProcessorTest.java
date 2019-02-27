@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.Modifier;
 import javax.tools.JavaFileObject;
+import java.io.IOException;
 import java.util.function.Consumer;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -54,19 +55,23 @@ class CommandProcessorTest {
 
     @Test
     @DisplayName("can generate a simple command")
-    void generateSimpleCommand() {
+    void generateSimpleCommand() throws IOException {
         Compilation compilation = javac()
             .withProcessors(new CommandProcessor())
             .compile(getSimpleCommandSource());
         assertThat(compilation).succeededWithoutWarnings();
-        assertThat(compilation)
-            .generatedSourceFile("pkg.SimpleCommandRegistration")
-            .hasSourceEquivalentTo(JavaFileObjects.forSourceString("pkg.SimpleCommandRegistration", ""));
+        JavaFileObject gen = compilation.generatedSourceFile("pkg.SimpleCommandRegistration")
+            .orElseThrow(AssertionError::new);
+        System.err.println("===> Source:");
+        System.err.println(getSimpleCommandSource().getCharContent(true));
+        System.err.println("===> Generated:");
+        System.err.println(gen.getCharContent(true));
     }
 
     private JavaFileObject getSimpleCommandSource() {
         return classSource("pkg", "SimpleCommand", b -> b
             .addAnnotation(CommandContainer.class)
+            .addModifiers(Modifier.PUBLIC)
             .addMethod(MethodSpec.methodBuilder("aSimpleCommand")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Command.class)

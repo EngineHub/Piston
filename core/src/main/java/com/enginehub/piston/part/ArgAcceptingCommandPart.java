@@ -27,11 +27,11 @@ import java.util.List;
 
 public interface ArgAcceptingCommandPart<T> extends CommandPart {
 
-    default T value(CommandParameters<?> parameters) {
+    default T value(CommandParameters parameters) {
         return parameters.valueOf(this);
     }
 
-    default List<T> values(CommandParameters<?> parameters) {
+    default List<T> values(CommandParameters parameters) {
         return parameters.valuesOf(this);
     }
 

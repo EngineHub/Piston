@@ -3,6 +3,7 @@ object Libs {
     const val junitApi = "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     const val guava = "com.google.guava:guava:27.0.1-jre"
+    const val guice = "com.google.inject:guice:4.2.2"
     const val autoCommon = "com.google.auto:auto-common:0.10"
     private const val autoValueVersion = "1.6.3"
     const val autoValueAnnotations = "com.google.auto.value:auto-value-annotations:$autoValueVersion"
