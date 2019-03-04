@@ -20,50 +20,51 @@
 package com.enginehub.piston;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
 
 import javax.annotation.Nullable;
-import javax.lang.model.element.Modifier;
-import java.util.Collection;
 
+/**
+ * Information that can be used to supply a parameter for a
+ * registered command method.
+ */
 @AutoValue
-abstract class RegistrationInfo {
+abstract class CommandParamInfo {
 
-    static Builder builder() {
-        return new AutoValue_RegistrationInfo.Builder();
+    public static Builder builder() {
+        return new AutoValue_CommandParamInfo.Builder();
     }
 
     @AutoValue.Builder
-    interface Builder {
+    public interface Builder {
 
-        Builder name(String name);
+        Builder partVariable(@Nullable String variable);
 
-        Builder targetClassName(ClassName className);
+        Builder construction(@Nullable CodeBlock construction);
 
-        Builder classVisibility(@Nullable Modifier visibility);
+        Builder extractMethod(MethodSpec extraction);
 
-        Builder javaxInjectClassName(@Nullable ClassName className);
-
-        Builder commands(Collection<CommandInfo> commands);
-
-        RegistrationInfo build();
-
+        CommandParamInfo build();
     }
 
-    RegistrationInfo() {
-    }
-
-    abstract String getName();
-
-    abstract ClassName getTargetClassName();
-
+    /**
+     * Variable name, if used to store data.
+     */
     @Nullable
-    abstract Modifier getClassVisibility();
+    abstract String getPartVariable();
 
+    /**
+     * Code for initializing data the extraction code uses.
+     */
     @Nullable
-    abstract ClassName getJavaxInjectClassName();
+    abstract CodeBlock getConstruction();
 
-    abstract ImmutableList<CommandInfo> getCommands();
+    /**
+     * Code for extracting the value from a {@link CommandParameters} instance.
+     *
+     * <p>The parameters instance is always available as {@link ReservedVariables#PARAMETERS}.</p>
+     */
+    abstract MethodSpec getExtractMethod();
 
 }

@@ -137,13 +137,13 @@ abstract class CommandImpl implements Command {
     }
 
     private void appendArguments(StringBuilder builder) {
-        List<CommandArgument<?>> args = getParts().stream()
+        List<CommandArgument> args = getParts().stream()
             .filter(x -> x instanceof CommandArgument)
-            .map(x -> (CommandArgument<?>) x)
+            .map(x -> (CommandArgument) x)
             .collect(Collectors.toList());
         if (args.size() > 0) {
             builder.append("Arguments:\n");
-            for (CommandArgument<?> arg : args) {
+            for (CommandArgument arg : args) {
                 builder.append("  ").append(arg.getTextRepresentation());
                 if (arg.getDefaults().size() > 0) {
                     builder.append(" (defaults to ");

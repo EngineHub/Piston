@@ -74,6 +74,7 @@ class CommandProcessorTest {
             .addModifiers(Modifier.PUBLIC)
             .addMethod(MethodSpec.methodBuilder("aSimpleCommand")
                 .addModifiers(Modifier.PUBLIC)
+                .addParameter(String.class, "injected")
                 .addAnnotation(AnnotationSpec.builder(Command.class)
                     .addMember("name", "$S", "simple")
                     .addMember("desc", "$S", "description")

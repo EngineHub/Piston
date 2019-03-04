@@ -19,82 +19,72 @@
 
 package com.enginehub.piston.part;
 
-import com.enginehub.piston.converter.ArgumentConverter;
-import com.enginehub.piston.converter.ArgumentConverters;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Key;
+
+import java.util.Collection;
 
 @AutoValue
-public abstract class CommandArgument<T> implements ArgAcceptingCommandPart<T> {
+public abstract class CommandArgument implements ArgAcceptingCommandPart {
 
-    public static <T> Builder<T> builder(String name,
-                                         String description,
-                                         ArgumentConverter<T> converter) {
-        return new AutoValue_CommandArgument.Builder<>()
+    public static Builder builder(String name, String description) {
+        return new AutoValue_CommandArgument.Builder()
             .named(name)
             .describedBy(description)
-            .convertedBy(converter)
-            .required()
-            .defaultsTo(ImmutableList.of());
+            .defaultsTo(ImmutableList.of())
+            .ofTypes(ImmutableSet.of());
     }
 
     @AutoValue.Builder
-    public abstract static class Builder<T> {
+    public abstract static class Builder {
 
-        public final Builder<T> named(String name) {
+        public final Builder named(String name) {
             return name(name);
         }
 
-        abstract Builder<T> name(String name);
+        abstract Builder name(String name);
 
-        public final Builder<T> describedBy(String description) {
+        public final Builder describedBy(String description) {
             return description(description);
         }
 
-        abstract Builder<T> description(String description);
+        abstract Builder description(String description);
 
-        public final Builder<T> required() {
-            return required(true);
+        public final Builder defaultsTo(Iterable<String> defaults) {
+            return defaults(defaults);
         }
 
-        public final Builder<T> optional() {
-            return required(false);
+        abstract Builder defaults(Iterable<String> defaults);
+
+        public final Builder ofTypes(Collection<Key<?>> types) {
+            return types(types);
         }
 
-        abstract Builder<T> required(boolean required);
+        abstract Builder types(Collection<Key<?>> types);
 
-        public final <U> Builder<U> ofType(Class<U> type) {
-            return ofType(TypeToken.of(type));
-        }
-
-        public final <U> Builder<U> ofType(TypeToken<U> type) {
-            return convertedBy(ArgumentConverters.get(type));
-        }
-
-        // auto-value workaround, since it can't tell we're changing the type of the whole
-        // builder!
-        @SuppressWarnings("unchecked")
-        public final <U> Builder<U> convertedBy(ArgumentConverter<U> converter) {
-            return (Builder<U>) converter((ArgumentConverter<T>) converter);
-        }
-
-        abstract Builder<T> converter(ArgumentConverter<T> converter);
-
-        public final Builder<T> defaultsTo(Iterable<T> defaults) {
-            return defaults(defaults).optional();
-        }
-
-        abstract Builder<T> defaults(Iterable<T> defaults);
-
-        public abstract CommandArgument<T> build();
+        public abstract CommandArgument build();
     }
 
     public abstract String getName();
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * Arguments are always required when they have no defaults.
+     * To provide a {@code null} default, use the empty string.
+     * </p>
+     */
+    @Override
+    public final boolean isRequired() {
+        return getDefaults().isEmpty();
+    }
+
     @Override
     public String getTextRepresentation() {
-        return isRequired() ? getName() : "[" + getName() + "]";
+        return isRequired() ? "<" + getName() + ">" : "[" + getName() + "]";
     }
 
 }

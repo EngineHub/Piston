@@ -19,8 +19,11 @@
 
 package com.enginehub.piston;
 
+import com.enginehub.piston.converter.ArgumentConverter;
 import com.google.inject.Key;
 
+import java.util.Collection;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -71,6 +74,27 @@ public interface CommandManager {
     }
 
     /**
+     * Register a converter for {@link CommandValue#as(Key)} to use.
+     *
+     * @param key the key to register the converter under
+     * @param converter the converter to register
+     * @param <T> the type of value returned by the converter
+     */
+    <T> void registerConverter(Key<T> key, ArgumentConverter<T> converter);
+
+    /**
+     * Convert a value using a registered converter.
+     *
+     * @param value the value to convert
+     * @param key the key for the converter
+     * @param <T> the type of the converted value
+     * @return the converted value
+     * @throws NoSuchElementException if there is no converter
+     * @see #registerConverter(Key, ArgumentConverter)
+     */
+    <T> Collection<T> convert(String value, Key<T> key) throws NoSuchElementException;
+
+    /**
      * Inject a value into this manager. It will be provided by
      * {@link CommandParameters#injectedValue(Key)}.
      *
@@ -84,5 +108,18 @@ public interface CommandManager {
      * Retrieve all commands that are registered.
      */
     Stream<Command> getAllCommands();
+
+    /**
+     * Execute a command, given a set of arguments.
+     *
+     * <p>
+     * Argument zero is the command name, without any leading slash.
+     * The rest of the arguments will be parsed into the correct parts.
+     * </p>
+     *
+     * @param args the arguments to include
+     * @return the count from the executed command
+     */
+    int execute(String[] args);
 
 }

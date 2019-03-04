@@ -19,72 +19,66 @@
 
 package com.enginehub.piston.part;
 
-import com.enginehub.piston.converter.ArgumentConverter;
-import com.enginehub.piston.converter.ArgumentConverters;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
+import com.google.inject.Key;
+
+import java.util.Collection;
 
 @AutoValue
-public abstract class ArgAcceptingCommandFlag<T> implements CommandFlag, ArgAcceptingCommandPart<T> {
+public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAcceptingCommandPart {
 
-    public static <T> Builder<T> builder(char name,
-                                         String description,
-                                         ArgumentConverter<T> converter) {
-        return new AutoValue_ArgAcceptingCommandFlag.Builder<>()
+    public static Builder builder(char name, String description) {
+        return new AutoValue_ArgAcceptingCommandFlag.Builder()
             .named(name)
             .describedBy(description)
-            .convertedBy(converter)
-            .defaultsTo(ImmutableList.of());
+            .defaultsTo(ImmutableList.of())
+            .ofTypes(ImmutableList.of());
     }
 
     @AutoValue.Builder
-    public abstract static class Builder<T> {
+    public abstract static class Builder {
 
-        public final Builder<T> named(char name) {
+        public final Builder named(char name) {
             return name(name);
         }
 
-        abstract Builder<T> name(char name);
+        abstract Builder name(char name);
 
-        public final Builder<T> describedBy(String description) {
+        public final Builder describedBy(String description) {
             return description(description);
         }
 
-        abstract Builder<T> description(String description);
+        abstract Builder description(String description);
 
-        public final <U> Builder<U> ofType(Class<U> type) {
-            return ofType(TypeToken.of(type));
-        }
-
-        public final <U> Builder<U> ofType(TypeToken<U> type) {
-            return convertedBy(ArgumentConverters.get(type));
-        }
-
-        // auto-value workaround, since it can't tell we're changing the type of the whole
-        // builder!
-        @SuppressWarnings("unchecked")
-        public final <U> Builder<U> convertedBy(ArgumentConverter<U> converter) {
-            return (Builder<U>) converter((ArgumentConverter<T>) converter);
-        }
-
-        abstract Builder<T> converter(ArgumentConverter<T> converter);
-
-        public final Builder<T> defaultsTo(Iterable<T> defaults) {
+        public final Builder defaultsTo(Iterable<String> defaults) {
             return defaults(defaults);
         }
 
-        abstract Builder<T> defaults(Iterable<T> defaults);
+        abstract Builder defaults(Iterable<String> defaults);
 
-        public abstract ArgAcceptingCommandFlag<T> build();
+        public final Builder ofTypes(Collection<Key<?>> types) {
+            return types(types);
+        }
+
+        abstract Builder types(Collection<Key<?>> types);
+
+        public final Builder argNamed(String name) {
+            return argumentName(name);
+        }
+
+        abstract Builder argumentName(String name);
+
+        public abstract ArgAcceptingCommandFlag build();
     }
 
     ArgAcceptingCommandFlag() {
     }
 
+    public abstract String getArgumentName();
+
     @Override
     public String getTextRepresentation() {
-        return "[-" + getName() +
-            " <" + getConverter().describeAcceptableArguments() + ">]";
+        return "[-" + getName() + " <" + getArgumentName() + ">]";
     }
 }

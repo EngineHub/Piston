@@ -22,6 +22,7 @@ package com.enginehub.piston;
 import com.enginehub.piston.annotation.Command;
 import com.enginehub.piston.annotation.CommandCondition;
 import com.enginehub.piston.annotation.CommandContainer;
+import com.enginehub.piston.annotation.DependencySupport;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
@@ -152,8 +153,9 @@ public class CommandProcessor extends BasicAnnotationProcessor {
 
         Optional<AnnotationMirror> conditionMirror = findCommandCondition(method);
         CommandInfo.Builder builder = CommandInfo.builder();
+        DependencySupport dependencySupport = new CommandInfoDependencySupport(builder);
         builder.condition(conditionMirror.map(m ->
-            new ConditionGenerator(m, method, new CommandInfoDependencySupport(builder))
+            new ConditionGenerator(m, method, dependencySupport)
                 .generateCondition()
         ).orElse(null));
 
@@ -168,15 +170,15 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         if (descFooter.equals("")) {
             descFooter = null;
         }
-        List<CommandPartInfo> parts = new CommandParameterInterpreter(method)
-            .getParts();
+        List<CommandParamInfo> params = new CommandParameterInterpreter(method, dependencySupport)
+            .getParams();
         return builder
             .commandMethod(method)
             .name(name)
             .aliases(aliases)
             .description(desc)
             .footer(descFooter)
-            .parts(parts)
+            .params(params)
             .build();
     }
 

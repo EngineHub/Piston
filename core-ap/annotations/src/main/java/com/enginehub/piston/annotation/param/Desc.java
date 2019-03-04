@@ -17,30 +17,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.enginehub.piston.part;
+package com.enginehub.piston.annotation.param;
 
-import com.enginehub.piston.CommandParameters;
-import com.enginehub.piston.CommandValue;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
+/**
+ * Adds a description to a parameter binding. This must be applied to
+ * any bound parameter.
+ */
+public @interface Desc {
 
-public interface ArgAcceptingCommandPart extends CommandPart {
-
-    default CommandValue value(CommandParameters parameters) {
-        return parameters.valueOf(this);
-    }
-
-    /**
-     * All possible types for this argument. This allows for completions to
-     * be filled from converters registered with the manager.
-     *
-     * <p>
-     * This set may be empty, in which case there will be no completions.
-     * </p>
-     */
-    ImmutableSet<Key<?>> getTypes();
-
-    ImmutableList<String> getDefaults();
+    String value();
 
 }

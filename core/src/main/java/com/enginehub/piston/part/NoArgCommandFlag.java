@@ -19,7 +19,6 @@
 
 package com.enginehub.piston.part;
 
-import com.enginehub.piston.converter.ArgumentConverters;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
@@ -47,12 +46,11 @@ public abstract class NoArgCommandFlag implements CommandFlag {
 
         abstract Builder description(String description);
 
-        public final ArgAcceptingCommandFlag.Builder<String> withRequiredArg() {
+        public final ArgAcceptingCommandFlag.Builder withRequiredArg() {
             NoArgCommandFlag flag = build();
             return ArgAcceptingCommandFlag.builder(
                 flag.getName(),
-                flag.getDescription(),
-                ArgumentConverters.forString()
+                flag.getDescription()
             );
         }
 

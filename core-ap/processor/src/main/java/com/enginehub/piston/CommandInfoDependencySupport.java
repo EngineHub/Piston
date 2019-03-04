@@ -26,31 +26,34 @@ import com.google.common.collect.Multiset;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 
-import static com.enginehub.piston.ReservedVariables.COMMAND_MANANGER;
-
 class CommandInfoDependencySupport implements DependencySupport {
-    private final Multiset<String> nameMemory = HashMultiset.create();
+    private final Multiset<String> fieldNames = HashMultiset.create(ReservedVariables.names());
+    private final Multiset<String> methodNames = HashMultiset.create();
     private final CommandInfo.Builder builder;
-
-    // initialize reserved field names
-    {
-        nameMemory.add(COMMAND_MANANGER);
-    }
 
     public CommandInfoDependencySupport(CommandInfo.Builder builder) {
         this.builder = builder;
     }
 
+    private static String realName(Multiset<String> memory, String name) {
+        return memory.add(name)
+            ? name
+            : name + (memory.count(name) - 1);
+    }
+
     @Override
     public String requestInScope(TypeName type, String name, AnnotationSpec... annotations) {
-        String realName = nameMemory.add(name)
-            ? name
-            : name + (nameMemory.count(name) - 1);
+        String realName = realName(fieldNames, name);
         builder.addRequiredVariable(RequiredVariable.builder()
             .type(type)
-            .name(name)
+            .name(realName)
             .annotations(ImmutableList.copyOf(annotations))
             .build());
         return realName;
+    }
+
+    @Override
+    public String requestMethodName(String name) {
+        return realName(methodNames, name);
     }
 }

@@ -17,30 +17,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.enginehub.piston.part;
+package com.enginehub.piston.annotation.param;
 
-import com.enginehub.piston.CommandParameters;
-import com.enginehub.piston.CommandValue;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface ArgAcceptingCommandPart extends CommandPart {
-
-    default CommandValue value(CommandParameters parameters) {
-        return parameters.valueOf(this);
-    }
+/**
+ * Bind this parameter as a required argument.
+ */
+@Documented
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Arg {
 
     /**
-     * All possible types for this argument. This allows for completions to
-     * be filled from converters registered with the manager.
-     *
-     * <p>
-     * This set may be empty, in which case there will be no completions.
-     * </p>
+     * The name of the argument.
      */
-    ImmutableSet<Key<?>> getTypes();
-
-    ImmutableList<String> getDefaults();
+    String value();
 
 }

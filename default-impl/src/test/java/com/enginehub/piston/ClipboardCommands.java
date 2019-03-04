@@ -19,7 +19,6 @@
 
 package com.enginehub.piston;
 
-import com.enginehub.piston.converter.SimpleArgumentConverter;
 import com.enginehub.piston.part.ArgAcceptingCommandFlag;
 import com.enginehub.piston.part.CommandArgument;
 import com.enginehub.piston.part.CommandFlag;
@@ -30,19 +29,17 @@ import static com.enginehub.piston.part.CommandParts.flag;
 
 public class ClipboardCommands {
 
-    private static final CommandArgument<Object> LEAVE_ID =
+    private static final CommandArgument LEAVE_ID =
         arg("leaveId", "Leaves this block in place of removed blocks")
-            .convertedBy(SimpleArgumentConverter.fromSingle(x -> (Object) x, "pattern"))
             .defaultsTo(ImmutableList.of("air"))
             .build();
     private static final CommandFlag COPY_ENTITIES =
         flag('e', "Also copy entities").build();
     private static final CommandFlag CUT_ENTITIES =
         flag('e', "Also cut entities").build();
-    private static final ArgAcceptingCommandFlag<Object> MASK =
+    private static final ArgAcceptingCommandFlag MASK =
         flag('m', "Add a source mask, excluded blocks become air in the paste")
             .withRequiredArg()
-            .convertedBy(SimpleArgumentConverter.fromSingle(x -> (Object) x, "mask"))
             .build();
 
     public static void main(String[] args) {
@@ -66,15 +63,15 @@ public class ClipboardCommands {
 
     private int copy(CommandParameters params) {
         boolean copyEntities = COPY_ENTITIES.in(params);
-        Object mask = MASK.value(params);
+        Object mask = MASK.value(params).asSingle(Object.class);
 
         return 1;
     }
 
     private int cut(CommandParameters params) {
         boolean cutEntities = CUT_ENTITIES.in(params);
-        Object mask = MASK.value(params);
-        Object leavePattern = LEAVE_ID.value(params);
+        Object mask = MASK.value(params).asSingle(Object.class);
+        Object leavePattern = LEAVE_ID.value(params).asSingle(Object.class);
 
         return 1;
     }

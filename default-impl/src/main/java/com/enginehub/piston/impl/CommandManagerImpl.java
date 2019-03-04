@@ -21,17 +21,22 @@ package com.enginehub.piston.impl;
 
 import com.enginehub.piston.Command;
 import com.enginehub.piston.CommandManager;
+import com.enginehub.piston.converter.ArgumentConverter;
 import com.google.inject.Key;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
+
 public class CommandManagerImpl implements CommandManager {
     private final Map<String, Command> commands = new ConcurrentHashMap<>();
     private final Map<Key<?>, Supplier<?>> injectedValues = new ConcurrentHashMap<>();
+    private final Map<Key<?>, ArgumentConverter<?>> converters = new ConcurrentHashMap<>();
 
     @Override
     public Command.Builder newCommand(String name) {
@@ -44,8 +49,28 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
+    public <T> void registerConverter(Key<T> key, ArgumentConverter<T> converter) {
+        converters.put(key, converter);
+    }
+
+    @Override
+    public <T> Collection<T> convert(String value, Key<T> key) {
+        @SuppressWarnings("unchecked")
+        ArgumentConverter<T> converter = (ArgumentConverter<T>) converters.get(key);
+        if (converter == null) {
+            throw new NoSuchElementException("No converter for " + key);
+        }
+        return requireNonNull(converter.convert(value), "Converter may not return null.");
+    }
+
+    @Override
     public Stream<Command> getAllCommands() {
         return commands.values().stream();
+    }
+
+    @Override
+    public int execute(String[] args) {
+        return 0;
     }
 
     @Override

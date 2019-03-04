@@ -17,19 +17,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.enginehub.piston;
+package com.enginehub.piston.annotation.param;
 
-import com.google.auto.value.AutoValue;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@AutoValue
-public abstract class CommandPartInfo {
+/**
+ * Bind this ({@code boolean}) parameter as an no-argument flag. If the flag is present,
+ * the value will be {@code true}. Otherwise, it will be {@code false}.
+ */
+@Documented
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Switch {
 
-    public static Builder builder() {
-        return new AutoValue_CommandPartInfo.Builder();
-    }
+    /**
+     * The name of the flag.
+     */
+    char value();
 
-    @AutoValue.Builder
-    public interface Builder {
-        CommandPartInfo build();
-    }
 }

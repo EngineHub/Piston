@@ -48,16 +48,7 @@ public interface CommandParameters {
      * @param part - the part to look for
      * @return the value
      */
-    <T> T valueOf(ArgAcceptingCommandPart<T> part);
-
-    /**
-     * Gets all the values of the specified part, throwing if it
-     * is not {@linkplain #has(CommandPart) present}.
-     *
-     * @param part - the part to look for
-     * @return the value
-     */
-    <T> List<T> valuesOf(ArgAcceptingCommandPart<T> part);
+    CommandValue valueOf(ArgAcceptingCommandPart part);
 
     /**
      * Get an injected value. Provide value injectors to the manager.

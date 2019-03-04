@@ -41,4 +41,12 @@ public interface DependencySupport {
      */
     String requestInScope(TypeName type, String name, AnnotationSpec... annotations);
 
+    /**
+     * Request a method name, avoiding collisions.
+     *
+     * @param name the base name for the method
+     * @return the actual name of the method
+     */
+    String requestMethodName(String name);
+
 }

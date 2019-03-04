@@ -35,7 +35,7 @@ public abstract class CommandInfo {
         Builder builder = new AutoValue_CommandInfo.Builder();
         builder.requiredVariablesBuilder();
         builder.footer(null);
-        builder.parts(ImmutableList.of());
+        builder.params(ImmutableList.of());
         return builder;
     }
 
@@ -52,7 +52,7 @@ public abstract class CommandInfo {
 
         Builder footer(@Nullable String footer);
 
-        Builder parts(Collection<CommandPartInfo> parts);
+        Builder params(Collection<CommandParamInfo> params);
 
         ImmutableList.Builder<RequiredVariable> requiredVariablesBuilder();
 
@@ -79,7 +79,7 @@ public abstract class CommandInfo {
 
     public abstract Optional<String> getFooter();
 
-    public abstract ImmutableList<CommandPartInfo> getParts();
+    public abstract ImmutableList<CommandParamInfo> getParams();
 
     public abstract ImmutableList<RequiredVariable> getRequiredVariables();
 
