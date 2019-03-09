@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -19,7 +19,6 @@
 
 package org.enginehub.piston;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -28,6 +27,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.enginehub.piston.util.SafeName;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
@@ -36,11 +36,14 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Streams.concat;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static org.enginehub.piston.util.CodeBlockUtil.listForGen;
+import static org.enginehub.piston.util.CodeBlockUtil.stringListForGen;
 
 /**
  * Class that handles the generation of command registration classes.
@@ -57,14 +60,18 @@ class CommandRegistrationGenerator {
     private static final ParameterSpec COMMAND_PARAMETERS_SPEC
         = ParameterSpec.builder(CommandParameters.class, "parameters").build();
     private final RegistrationInfo info;
-    private final List<RequiredVariable> requiredVariables;
+    private final List<RequiredVariable> injectedVariables;
 
     CommandRegistrationGenerator(RegistrationInfo info) {
         this.info = info;
-        this.requiredVariables = concat(
-            info.getCommands().stream().flatMap(i -> i.getRequiredVariables().stream()),
+        this.injectedVariables = concat(
+            cmdsFlatMap(i -> i.getInjectedVariables().stream()),
             additionalVariables(info)
         ).collect(toList());
+    }
+
+    private <T> Stream<T> cmdsFlatMap(Function<CommandInfo, Stream<T>> map) {
+        return info.getCommands().stream().flatMap(map);
     }
 
     private static Stream<RequiredVariable> additionalVariables(RegistrationInfo info) {
@@ -84,8 +91,8 @@ class CommandRegistrationGenerator {
         return b.build();
     }
 
-    private Stream<RequiredVariable> getRequiredVars() {
-        return requiredVariables.stream();
+    private Stream<RequiredVariable> getInjectedVariables() {
+        return injectedVariables.stream();
     }
 
     private static boolean isCommandStatic(CommandInfo info) {
@@ -114,14 +121,13 @@ class CommandRegistrationGenerator {
     }
 
     private Iterable<MethodSpec> getParameterMethods() {
-        return info.getCommands().stream()
-            .flatMap(cmd -> cmd.getParams().stream())
+        return cmdsFlatMap(cmd -> cmd.getParams().stream())
             .map(CommandParamInfo::getExtractMethod)
             .collect(toList());
     }
 
     private Iterable<FieldSpec> generateFields() {
-        return getRequiredVars()
+        return concat(getInjectedVariables(), cmdsFlatMap(cmd -> cmd.getDeclaredFields().stream()))
             .map(var -> FieldSpec.builder(
                 var.getType(), var.getName(),
                 Modifier.PRIVATE, Modifier.FINAL
@@ -130,12 +136,12 @@ class CommandRegistrationGenerator {
     }
 
     private MethodSpec generateConstructor() {
-        List<ParameterSpec> params = getRequiredVars()
+        List<ParameterSpec> params = getInjectedVariables()
             .map(var -> ParameterSpec.builder(var.getType(), var.getName())
                 .addAnnotations(var.getAnnotations())
                 .build())
             .collect(toList());
-        CodeBlock.Builder body = getRequiredVars()
+        CodeBlock.Builder body = getInjectedVariables()
             .map(var -> CodeBlock.of("this.$1L = $1L;\n", var.getName()))
             .reduce(CodeBlock.of(""), (a, b) -> a.toBuilder().add(b).build())
             .toBuilder();
@@ -147,7 +153,12 @@ class CommandRegistrationGenerator {
         if (info.getClassVisibility() != null) {
             constr.addModifiers(info.getClassVisibility());
         }
+
         for (CommandInfo cmd : info.getCommands()) {
+            cmd.getParams().stream()
+                .map(CommandParamInfo::getConstruction)
+                .filter(Objects::nonNull)
+                .forEach(body::add);
             body.add(generateRegisterCommandCode(cmd));
         }
         return constr
@@ -173,24 +184,14 @@ class CommandRegistrationGenerator {
         cmd.getFooter().ifPresent(footer ->
             lambda.addStatement("b.footer($S)", footer)
         );
-        cmd.getParams().stream()
-            .map(CommandParamInfo::getConstruction)
-            .filter(Objects::nonNull)
-            .forEach(lambda::add);
-        lambda.addStatement("b.parts($L)", stringListForGen(cmd.getParams().stream().map(
+        lambda.addStatement("b.parts($L)", listForGen(cmd.getParams().stream().map(
             CommandParamInfo::getPartVariable
-        )));
-        lambda.addStatement("b.action(this::$L)", cmd.getName());
+        ).filter(Objects::nonNull)));
+        lambda.addStatement("b.action(this::$L)", SafeName.from(cmd.getName()));
         if (cmd.getCondition().isPresent()) {
             lambda.addStatement("b.condition(this::$L)", conditionMethodName(cmd));
         }
         return lambda.unindent().add("}").build();
-    }
-
-    private CodeBlock stringListForGen(Stream<String> aliases) {
-        return CodeBlock.of("$T.of($L)", ImmutableList.class,
-            aliases.map(x -> CodeBlock.of("$S", x).toString())
-                .collect(joining(", ")));
     }
 
     private Iterable<MethodSpec> generateConditionMethods() {
@@ -206,7 +207,7 @@ class CommandRegistrationGenerator {
     }
 
     private String conditionMethodName(CommandInfo c) {
-        return c.getName() + "Condition";
+        return SafeName.from(c.getName()) + "Condition";
     }
 
     private Iterable<MethodSpec> generateCommandBindings() {
@@ -216,7 +217,7 @@ class CommandRegistrationGenerator {
     }
 
     private MethodSpec generateCommandBinding(CommandInfo commandInfo) {
-        MethodSpec.Builder spec = MethodSpec.methodBuilder(commandInfo.getName())
+        MethodSpec.Builder spec = MethodSpec.methodBuilder(SafeName.from(commandInfo.getName()))
             .addModifiers(Modifier.PRIVATE)
             .returns(int.class)
             .addParameter(COMMAND_PARAMETERS_SPEC);

@@ -12,4 +12,9 @@ dependencies {
     "annotationProcessor"(Libs.autoService)
 
     "testImplementation"(Libs.compileTesting)
+    "testAnnotationProcessor"(project.convention.getPlugin<JavaPluginConvention>()
+            .sourceSets.getByName("main").output)
 }
+
+configurations.getByName("testAnnotationProcessor")
+        .extendsFrom(configurations.getByName("runtimeClasspath"))

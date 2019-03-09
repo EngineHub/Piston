@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -19,32 +19,54 @@
 
 package org.enginehub.piston;
 
-import org.enginehub.piston.annotation.DependencySupport;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multiset;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
+import org.enginehub.piston.annotation.GenerationSupport;
 
-class CommandInfoDependencySupport implements DependencySupport {
-    private final Multiset<String> fieldNames = HashMultiset.create(ReservedVariables.names());
-    private final Multiset<String> methodNames = HashMultiset.create();
-    private final CommandInfo.Builder builder;
-
-    public CommandInfoDependencySupport(CommandInfo.Builder builder) {
-        this.builder = builder;
-    }
+class CommandInfoGenerationSupport implements GenerationSupport {
 
     private static String realName(Multiset<String> memory, String name) {
+        // Make the name safe first
+        name = javaSafeName(name);
         return memory.add(name)
             ? name
             : name + (memory.count(name) - 1);
     }
 
+    private static String javaSafeName(String name) {
+        return name.codePoints()
+            .map(point -> Character.isJavaIdentifierPart(point) ? point : '_')
+            .collect(StringBuilder::new,
+                StringBuilder::appendCodePoint,
+                StringBuilder::append).toString();
+    }
+
+    private final Multiset<String> fieldNames = HashMultiset.create(ReservedVariables.names());
+    private final Multiset<String> methodNames = HashMultiset.create();
+    private final CommandInfo.Builder builder;
+
+    public CommandInfoGenerationSupport(CommandInfo.Builder builder) {
+        this.builder = builder;
+    }
+
     @Override
-    public String requestInScope(TypeName type, String name, AnnotationSpec... annotations) {
+    public String requestDependency(TypeName type, String name, AnnotationSpec... annotations) {
         String realName = realName(fieldNames, name);
-        builder.addRequiredVariable(RequiredVariable.builder()
+        builder.addInjectedVariable(RequiredVariable.builder()
+            .type(type)
+            .name(realName)
+            .annotations(ImmutableList.copyOf(annotations))
+            .build());
+        return realName;
+    }
+
+    @Override
+    public String requestField(TypeName type, String name, AnnotationSpec... annotations) {
+        String realName = realName(fieldNames, name);
+        builder.addDeclaredField(RequiredVariable.builder()
             .type(type)
             .name(realName)
             .annotations(ImmutableList.copyOf(annotations))

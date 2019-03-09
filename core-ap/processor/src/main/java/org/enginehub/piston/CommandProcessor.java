@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -19,10 +19,6 @@
 
 package org.enginehub.piston;
 
-import org.enginehub.piston.annotation.Command;
-import org.enginehub.piston.annotation.CommandCondition;
-import org.enginehub.piston.annotation.CommandContainer;
-import org.enginehub.piston.annotation.DependencySupport;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
@@ -35,6 +31,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.CommandCondition;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.GenerationSupport;
+import org.enginehub.piston.util.ProcessingException;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
@@ -52,12 +53,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
 import static com.google.auto.common.MoreElements.getPackage;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static org.enginehub.piston.util.AnnoValueExtraction.getList;
+import static org.enginehub.piston.util.AnnoValueExtraction.getValue;
 
 @AutoService(Processor.class)
 public class CommandProcessor extends BasicAnnotationProcessor {
@@ -153,24 +155,24 @@ public class CommandProcessor extends BasicAnnotationProcessor {
 
         Optional<AnnotationMirror> conditionMirror = findCommandCondition(method);
         CommandInfo.Builder builder = CommandInfo.builder();
-        DependencySupport dependencySupport = new CommandInfoDependencySupport(builder);
+        GenerationSupport generationSupport = new CommandInfoGenerationSupport(builder);
         builder.condition(conditionMirror.map(m ->
-            new ConditionGenerator(m, method, dependencySupport)
+            new ConditionGenerator(m, method, generationSupport)
                 .generateCondition()
         ).orElse(null));
 
-        String name = (String) getAnnotationValue(mirror, "name").getValue();
+        String name = getValue(method, mirror, "name", String.class);
         @SuppressWarnings("unchecked")
-        List<String> aliasesList = (List<String>) getAnnotationValue(mirror, "aliases").getValue();
+        List<String> aliasesList = getList(method, mirror, "aliases", String.class);
         ImmutableList<String> aliases = ImmutableList.copyOf(
             aliasesList
         );
-        String desc = (String) getAnnotationValue(mirror, "desc").getValue();
-        String descFooter = (String) getAnnotationValue(mirror, "descFooter").getValue();
+        String desc = getValue(method, mirror, "desc", String.class);
+        String descFooter = getValue(method, mirror, "descFooter", String.class);
         if (descFooter.equals("")) {
             descFooter = null;
         }
-        List<CommandParamInfo> params = new CommandParameterInterpreter(method, dependencySupport)
+        List<CommandParamInfo> params = new CommandParameterInterpreter(method, generationSupport)
             .getParams();
         return builder
             .commandMethod(method)

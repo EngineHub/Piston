@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -22,11 +22,13 @@ package org.enginehub.piston.annotation;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 
-public interface DependencySupport {
+public interface GenerationSupport {
 
     /**
      * Request that a variable with the given type and name be in-scope
      * for the code block returned by the method using this support object.
+     * Also requests that it be injected, i.e. the code asking for this variable
+     * doesn't know how it should be initialized.
      *
      * <p>
      * The annotations are added the parameters wherever they are added,
@@ -39,7 +41,18 @@ public interface DependencySupport {
      * @param annotations the annotations to add to any parameter
      * @return the actual name of the variable. You must use this to reference it.
      */
-    String requestInScope(TypeName type, String name, AnnotationSpec... annotations);
+    String requestDependency(TypeName type, String name, AnnotationSpec... annotations);
+
+    /**
+     * Request a field to store data in. The code requesting this field will initialize
+     * it.
+     *
+     * @param type the type of the field
+     * @param name the requested name of the field
+     * @param annotations the annotations to add to the field
+     * @return the actual name of the field. You must use this to reference it.
+     */
+    String requestField(TypeName type, String name, AnnotationSpec... annotations);
 
     /**
      * Request a method name, avoiding collisions.

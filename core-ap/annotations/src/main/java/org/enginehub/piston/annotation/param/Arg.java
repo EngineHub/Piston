@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -25,17 +25,21 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Bind this parameter as a required argument.
- */
 @Documented
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.SOURCE)
 public @interface Arg {
 
+    String NAME_IS_PARAMETER_NAME = "__NAME_IS_PARAMETER_NAME__";
+
     /**
-     * The name of the argument.
+     * The name of the argument. If not specified, defaults to the name of
+     * the parameter.
      */
-    String value();
+    String name() default NAME_IS_PARAMETER_NAME;
+
+    String desc();
+
+    String[] def() default {};
 
 }

@@ -17,17 +17,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.enginehub.piston.util;
 
 /**
- * Marks this class to be searched for {@link Command} annotations.
+ * Utility for making Java-safe names from free-form Unicode.
+ *
+ * <p>
+ *     Safe names are made by replacing non-safe characters with underscores.
+ * </p>
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
-public @interface CommandContainer {
+public class SafeName {
+
+    public static String from(String unsafe) {
+        StringBuilder result = new StringBuilder(unsafe.length());
+        int firstCp = unsafe.codePointAt(0);
+        if (!Character.isJavaIdentifierStart(firstCp)) {
+            firstCp = '_';
+        }
+        result.appendCodePoint(firstCp);
+        unsafe.codePoints()
+            .skip(1)
+            .map(cp -> Character.isJavaIdentifierPart(cp) ? cp : '_')
+            .forEachOrdered(result::appendCodePoint);
+        return result.toString();
+    }
+
 }

@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -59,4 +59,23 @@ public class CaseHelper {
             }).collect(joining(" "));
     }
 
+    /**
+     * Convert a string from camel case to title case.
+     *
+     * <p>
+     * Example: {@code "someMethodName"} -> {@code "SomeMethodName"}.
+     * </p>
+     *
+     * @param camelCase the string that is in camel case
+     * @return a string in title case
+     */
+    public static String camelToTitle(String camelCase) {
+        StringBuilder out = new StringBuilder(camelCase.length());
+        int capital = Character.toUpperCase(camelCase.codePointAt(0));
+        out.appendCodePoint(capital)
+            .append(camelCase,
+                camelCase.offsetByCodePoints(0, 1),
+                camelCase.length());
+        return out.toString();
+    }
 }

@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -33,7 +33,8 @@ public abstract class CommandInfo {
 
     public static Builder builder() {
         Builder builder = new AutoValue_CommandInfo.Builder();
-        builder.requiredVariablesBuilder();
+        builder.injectedVariablesBuilder();
+        builder.declaredFieldsBuilder();
         builder.footer(null);
         builder.params(ImmutableList.of());
         return builder;
@@ -54,10 +55,17 @@ public abstract class CommandInfo {
 
         Builder params(Collection<CommandParamInfo> params);
 
-        ImmutableList.Builder<RequiredVariable> requiredVariablesBuilder();
+        ImmutableList.Builder<RequiredVariable> injectedVariablesBuilder();
 
-        default Builder addRequiredVariable(RequiredVariable var) {
-            requiredVariablesBuilder().add(var);
+        default Builder addInjectedVariable(RequiredVariable var) {
+            injectedVariablesBuilder().add(var);
+            return this;
+        }
+
+        ImmutableList.Builder<RequiredVariable> declaredFieldsBuilder();
+
+        default Builder addDeclaredField(RequiredVariable var) {
+            declaredFieldsBuilder().add(var);
             return this;
         }
 
@@ -81,7 +89,9 @@ public abstract class CommandInfo {
 
     public abstract ImmutableList<CommandParamInfo> getParams();
 
-    public abstract ImmutableList<RequiredVariable> getRequiredVariables();
+    public abstract ImmutableList<RequiredVariable> getInjectedVariables();
+
+    public abstract ImmutableList<RequiredVariable> getDeclaredFields();
 
     public abstract Optional<CodeBlock> getCondition();
 

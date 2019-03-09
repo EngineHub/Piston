@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -20,8 +20,9 @@
 package org.enginehub.piston;
 
 import org.enginehub.piston.annotation.CommandConditionGenerator;
-import org.enginehub.piston.annotation.DependencySupport;
+import org.enginehub.piston.annotation.GenerationSupport;
 import com.squareup.javapoet.CodeBlock;
+import org.enginehub.piston.util.ProcessingException;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
@@ -35,9 +36,9 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 class ConditionGenerator {
     private final AnnotationMirror conditionMirror;
     private final ExecutableElement method;
-    private final DependencySupport depSupport;
+    private final GenerationSupport depSupport;
 
-    ConditionGenerator(AnnotationMirror conditionMirror, ExecutableElement method, DependencySupport depSupport) {
+    ConditionGenerator(AnnotationMirror conditionMirror, ExecutableElement method, GenerationSupport depSupport) {
         this.conditionMirror = conditionMirror;
         this.method = method;
         this.depSupport = depSupport;

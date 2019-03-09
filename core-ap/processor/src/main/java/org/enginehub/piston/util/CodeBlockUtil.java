@@ -1,7 +1,7 @@
 /*
- * WorldEdit, a Minecraft world manipulation toolkit
+ * Piston, a flexible command management system.
  * Copyright (C) EngineHub <http://www.enginehub.com>
- * Copyright (C) oblique-commands contributors
+ * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -17,14 +17,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.annotation.param;
+package org.enginehub.piston.util;
 
-/**
- * Adds a description to a parameter binding. This must be applied to
- * any bound parameter.
- */
-public @interface Desc {
+import com.google.common.collect.ImmutableList;
+import com.squareup.javapoet.CodeBlock;
 
-    String value();
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
+
+public class CodeBlockUtil {
+    public static CodeBlock stringListForGen(Stream<String> strings) {
+        return listForGen(strings.map(x -> CodeBlock.of("$S", x).toString()));
+    }
+
+    public static CodeBlock listForGen(Stream<String> rawCode) {
+        return CodeBlock.of("$T.of($L)", ImmutableList.class,
+            rawCode.collect(joining(", ")));
+    }
 }
