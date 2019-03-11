@@ -23,6 +23,7 @@ import org.enginehub.piston.converter.ArgumentConverter;
 import com.google.inject.Key;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -120,6 +121,6 @@ public interface CommandManager {
      * @param args the arguments to include
      * @return the count from the executed command
      */
-    int execute(String[] args);
+    int execute(List<String> args);
 
 }

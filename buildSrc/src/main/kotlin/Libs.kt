@@ -12,4 +12,5 @@ object Libs {
     const val javapoet = "com.squareup:javapoet:1.11.1"
     const val inject = "javax.inject:javax.inject:1"
     const val compileTesting = "com.google.testing.compile:compile-testing:0.15"
+    const val mockito = "org.mockito:mockito-core:2.25.0"
 }

@@ -17,18 +17,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.commands;
 
 import org.enginehub.piston.annotation.Command;
 import org.enginehub.piston.annotation.CommandContainer;
-import org.enginehub.piston.annotation.param.Arg;
 
 @CommandContainer
-public class SingleOptionalArgCommand {
+public interface NoArgCommand {
     @Command(
-        name = "single-arg-opt",
+        name = "no-arg",
         desc = "description"
     )
-    public void singleArg(@Arg(desc = "First argument", def = "") String first) {
-    }
+    void noArg();
 }

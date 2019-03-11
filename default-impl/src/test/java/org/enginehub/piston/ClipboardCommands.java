@@ -43,7 +43,7 @@ public class ClipboardCommands {
             .build();
 
     public static void main(String[] args) {
-        CommandManager manager = DefaultCommandManangerService.getInstance().newCommandManager();
+        CommandManager manager = DefaultCommandManagerService.getInstance().newCommandManager();
         new ClipboardCommands().register(manager);
         manager.getAllCommands().forEach(c -> System.err.println(c.getFullHelp()));
     }

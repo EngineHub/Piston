@@ -25,6 +25,7 @@ import org.enginehub.piston.converter.ArgumentConverter;
 import com.google.inject.Key;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,7 +70,7 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public int execute(String[] args) {
+    public int execute(List<String> args) {
         return 0;
     }
 

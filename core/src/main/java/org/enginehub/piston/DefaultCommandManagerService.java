@@ -35,11 +35,11 @@ import static com.google.common.collect.Streams.stream;
  * delegating methods have been accessed.
  * </p>
  */
-public class DefaultCommandManangerService implements CommandManagerService {
+public class DefaultCommandManagerService implements CommandManagerService {
 
-    private static final DefaultCommandManangerService INSTANCE = new DefaultCommandManangerService(getDefaultService());
+    private static final DefaultCommandManagerService INSTANCE = new DefaultCommandManagerService(getDefaultService());
 
-    public static DefaultCommandManangerService getInstance() {
+    public static DefaultCommandManagerService getInstance() {
         return INSTANCE;
     }
 
@@ -55,7 +55,7 @@ public class DefaultCommandManangerService implements CommandManagerService {
     private CommandManagerService sealedDefaultService;
     private boolean sealed;
 
-    private DefaultCommandManangerService(CommandManagerService defaultService) {
+    private DefaultCommandManagerService(CommandManagerService defaultService) {
         this.defaultService = defaultService;
     }
 

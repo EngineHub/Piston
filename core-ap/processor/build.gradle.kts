@@ -12,8 +12,9 @@ dependencies {
     "annotationProcessor"(Libs.autoService)
 
     "testImplementation"(Libs.compileTesting)
-    "testAnnotationProcessor"(project.convention.getPlugin<JavaPluginConvention>()
-            .sourceSets.getByName("main").output)
+    "testImplementation"(Libs.mockito)
+    "testImplementation"(project(":default-impl"))
+    "testAnnotationProcessor"(project(":core-ap:processor"))
 }
 
 configurations.getByName("testAnnotationProcessor")
