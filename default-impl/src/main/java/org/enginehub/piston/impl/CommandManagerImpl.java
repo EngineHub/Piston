@@ -31,6 +31,7 @@ import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverters;
+import org.enginehub.piston.exception.CommandException;
 import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.exception.NoSuchCommandException;
 import org.enginehub.piston.exception.NoSuchFlagException;
@@ -295,7 +296,13 @@ public class CommandManagerImpl implements CommandManager {
         }
 
         // Run the command action.
-        return command.getAction().run(parameters.build());
+        try {
+            return command.getAction().run(parameters.build());
+        } catch (CommandException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CommandException(e, command);
+        }
     }
 
     private void consumeFlags(Command command, CommandParametersImpl.Builder parameters, CommandParseCache parseCache, Set<ArgAcceptingCommandPart> defaultsNeeded, Iterator<String> argIter, String next) {

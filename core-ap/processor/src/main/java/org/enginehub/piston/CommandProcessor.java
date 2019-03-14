@@ -103,15 +103,17 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         ClassName javaxInjectClassName = findJavaxInject();
         for (Element element : elements) {
             TypeElement type = asType(element);
+            RegistrationInfo.Builder registration = RegistrationInfo.builder();
+            GenerationSupport generationSupport = new GenerationSupportImpl(registration);
             ImmutableList<CommandInfo> info = type.getEnclosedElements().stream()
                 .filter(enclosedElement -> enclosedElement.getKind() == ElementKind.METHOD)
                 .filter(m -> isAnnotationPresent(m, org.enginehub.piston.annotation.Command.class))
                 .map(MoreElements::asExecutable)
-                .map(this::getCommandInfo)
+                .map(m -> getCommandInfo(m, generationSupport))
                 .collect(toImmutableList());
             try {
                 new CommandRegistrationGenerator(
-                    RegistrationInfo.builder()
+                    registration
                         .name(type.getSimpleName() + "Registration")
                         .targetClassName(ClassName.get(type))
                         .classVisibility(visibility(type.getModifiers()))
@@ -149,13 +151,12 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             .orElse(null);
     }
 
-    private CommandInfo getCommandInfo(ExecutableElement method) {
+    private CommandInfo getCommandInfo(ExecutableElement method, GenerationSupport generationSupport) {
         AnnotationMirror mirror = getAnnotationMirror(method, Command.class)
             .toJavaUtil().orElseThrow(() -> new IllegalStateException("Should have a value"));
 
         Optional<AnnotationMirror> conditionMirror = findCommandCondition(method);
         CommandInfo.Builder builder = CommandInfo.builder();
-        GenerationSupport generationSupport = new CommandInfoGenerationSupport(builder);
         builder.condition(conditionMirror.map(m ->
             new ConditionGenerator(m, method, generationSupport)
                 .generateCondition()

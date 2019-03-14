@@ -26,14 +26,14 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import org.enginehub.piston.annotation.GenerationSupport;
 
-class CommandInfoGenerationSupport implements GenerationSupport {
+class GenerationSupportImpl implements GenerationSupport {
 
     private static String realName(Multiset<String> memory, String name) {
         // Make the name safe first
         name = javaSafeName(name);
-        return memory.add(name)
-            ? name
-            : name + (memory.count(name) - 1);
+        memory.add(name);
+        int count = memory.count(name);
+        return count == 1 ? name : name + count;
     }
 
     private static String javaSafeName(String name) {
@@ -46,9 +46,9 @@ class CommandInfoGenerationSupport implements GenerationSupport {
 
     private final Multiset<String> fieldNames = HashMultiset.create(ReservedVariables.names());
     private final Multiset<String> methodNames = HashMultiset.create();
-    private final CommandInfo.Builder builder;
+    private final RegistrationInfo.Builder builder;
 
-    public CommandInfoGenerationSupport(CommandInfo.Builder builder) {
+    public GenerationSupportImpl(RegistrationInfo.Builder builder) {
         this.builder = builder;
     }
 

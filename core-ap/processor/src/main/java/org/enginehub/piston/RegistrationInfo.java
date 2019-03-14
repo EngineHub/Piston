@@ -31,7 +31,10 @@ import java.util.Collection;
 abstract class RegistrationInfo {
 
     static Builder builder() {
-        return new AutoValue_RegistrationInfo.Builder();
+        Builder builder = new AutoValue_RegistrationInfo.Builder();
+        builder.injectedVariablesBuilder();
+        builder.declaredFieldsBuilder();
+        return builder;
     }
 
     @AutoValue.Builder
@@ -46,6 +49,20 @@ abstract class RegistrationInfo {
         Builder javaxInjectClassName(@Nullable ClassName className);
 
         Builder commands(Collection<CommandInfo> commands);
+
+        ImmutableList.Builder<RequiredVariable> injectedVariablesBuilder();
+
+        default Builder addInjectedVariable(RequiredVariable var) {
+            injectedVariablesBuilder().add(var);
+            return this;
+        }
+
+        ImmutableList.Builder<RequiredVariable> declaredFieldsBuilder();
+
+        default Builder addDeclaredField(RequiredVariable var) {
+            declaredFieldsBuilder().add(var);
+            return this;
+        }
 
         RegistrationInfo build();
 
@@ -65,5 +82,9 @@ abstract class RegistrationInfo {
     abstract ClassName getJavaxInjectClassName();
 
     abstract ImmutableList<CommandInfo> getCommands();
+
+    abstract ImmutableList<RequiredVariable> getInjectedVariables();
+
+    abstract ImmutableList<RequiredVariable> getDeclaredFields();
 
 }

@@ -32,6 +32,7 @@ import org.enginehub.piston.util.SafeName;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -65,7 +66,7 @@ class CommandRegistrationGenerator {
     CommandRegistrationGenerator(RegistrationInfo info) {
         this.info = info;
         this.injectedVariables = concat(
-            cmdsFlatMap(i -> i.getInjectedVariables().stream()),
+            info.getInjectedVariables().stream(),
             additionalVariables(info)
         ).collect(toList());
     }
@@ -127,7 +128,7 @@ class CommandRegistrationGenerator {
     }
 
     private Iterable<FieldSpec> generateFields() {
-        return concat(getInjectedVariables(), cmdsFlatMap(cmd -> cmd.getDeclaredFields().stream()))
+        return concat(getInjectedVariables(), info.getDeclaredFields().stream())
             .map(var -> FieldSpec.builder(
                 var.getType(), var.getName(),
                 Modifier.PRIVATE, Modifier.FINAL
@@ -221,6 +222,9 @@ class CommandRegistrationGenerator {
             .addModifiers(Modifier.PRIVATE)
             .returns(int.class)
             .addParameter(COMMAND_PARAMETERS_SPEC);
+        for (TypeMirror thrownType : commandInfo.getCommandMethod().getThrownTypes()) {
+            spec.addException(TypeName.get(thrownType));
+        }
 
         CodeBlock callCommandMethod = generateCallCommandMethod(commandInfo);
         TypeName rawReturnType = TypeName.get(commandInfo.getCommandMethod().getReturnType()).unbox();

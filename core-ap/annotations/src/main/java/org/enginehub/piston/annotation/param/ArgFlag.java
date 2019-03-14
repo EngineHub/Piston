@@ -26,13 +26,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Bind this ({@code boolean}) parameter as an no-argument flag. If the flag is present,
- * the value will be {@code true}. Otherwise, it will be {@code false}.
+ * Bind this parameter as an argument flag.
  */
 @Documented
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Switch {
+public @interface ArgFlag {
 
     /**
      * The name of the flag.
@@ -43,5 +42,10 @@ public @interface Switch {
      * A description of the flag.
      */
     String desc();
+
+    /**
+     * Default values for the flag if it isn't present.
+     */
+    String[] def() default {};
 
 }

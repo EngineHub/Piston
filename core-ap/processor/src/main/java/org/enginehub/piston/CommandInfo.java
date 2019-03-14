@@ -33,8 +33,6 @@ public abstract class CommandInfo {
 
     public static Builder builder() {
         Builder builder = new AutoValue_CommandInfo.Builder();
-        builder.injectedVariablesBuilder();
-        builder.declaredFieldsBuilder();
         builder.footer(null);
         builder.params(ImmutableList.of());
         return builder;
@@ -55,20 +53,6 @@ public abstract class CommandInfo {
 
         Builder params(Collection<CommandParamInfo> params);
 
-        ImmutableList.Builder<RequiredVariable> injectedVariablesBuilder();
-
-        default Builder addInjectedVariable(RequiredVariable var) {
-            injectedVariablesBuilder().add(var);
-            return this;
-        }
-
-        ImmutableList.Builder<RequiredVariable> declaredFieldsBuilder();
-
-        default Builder addDeclaredField(RequiredVariable var) {
-            declaredFieldsBuilder().add(var);
-            return this;
-        }
-
         Builder condition(@Nullable CodeBlock condition);
 
         CommandInfo build();
@@ -88,10 +72,6 @@ public abstract class CommandInfo {
     public abstract Optional<String> getFooter();
 
     public abstract ImmutableList<CommandParamInfo> getParams();
-
-    public abstract ImmutableList<RequiredVariable> getInjectedVariables();
-
-    public abstract ImmutableList<RequiredVariable> getDeclaredFields();
 
     public abstract Optional<CodeBlock> getCondition();
 

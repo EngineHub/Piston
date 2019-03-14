@@ -31,7 +31,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.enginehub.piston.annotation.GenerationSupport;
 import org.enginehub.piston.annotation.param.Arg;
+import org.enginehub.piston.annotation.param.ArgFlag;
 import org.enginehub.piston.annotation.param.Switch;
+import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.util.CaseHelper;
@@ -63,6 +65,7 @@ class CommandParameterInterpreter {
 
     private final Map<Class<? extends Annotation>, ParamTransform> ANNOTATION_TRANSFORMS = ImmutableMap.of(
         Arg.class, this::argTransform,
+        ArgFlag.class, this::argFlagTransform,
         Switch.class, this::switchTransform
     );
     private final ExecutableElement method;
@@ -113,6 +116,35 @@ class CommandParameterInterpreter {
             .build();
     }
 
+    private CommandParamInfo argFlagTransform(VariableElement parameter) {
+        AnnotationMirror arg = MoreElements.getAnnotationMirror(parameter, ArgFlag.class)
+            .toJavaUtil().orElseThrow(() ->
+                new ProcessingException("Missing Arg annotation").withElement(parameter));
+        char name = getValue(parameter, arg, "name", char.class);
+        String desc = getValue(parameter, arg, "desc", String.class);
+        List<String> defaults = getList(parameter, arg, "def", String.class);
+        String var = generationSupport.requestField(
+            ClassName.get(ArgAcceptingCommandFlag.class),
+            parameter.getSimpleName() + "Part"
+        );
+        return CommandParamInfo.builder()
+            .partVariable(var)
+            .construction(CodeBlock.builder()
+                .addStatement("$L = $T.builder('$L', $S).defaultsTo($L).build()",
+                    var,
+                    ArgAcceptingCommandFlag.class,
+                    name, desc,
+                    stringListForGen(defaults.stream()))
+                .build())
+            .extractMethod(extractSpec(parameter, parameter.getSimpleName().toString())
+                .addCode(CodeBlock.builder()
+                    .addStatement("return $L.value($L).asSingle($L)",
+                        var, ReservedVariables.PARAMETERS, asKeyType(parameter.asType()))
+                    .build())
+                .build())
+            .build();
+    }
+
     private CommandParamInfo switchTransform(VariableElement parameter) {
         checkState(TypeName.BOOLEAN.equals(TypeName.get(parameter.asType())),
             "Non-boolean parameter annotated with @Switch");
@@ -128,10 +160,10 @@ class CommandParameterInterpreter {
         return CommandParamInfo.builder()
             .partVariable(var)
             .construction(CodeBlock.builder()
-                .addStatement("$L = $T.builder($L, $S).build()",
+                .addStatement("$L = $T.builder('$L', $S).build()",
                     var,
                     NoArgCommandFlag.class,
-                    "'" + name + "'", desc)
+                    name, desc)
                 .build())
             .extractMethod(extractSpec(parameter, parameter.getSimpleName().toString())
                 .addCode(CodeBlock.builder()
@@ -158,7 +190,7 @@ class CommandParameterInterpreter {
         return TypeSpec.anonymousClassBuilder("")
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(Key.class),
-                TypeName.get(mirror)
+                TypeName.get(mirror).box()
             ))
             .build();
     }

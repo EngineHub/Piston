@@ -20,7 +20,9 @@
 package org.enginehub.piston.util;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.Primitives;
 
+import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
@@ -37,14 +39,26 @@ import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
  */
 public class AnnoValueExtraction {
 
-    private static final AnnotationValueVisitor<Object, Predicate<Object>> GENERAL_VISITOR =
-        new SimpleAnnotationValueVisitor8<Object, Predicate<Object>>() {
+    private static final class GeneralResult {
+        @Nullable
+        private final Object good;
+        @Nullable
+        private final Object bad;
+
+        public GeneralResult(@Nullable Object good, @Nullable Object bad) {
+            this.good = good;
+            this.bad = bad;
+        }
+    }
+
+    private static final AnnotationValueVisitor<GeneralResult, Predicate<Object>> GENERAL_VISITOR =
+        new SimpleAnnotationValueVisitor8<GeneralResult, Predicate<Object>>() {
             @Override
-            protected Object defaultAction(Object o, Predicate<Object> objectPredicate) {
+            protected GeneralResult defaultAction(Object o, Predicate<Object> objectPredicate) {
                 if (objectPredicate.test(o)) {
-                    return o;
+                    return new GeneralResult(o, null);
                 }
-                return null;
+                return new GeneralResult(null, o);
             }
         };
 
@@ -60,14 +74,16 @@ public class AnnoValueExtraction {
                                         AnnotationMirror mirror,
                                         Class<T> type,
                                         AnnotationValue value) {
-        T result = type.cast(
-            value.accept(GENERAL_VISITOR, type::isInstance)
-        );
-        if (result == null) {
-            throw new ProcessingException("Value is not of expected type " + type.getCanonicalName())
+        Class<T> boxed = Primitives.wrap(type);
+        GeneralResult result = value.accept(GENERAL_VISITOR, boxed::isInstance);
+        if (result.bad != null) {
+            throw new ProcessingException(
+                "Value is not of expected type " + boxed.getCanonicalName()
+                    + ", got " + result.bad.getClass().getCanonicalName())
                 .withElement(annotated).withAnnotation(mirror);
         }
-        return result;
+        assert result.good != null;
+        return boxed.cast(result.good);
     }
 
     public static <T> List<T> getList(Element annotated,
