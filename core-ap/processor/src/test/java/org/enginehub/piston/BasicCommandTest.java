@@ -25,6 +25,10 @@ import org.enginehub.piston.commands.NoArgCommand;
 import org.enginehub.piston.commands.NoArgCommandRegistration;
 import org.enginehub.piston.commands.NoArgWithInjectedCommand;
 import org.enginehub.piston.commands.NoArgWithInjectedCommandRegistration;
+import org.enginehub.piston.commands.SingleArgCommand;
+import org.enginehub.piston.commands.SingleArgCommandRegistration;
+import org.enginehub.piston.commands.SingleOptionalArgCommand;
+import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -69,6 +73,36 @@ class BasicCommandTest {
                 .setManagerSetup(commandManager -> commandManager.injectValue(
                     Key.get(String.class), () -> injected
                 ))
+        );
+    }
+
+    @Test
+    void singleArgCommand() {
+        String testString = "somethingnotspaced";
+        testCommand(
+            new TestCommandConfig<>(
+                SingleArgCommand.class,
+                SingleArgCommandRegistration::new,
+                cmd -> verify(cmd).singleArg(testString))
+                .setCommandLine("single-arg " + testString)
+        );
+    }
+    @Test
+    void singleOptionalArgCommand() {
+        String testString = "somethingnotspaced";
+        testCommand(
+            new TestCommandConfig<>(
+                SingleOptionalArgCommand.class,
+                SingleOptionalArgCommandRegistration::new,
+                cmd -> verify(cmd).singleArg(""))
+                .setCommandLine("single-arg-opt")
+        );
+        testCommand(
+            new TestCommandConfig<>(
+                SingleOptionalArgCommand.class,
+                SingleOptionalArgCommandRegistration::new,
+                cmd -> verify(cmd).singleArg(testString))
+                .setCommandLine("single-arg-opt " + testString)
         );
     }
 }

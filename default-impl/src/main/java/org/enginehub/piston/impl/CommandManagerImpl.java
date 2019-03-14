@@ -30,6 +30,7 @@ import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.converter.ArgumentConverter;
+import org.enginehub.piston.converter.ArgumentConverters;
 import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.exception.NoSuchCommandException;
 import org.enginehub.piston.exception.NoSuchFlagException;
@@ -130,6 +131,10 @@ public class CommandManagerImpl implements CommandManager {
         .build(CacheLoader.from(CommandManagerImpl::cacheCommand));
     private final Map<Key<?>, Supplier<?>> injectedValues = new HashMap<>();
     private final Map<Key<?>, ArgumentConverter<?>> converters = new HashMap<>();
+
+    public CommandManagerImpl() {
+        registerConverter(Key.get(String.class), ArgumentConverters.forString());
+    }
 
     @Override
     public Command.Builder newCommand(String name) {
@@ -327,6 +332,7 @@ public class CommandManagerImpl implements CommandManager {
                               Consumer<CommandValueImpl.Builder> valueAdder) {
         parameters.addPresentPart(part);
         CommandValueImpl.Builder builder = CommandValueImpl.builder();
+        valueAdder.accept(builder);
         parameters.addValue(part, builder
             .commandContext(command)
             .partContext(part)

@@ -90,6 +90,7 @@ abstract class CommandValueImpl implements CommandValue {
                     converter.get().describeAcceptableArguments()),
                     commandContext());
             }
+            values.addAll(convert);
         }
         return values.build();
     }
