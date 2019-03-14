@@ -122,7 +122,9 @@ abstract class CommandImpl implements Command {
 
     @Override
     public String getFullHelp() {
-        StringBuilder builder = new StringBuilder("Usage: ");
+        StringBuilder builder = new StringBuilder(getDescription());
+
+        builder.append("\nUsage: ");
 
         appendUsage(builder);
         builder.append('\n');

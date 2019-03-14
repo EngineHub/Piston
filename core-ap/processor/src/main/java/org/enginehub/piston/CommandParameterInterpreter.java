@@ -121,6 +121,10 @@ class CommandParameterInterpreter {
             .toJavaUtil().orElseThrow(() ->
                 new ProcessingException("Missing Arg annotation").withElement(parameter));
         char name = getValue(parameter, arg, "name", char.class);
+        String argName = getValue(parameter, arg, "argName", String.class);
+        if (argName.equals(ArgFlag.ARG_NAME_IS_PARAMETER_NAME)) {
+            argName = parameter.getSimpleName().toString();
+        }
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         String var = generationSupport.requestField(
@@ -130,10 +134,10 @@ class CommandParameterInterpreter {
         return CommandParamInfo.builder()
             .partVariable(var)
             .construction(CodeBlock.builder()
-                .addStatement("$L = $T.builder('$L', $S).defaultsTo($L).build()",
+                .addStatement("$L = $T.builder('$L', $S).argNamed($S).defaultsTo($L).build()",
                     var,
                     ArgAcceptingCommandFlag.class,
-                    name, desc,
+                    name, desc, argName,
                     stringListForGen(defaults.stream()))
                 .build())
             .extractMethod(extractSpec(parameter, parameter.getSimpleName().toString())

@@ -213,7 +213,7 @@ public class CommandManagerImpl implements CommandManager {
         } finally {
             lock.readLock().unlock();
         }
-        return allCommands.stream();
+        return allCommands.stream().distinct();
     }
 
     @Override

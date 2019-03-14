@@ -38,6 +38,14 @@ public @interface ArgFlag {
      */
     char name();
 
+    String ARG_NAME_IS_PARAMETER_NAME = "__ARG_NAME_IS_PARAMETER_NAME__";
+
+    /**
+     * The name of the argument. If not specified, defaults to the name of
+     * the parameter.
+     */
+    String argName() default ARG_NAME_IS_PARAMETER_NAME;
+
     /**
      * A description of the flag.
      */
