@@ -17,13 +17,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.enginehub.piston.exception;
+
+import org.enginehub.piston.Command;
+
 /**
- * A reference implementation of the Piston command system.
- *
- * <p>
- * This package provides a reference for implementing all the interfaces,
- * as well as one way to hook them into the Piston core library loader.
- * </p>
+ * Parent class for all usage-related exceptions.
  */
-@org.enginehub.piston.util.NonnullByDefault
-package org.enginehub.piston.impl;
+public class UsageException extends CommandException {
+    public UsageException(Command command) {
+        super(command);
+    }
+
+    public UsageException(String message, Command command) {
+        super(message, command);
+    }
+
+    public UsageException(String message, Throwable cause, Command command) {
+        super(message, cause, command);
+    }
+
+    public UsageException(Throwable cause, Command command) {
+        super(cause, command);
+    }
+}

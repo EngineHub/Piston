@@ -19,25 +19,117 @@
 
 package org.enginehub.piston.impl;
 
+import com.google.common.base.Joiner;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.converter.ArgumentConverter;
-import com.google.inject.Key;
+import org.enginehub.piston.exception.ConditionFailedException;
+import org.enginehub.piston.exception.NoSuchCommandException;
+import org.enginehub.piston.exception.NoSuchFlagException;
+import org.enginehub.piston.exception.UsageException;
+import org.enginehub.piston.part.ArgAcceptingCommandFlag;
+import org.enginehub.piston.part.ArgAcceptingCommandPart;
+import org.enginehub.piston.part.CommandArgument;
+import org.enginehub.piston.part.CommandFlag;
+import org.enginehub.piston.part.CommandPart;
+import org.enginehub.piston.part.NoArgCommandFlag;
+import org.enginehub.piston.part.SubCommandPart;
 
-import java.util.Collection;
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public class CommandManagerImpl implements CommandManager {
-    private final Map<String, Command> commands = new ConcurrentHashMap<>();
-    private final Map<Key<?>, Supplier<?>> injectedValues = new ConcurrentHashMap<>();
-    private final Map<Key<?>, ArgumentConverter<?>> converters = new ConcurrentHashMap<>();
+
+    private static CommandParseCache cacheCommand(Command command) {
+        ImmutableList.Builder<CommandArgument> arguments = ImmutableList.builder();
+        ImmutableList.Builder<ArgAcceptingCommandPart> defaultProvided = ImmutableList.builder();
+        ImmutableMap.Builder<Character, CommandFlag> flags = ImmutableMap.builder();
+        ImmutableMap.Builder<String, Command> subCommands = ImmutableMap.builder();
+        boolean subCommandRequired = false;
+        ImmutableList<CommandPart> parts = command.getParts();
+        for (int i = 0; i < parts.size(); i++) {
+            CommandPart part = parts.get(i);
+            if (part instanceof ArgAcceptingCommandFlag || part instanceof NoArgCommandFlag) {
+                CommandFlag flag = (CommandFlag) part;
+                flags.put(flag.getName(), flag);
+            } else if (part instanceof CommandArgument) {
+                arguments.add((CommandArgument) part);
+            } else if (part instanceof SubCommandPart) {
+                checkState(i + 1 >= parts.size(),
+                    "Sub-command must be last part.");
+                for (Command cmd : ((SubCommandPart) part).getCommands()) {
+                    subCommands.put(cmd.getName(), cmd);
+                    for (String alias : cmd.getAliases()) {
+                        subCommands.put(alias, cmd);
+                    }
+                }
+                subCommandRequired = part.isRequired();
+            } else {
+                throw new IllegalStateException("Unknown part implementation " + part);
+            }
+            if (part instanceof ArgAcceptingCommandPart) {
+                ArgAcceptingCommandPart argPart = (ArgAcceptingCommandPart) part;
+                if (argPart.getDefaults().size() > 0) {
+                    defaultProvided.add(argPart);
+                }
+            }
+        }
+        return new CommandParseCache(
+            arguments.build(),
+            defaultProvided.build(),
+            flags.build(),
+            subCommands.build(),
+            subCommandRequired);
+    }
+
+    private static class CommandParseCache {
+        final ImmutableList<CommandArgument> arguments;
+        final ImmutableList<ArgAcceptingCommandPart> defaultProvided;
+        final ImmutableMap<Character, CommandFlag> flags;
+        final ImmutableMap<String, Command> subCommands;
+        final boolean subCommandRequired;
+
+        CommandParseCache(ImmutableList<CommandArgument> arguments,
+                          ImmutableList<ArgAcceptingCommandPart> defaultProvided,
+                          ImmutableMap<Character, CommandFlag> flags,
+                          ImmutableMap<String, Command> subCommands,
+                          boolean subCommandRequired) {
+            this.arguments = arguments;
+            this.defaultProvided = defaultProvided;
+            this.flags = flags;
+            this.subCommands = subCommands;
+            this.subCommandRequired = subCommandRequired;
+        }
+    }
+
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Map<String, Command> commands = new HashMap<>();
+    // Cache information like flags if we can, but let GC clear it if needed.
+    private final LoadingCache<Command, CommandParseCache> commandCache = CacheBuilder.newBuilder()
+        .softValues()
+        .build(CacheLoader.from(CommandManagerImpl::cacheCommand));
+    private final Map<Key<?>, Supplier<?>> injectedValues = new HashMap<>();
+    private final Map<Key<?>, ArgumentConverter<?>> converters = new HashMap<>();
 
     @Override
     public Command.Builder newCommand(String name) {
@@ -46,36 +138,199 @@ public class CommandManagerImpl implements CommandManager {
 
     @Override
     public void register(Command command) {
-        commands.put(command.getName(), command);
+        // Run it through the cache for a validity check,
+        // and so that we can cache many commands in high-memory situations.
+        commandCache.getUnchecked(command);
+        lock.writeLock().lock();
+        try {
+            registerIfAvailable(command.getName(), command);
+            for (String alias : command.getAliases()) {
+                registerIfAvailable(alias, command);
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    private void registerIfAvailable(String name, Command command) {
+        Command existing = commands.put(name, command);
+        if (existing != null) {
+            commands.put(name, existing);
+            throw new IllegalArgumentException("A command is already registered under "
+                + name + "; existing=" + existing + ",rejected=" + command);
+        }
     }
 
     @Override
     public <T> void registerConverter(Key<T> key, ArgumentConverter<T> converter) {
-        converters.put(key, converter);
-    }
-
-    @Override
-    public <T> Collection<T> convert(String value, Key<T> key) {
-        @SuppressWarnings("unchecked")
-        ArgumentConverter<T> converter = (ArgumentConverter<T>) converters.get(key);
-        if (converter == null) {
-            throw new NoSuchElementException("No converter for " + key);
+        lock.writeLock().lock();
+        try {
+            converters.put(key, converter);
+        } finally {
+            lock.writeLock().unlock();
         }
-        return requireNonNull(converter.convert(value), "Converter may not return null.");
     }
 
     @Override
-    public Stream<Command> getAllCommands() {
-        return commands.values().stream();
+    public <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key) {
+        @SuppressWarnings("unchecked")
+        ArgumentConverter<T> converter = (ArgumentConverter<T>) getArgumentConverter(key);
+        return Optional.ofNullable(converter);
     }
 
-    @Override
-    public int execute(List<String> args) {
-        return 0;
+    @Nullable
+    private <T> ArgumentConverter<?> getArgumentConverter(Key<T> key) {
+        lock.readLock().lock();
+        try {
+            return converters.get(key);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public <T> void injectValue(Key<T> key, Supplier<T> supplier) {
-        injectedValues.put(key, supplier);
+        lock.writeLock().lock();
+        try {
+            injectedValues.put(key, supplier);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public Stream<Command> getAllCommands() {
+        ImmutableList<Command> allCommands;
+        lock.readLock().lock();
+        try {
+            allCommands = ImmutableList.copyOf(commands.values());
+        } finally {
+            lock.readLock().unlock();
+        }
+        return allCommands.stream();
+    }
+
+    @Override
+    public int execute(List<String> args) {
+        lock.readLock().lock();
+        try {
+            String name = args.get(0);
+            Command command = commands.get(name);
+            if (command == null) {
+                throw new NoSuchCommandException(name);
+            }
+            return executeSubCommand(command, args.subList(1, args.size()));
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    private int executeSubCommand(Command command, List<String> args) {
+        if (!command.getCondition().satisfied()) {
+            throw new ConditionFailedException(command);
+        }
+        CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
+            .injectedValues(Maps.transformValues(injectedValues, Supplier::get));
+        CommandParseCache parseCache = commandCache.getUnchecked(command);
+
+        boolean flagsEnabled = true;
+        Set<ArgAcceptingCommandPart> defaultsNeeded = new HashSet<>(parseCache.defaultProvided);
+        Iterator<CommandArgument> partIter = parseCache.arguments.iterator();
+        Iterator<String> argIter = args.iterator();
+        while (argIter.hasNext()) {
+            String next = argIter.next();
+
+            // Handle flags:
+            if (next.startsWith("-") && flagsEnabled) {
+                if (next.equals("--")) {
+                    // Special option to stop flag handling.
+                    flagsEnabled = false;
+                } else {
+                    // Pick out individual flags from the long-option form.
+                    consumeFlags(command, parameters, parseCache, defaultsNeeded, argIter, next);
+                }
+                continue;
+            }
+
+            // Otherwise, eat it as the current argument.
+            if (!partIter.hasNext()) {
+                // we may still consume as a sub-command
+                if (parseCache.subCommands.isEmpty()) {
+                    // but not in this case
+                    break;
+                }
+                Command sub = parseCache.subCommands.get(next);
+                if (sub == null) {
+                    throw new UsageException("Bad sub-command. Acceptable commands: "
+                        + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
+                }
+                return executeSubCommand(sub, ImmutableList.copyOf(argIter));
+            }
+            CommandArgument nextPart = partIter.next();
+            addValueFull(parameters, command, nextPart, v -> v.value(next));
+            defaultsNeeded.remove(nextPart);
+        }
+
+        // Handle error conditions.
+        boolean moreParts = partIter.hasNext() && partIter.next().isRequired();
+        // The sub-command is only handled on empty-parts.
+        // If we made it here, we ran out of arguments before calling into it.
+        if (moreParts || parseCache.subCommandRequired) {
+            checkState(!argIter.hasNext(), "Should not have more arguments to analyze.");
+            throw new UsageException("Not enough arguments", command);
+        }
+
+        if (argIter.hasNext()) {
+            checkState(!partIter.hasNext(), "Should not have more parts to analyze.");
+            throw new UsageException("Too many arguments", command);
+        }
+
+        for (ArgAcceptingCommandPart part : defaultsNeeded) {
+            addValueFull(parameters, command, part, v -> v.values(part.getDefaults()));
+        }
+
+        // Run the command action.
+        return command.getAction().run(parameters.build());
+    }
+
+    private void consumeFlags(Command command, CommandParametersImpl.Builder parameters, CommandParseCache parseCache, Set<ArgAcceptingCommandPart> defaultsNeeded, Iterator<String> argIter, String next) {
+        char[] flagArray = new char[next.length() - 1];
+        next.getChars(1, next.length(), flagArray, 0);
+        for (int i = 0; i < flagArray.length; i++) {
+            char c = flagArray[i];
+            CommandFlag flag = parseCache.flags.get(c);
+            if (flag == null) {
+                throw new NoSuchFlagException(command, c);
+            }
+            if (flag instanceof ArgAcceptingCommandFlag) {
+                if (i + 1 < flagArray.length) {
+                    // Only allow argument-flags at the end of flag-combos.
+                    throw new UsageException("Argument-accepting flags must be " +
+                        "at the end of combined flag groups.", command);
+                }
+                if (!argIter.hasNext()) {
+                    break;
+                }
+                addValueFull(parameters, command, flag, v -> v.value(argIter.next()));
+                defaultsNeeded.remove(flag);
+            } else {
+                // Sanity-check. Real check is in `cacheCommand`.
+                checkState(flag instanceof NoArgCommandFlag);
+                parameters.addPresentPart(flag);
+            }
+        }
+    }
+
+    private void addValueFull(CommandParametersImpl.Builder parameters,
+                              Command command,
+                              CommandPart part,
+                              Consumer<CommandValueImpl.Builder> valueAdder) {
+        parameters.addPresentPart(part);
+        CommandValueImpl.Builder builder = CommandValueImpl.builder();
+        parameters.addValue(part, builder
+            .commandContext(command)
+            .partContext(part)
+            .manager(this)
+            .build());
     }
 }

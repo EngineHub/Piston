@@ -17,13 +17,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * A reference implementation of the Piston command system.
- *
- * <p>
- * This package provides a reference for implementing all the interfaces,
- * as well as one way to hook them into the Piston core library loader.
- * </p>
- */
-@org.enginehub.piston.util.NonnullByDefault
-package org.enginehub.piston.impl;
+package org.enginehub.piston.exception;
+
+public class NoSuchCommandException extends CommandException {
+
+    private final String requestedCommand;
+
+    public NoSuchCommandException(String requestedCommand) {
+        super("No such command: " + requestedCommand, null);
+        this.requestedCommand = requestedCommand;
+    }
+
+    public String getRequestedCommand() {
+        return requestedCommand;
+    }
+}

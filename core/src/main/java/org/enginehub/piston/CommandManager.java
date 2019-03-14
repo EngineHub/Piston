@@ -19,12 +19,12 @@
 
 package org.enginehub.piston;
 
-import org.enginehub.piston.converter.ArgumentConverter;
 import com.google.inject.Key;
+import org.enginehub.piston.converter.ArgumentConverter;
 
-import java.util.Collection;
+import javax.annotation.Nullable;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -75,7 +75,7 @@ public interface CommandManager {
     }
 
     /**
-     * Register a converter for {@link CommandValue#as(Key)} to use.
+     * Register a converter for {@link CommandValue#asMultiple(Key)} to use.
      *
      * @param key the key to register the converter under
      * @param converter the converter to register
@@ -84,16 +84,13 @@ public interface CommandManager {
     <T> void registerConverter(Key<T> key, ArgumentConverter<T> converter);
 
     /**
-     * Convert a value using a registered converter.
+     * Get a converter for a key.
      *
-     * @param value the value to convert
-     * @param key the key for the converter
-     * @param <T> the type of the converted value
-     * @return the converted value
-     * @throws NoSuchElementException if there is no converter
-     * @see #registerConverter(Key, ArgumentConverter)
+     * @param key the key the converter is registered under
+     * @param <T> the type of value returned by the converter
+     * @return the converter, if present
      */
-    <T> Collection<T> convert(String value, Key<T> key) throws NoSuchElementException;
+    <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key);
 
     /**
      * Inject a value into this manager. It will be provided by

@@ -17,13 +17,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.enginehub.piston.util;
+
+import javax.annotation.Nonnull;
+import javax.annotation.meta.TypeQualifierDefault;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * A reference implementation of the Piston command system.
- *
- * <p>
- * This package provides a reference for implementing all the interfaces,
- * as well as one way to hook them into the Piston core library loader.
- * </p>
+ * Marks a package, class, or method as having all elements {@link Nonnull} by default.
  */
-@org.enginehub.piston.util.NonnullByDefault
-package org.enginehub.piston.impl;
+@Documented
+@Nonnull
+@TypeQualifierDefault({ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD})
+public @interface NonnullByDefault {
+}

@@ -19,6 +19,7 @@
 
 package org.enginehub.piston.converter;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -34,9 +35,14 @@ public interface ArgumentConverter<T> {
     /**
      * Converts the argument input to a collection of argument values.
      *
+     * <p>
+     * If it can't be converted, return {@code null}.
+     * </p>
+     *
      * @param argument the argument input to convert
      * @return the argument values
      */
+    @Nullable
     Collection<T> convert(String argument);
 
     /**

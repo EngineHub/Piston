@@ -26,11 +26,6 @@ import com.google.inject.Key;
 public interface CommandParameters {
 
     /**
-     * Determine if the execution will also include a sub-command.
-     */
-    boolean isRunningSubcommand();
-
-    /**
      * Checks if the parameters contain the specified part.
      *
      * @param part - the part to look for

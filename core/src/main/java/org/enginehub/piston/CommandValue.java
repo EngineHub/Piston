@@ -95,6 +95,11 @@ public interface CommandValue {
      * @throws IllegalStateException if not exactly one value is present
      * @see #asString()
      */
-    <T> T asSingle(Key<T> key);
+    default <T> T asSingle(Key<T> key) {
+        ImmutableList<T> values = asMultiple(key);
+        checkState(values.size() > 0, "No value present");
+        checkState(values.size() == 1, "Too many values present");
+        return values.get(0);
+    }
 
 }

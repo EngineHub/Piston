@@ -17,13 +17,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * A reference implementation of the Piston command system.
- *
- * <p>
- * This package provides a reference for implementing all the interfaces,
- * as well as one way to hook them into the Piston core library loader.
- * </p>
- */
-@org.enginehub.piston.util.NonnullByDefault
-package org.enginehub.piston.impl;
+package org.enginehub.piston.exception;
+
+import org.enginehub.piston.Command;
+import org.enginehub.piston.part.CommandFlag;
+
+import static java.util.stream.Collectors.joining;
+
+public class NoSuchFlagException extends UsageException {
+
+    private static String getAllFlags(Command command) {
+        return command.getParts().stream()
+            .filter(CommandFlag.class::isInstance)
+            .map(f -> String.valueOf(((CommandFlag) f).getName()))
+            .collect(joining());
+    }
+
+    public NoSuchFlagException(Command command, char requestedFlag) {
+        super("Flag '" + requestedFlag + "' is not a valid flag for "
+            + command.getName() + ". Options: " + getAllFlags(command), command);
+    }
+
+}

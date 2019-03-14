@@ -19,6 +19,7 @@
 
 package org.enginehub.piston;
 
+import javax.annotation.Nullable;
 import java.util.ServiceLoader;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,20 +53,19 @@ public class DefaultCommandManagerService implements CommandManagerService {
 
     private final Lock sealLock = new ReentrantLock();
     private CommandManagerService defaultService;
+    @Nullable
     private CommandManagerService sealedDefaultService;
-    private boolean sealed;
 
     private DefaultCommandManagerService(CommandManagerService defaultService) {
         this.defaultService = defaultService;
     }
 
     private CommandManagerService sealDelegate() {
-        if (!sealed) {
+        if (sealedDefaultService == null) {
             sealLock.lock();
             try {
                 // double-check under lock, it may have been sealed by another thread
-                if (!sealed) {
-                    sealed = true;
+                if (sealedDefaultService == null) {
                     // capture this under the lock to ensure thread-safety
                     // once done, it will forever be the same value
                     sealedDefaultService = defaultService;
@@ -82,7 +82,7 @@ public class DefaultCommandManagerService implements CommandManagerService {
     public void setDefaultService(CommandManagerService defaultService) {
         sealLock.lock();
         try {
-            checkState(!sealed, "Piston default service is sealed");
+            checkState(sealedDefaultService == null, "Piston default service is sealed");
             this.defaultService = defaultService;
         } finally {
             sealLock.unlock();
