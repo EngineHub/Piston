@@ -19,6 +19,8 @@
 
 package org.enginehub.piston.annotation;
 
+import org.enginehub.piston.Command.Condition;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,13 +31,15 @@ import java.lang.annotation.Target;
  * executes. This may be used as a meta-annotation, to allow it to be combined with a custom
  * annotation that has additional parameters.
  */
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface CommandCondition {
 
     /**
-     * The type to use to generate the actual condition.
+     * A class implementing {@link CommandConditionGenerator}, that will be called at runtime
+     * to provide the {@link Condition} for the method. The instance must be injected into the
+     * registration class.
      */
-    Class<? extends CommandConditionGenerator> type();
+    Class<? extends CommandConditionGenerator> value();
 
 }

@@ -35,7 +35,13 @@ import org.enginehub.piston.annotation.Command;
 import org.enginehub.piston.annotation.CommandCondition;
 import org.enginehub.piston.annotation.CommandContainer;
 import org.enginehub.piston.annotation.GenerationSupport;
+import org.enginehub.piston.optimize.CommandInfoOptimization;
+import org.enginehub.piston.optimize.CommandParamInfoOptimization;
+import org.enginehub.piston.optimize.ExtractSpecOptimization;
 import org.enginehub.piston.util.ProcessingException;
+import org.enginehub.piston.value.CommandInfo;
+import org.enginehub.piston.value.CommandParamInfo;
+import org.enginehub.piston.value.RegistrationInfo;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
@@ -104,15 +110,21 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         for (Element element : elements) {
             TypeElement type = asType(element);
             RegistrationInfo.Builder registration = RegistrationInfo.builder();
-            GenerationSupport generationSupport = new GenerationSupportImpl(registration);
+            IdentifierTracker identifierTracker = new IdentifierTracker();
+            GenerationSupport generationSupport = new GenerationSupportImpl(
+                identifierTracker, registration
+            );
             ImmutableList<CommandInfo> info = type.getEnclosedElements().stream()
                 .filter(enclosedElement -> enclosedElement.getKind() == ElementKind.METHOD)
                 .filter(m -> isAnnotationPresent(m, org.enginehub.piston.annotation.Command.class))
                 .map(MoreElements::asExecutable)
                 .map(m -> getCommandInfo(m, generationSupport))
                 .collect(toImmutableList());
+            CommandInfoOptimization rootOptimization = buildOptimizer(identifierTracker);
+            info = ImmutableList.copyOf(rootOptimization.optimize(info));
             try {
                 new CommandRegistrationGenerator(
+                    identifierTracker,
                     registration
                         .name(type.getSimpleName() + "Registration")
                         .targetClassName(ClassName.get(type))
@@ -129,6 +141,14 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             }
         }
         return ImmutableSet.of();
+    }
+
+    private CommandInfoOptimization buildOptimizer(IdentifierTracker identifierTracker) {
+        return new CommandInfoOptimization(
+            new CommandParamInfoOptimization(
+                new ExtractSpecOptimization(identifierTracker)
+            )
+        );
     }
 
     private static final ImmutableSet<Modifier> VISIBILITY_MODIFIERS = Sets.immutableEnumSet(
@@ -196,11 +216,15 @@ public class CommandProcessor extends BasicAnnotationProcessor {
                 if (element == null) {
                     return false;
                 }
-                if (element.getQualifiedName().contentEquals(CommandCondition.class.getCanonicalName())) {
+                if (isExactlyConditionAnno(element)) {
                     return true;
                 }
                 return isAnnotationPresent(element, CommandCondition.class);
             }));
+
+    private static boolean isExactlyConditionAnno(TypeElement element) {
+        return element.getQualifiedName().contentEquals(CommandCondition.class.getCanonicalName());
+    }
 
     private Optional<AnnotationMirror> findCommandCondition(ExecutableElement method) {
         return method.getAnnotationMirrors().stream()
@@ -209,6 +233,14 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             ))
             // reset the generic to just AnnotationMirror, no wildcard
             .map(x -> (AnnotationMirror) x)
+            .map(x -> {
+                Element annoElement = x.getAnnotationType().asElement();
+                return isExactlyConditionAnno(asType(annoElement))
+                    ? x
+                    : getAnnotationMirror(annoElement, CommandCondition.class).toJavaUtil()
+                    .orElseThrow(() -> new ProcessingException("No CommandCondition?")
+                        .withElement(method).withAnnotation(x));
+            })
             .map(Optional::of)
             .findFirst()
             .orElse(Optional.empty());

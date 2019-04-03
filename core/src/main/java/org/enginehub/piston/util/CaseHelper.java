@@ -60,6 +60,25 @@ public class CaseHelper {
     }
 
     /**
+     * Convert a string from title case to camel case.
+     *
+     * <p>
+     * Example: {@code "SomeClassName"} -> {@code "someClassName"}.
+     * </p>
+     *
+     * @param titleCase the string that is in title case
+     * @return a string in camel case
+     */
+    public static String titleToCamel(String titleCase) {
+        int firstCp = Character.toLowerCase(titleCase.codePointAt(0));
+        IntStream restCp = titleCase.codePoints().skip(1);
+        return concat(IntStream.of(firstCp), restCp)
+            .collect(() -> new StringBuilder(titleCase.length()),
+                StringBuilder::appendCodePoint,
+                StringBuilder::append).toString();
+    }
+
+    /**
      * Convert a string from camel case to title case.
      *
      * <p>

@@ -19,63 +19,107 @@
 
 package org.enginehub.piston;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multiset;
-import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import org.enginehub.piston.annotation.GenerationSupport;
+import org.enginehub.piston.util.SafeName;
+import org.enginehub.piston.value.RegistrationInfo;
+import org.enginehub.piston.value.RequiredVariable;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 class GenerationSupportImpl implements GenerationSupport {
 
-    private static String realName(Multiset<String> memory, String name) {
-        // Make the name safe first
-        name = javaSafeName(name);
-        memory.add(name);
-        int count = memory.count(name);
-        return count == 1 ? name : name + count;
+    private static final class ShareKey {
+        private final TypeName type;
+        private final String name;
+        private final Object shareKey;
+
+        ShareKey(TypeName type, String name, Object shareKey) {
+            this.type = type;
+            this.name = name;
+            this.shareKey = shareKey;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ShareKey shareKey1 = (ShareKey) o;
+            return type.equals(shareKey1.type) &&
+                name.equals(shareKey1.name) &&
+                shareKey.equals(shareKey1.shareKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, name, shareKey);
+        }
     }
 
-    private static String javaSafeName(String name) {
-        return name.codePoints()
-            .map(point -> Character.isJavaIdentifierPart(point) ? point : '_')
-            .collect(StringBuilder::new,
-                StringBuilder::appendCodePoint,
-                StringBuilder::append).toString();
-    }
-
-    private final Multiset<String> fieldNames = HashMultiset.create(ReservedVariables.names());
-    private final Multiset<String> methodNames = HashMultiset.create();
+    private final IdentifierTracker identifierTracker;
     private final RegistrationInfo.Builder builder;
+    private final Map<ShareKey, String> sharedDepNames = new HashMap<>();
+    private final Map<ShareKey, String> sharedFieldNames = new HashMap<>();
 
-    public GenerationSupportImpl(RegistrationInfo.Builder builder) {
+    public GenerationSupportImpl(IdentifierTracker identifierTracker,
+                                 RegistrationInfo.Builder builder) {
+        this.identifierTracker = identifierTracker;
         this.builder = builder;
     }
 
     @Override
-    public String requestDependency(TypeName type, String name, AnnotationSpec... annotations) {
-        String realName = realName(fieldNames, name);
+    public String requestDependency(TypeName type, String name, @Nullable Object shareKey) {
+        ShareKey hashKey = shareKey == null ? null : new ShareKey(type, name, shareKey);
+        if (hashKey != null) {
+            return sharedDepNames.computeIfAbsent(hashKey,
+                k -> requestDependencyUnshared(type, name)
+            );
+        }
+        return requestDependencyUnshared(type, name);
+    }
+
+    private String requestDependencyUnshared(TypeName type, String name) {
+        String realName = identifierTracker.fieldName(name);
         builder.addInjectedVariable(RequiredVariable.builder()
             .type(type)
             .name(realName)
-            .annotations(ImmutableList.copyOf(annotations))
             .build());
         return realName;
     }
 
     @Override
-    public String requestField(TypeName type, String name, AnnotationSpec... annotations) {
-        String realName = realName(fieldNames, name);
+    public String requestField(TypeName type, String name, @Nullable Object shareKey) {
+        ShareKey hashKey = shareKey == null ? null : new ShareKey(type, name, shareKey);
+        if (hashKey != null) {
+            return sharedFieldNames.computeIfAbsent(hashKey,
+                k -> requestFieldUnshared(type, name)
+            );
+        }
+        return requestFieldUnshared(type, name);
+    }
+
+    private String requestFieldUnshared(TypeName type, String name) {
+        String realName = identifierTracker.fieldName(name);
         builder.addDeclaredField(RequiredVariable.builder()
             .type(type)
             .name(realName)
-            .annotations(ImmutableList.copyOf(annotations))
             .build());
         return realName;
     }
 
     @Override
     public String requestMethodName(String name) {
-        return realName(methodNames, name);
+        return identifierTracker.methodName(name);
+    }
+
+    @Override
+    public CodeBlock requestKey(TypeName type) {
+        type = type.box();
+        builder.addKeyType(type);
+        return CodeBlock.of("$L", SafeName.getNameAsIdentifier(type) + "Key");
     }
 }

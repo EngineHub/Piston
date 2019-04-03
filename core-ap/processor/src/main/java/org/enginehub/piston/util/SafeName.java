@@ -19,6 +19,11 @@
 
 package org.enginehub.piston.util;
 
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+
 /**
  * Utility for making Java-safe names from free-form Unicode.
  *
@@ -42,4 +47,31 @@ public class SafeName {
         return result.toString();
     }
 
+    public static String getNameAsIdentifier(TypeName typeName) {
+        return from(CaseHelper.titleToCamel(getNameAsIdentifierRaw(typeName).toString()));
+    }
+
+    private static CharSequence getNameAsIdentifierRaw(TypeName typeName) {
+        if (typeName instanceof ClassName) {
+            // good, just the raw name works here
+            return ((ClassName) typeName).simpleName();
+        } else if (typeName instanceof ParameterizedTypeName) {
+            // append the type parameters
+            ParameterizedTypeName pt = (ParameterizedTypeName) typeName;
+            ClassName raw = pt.rawType;
+            StringBuilder result = new StringBuilder(
+                getNameAsIdentifierRaw(raw)
+            );
+            for (TypeName typeArgument : pt.typeArguments) {
+                result.append(getNameAsIdentifierRaw(typeArgument));
+            }
+            return result;
+        } else if (typeName instanceof ArrayTypeName) {
+            // append Array to the name
+            CharSequence base = getNameAsIdentifierRaw(((ArrayTypeName) typeName).componentType);
+            return new StringBuilder(base).append("Array");
+        }
+        // just use toString() as a last resort
+        return typeName.toString();
+    }
 }

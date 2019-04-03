@@ -17,54 +17,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.value;
 
 import com.google.auto.value.AutoValue;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-
-import javax.annotation.Nullable;
 
 /**
- * Information that can be used to supply a parameter for a
+ * Information that can be used to supply the condition for a
  * registered command method.
  */
 @AutoValue
-abstract class CommandParamInfo {
+public abstract class CommandCondInfo {
 
     public static Builder builder() {
-        return new AutoValue_CommandParamInfo.Builder();
+        return new AutoValue_CommandCondInfo.Builder();
     }
 
     @AutoValue.Builder
     public interface Builder {
 
-        Builder partVariable(@Nullable String variable);
+        Builder condVariable(String variable);
 
-        Builder construction(@Nullable CodeBlock construction);
+        Builder construction(CodeBlock construction);
 
-        Builder extractMethod(MethodSpec extraction);
-
-        CommandParamInfo build();
+        CommandCondInfo build();
     }
 
     /**
-     * Variable name, if used to store data.
+     * Variable name the condition is stored under.
      */
-    @Nullable
-    abstract String getPartVariable();
+    public abstract String getCondVariable();
 
     /**
-     * Code for initializing data the extraction code uses.
+     * Code for initializing the condition.
      */
-    @Nullable
-    abstract CodeBlock getConstruction();
-
-    /**
-     * Code for extracting the value from a {@link CommandParameters} instance.
-     *
-     * <p>The parameters instance is always available as {@link ReservedVariables#PARAMETERS}.</p>
-     */
-    abstract MethodSpec getExtractMethod();
+    public abstract CodeBlock getConstruction();
 
 }

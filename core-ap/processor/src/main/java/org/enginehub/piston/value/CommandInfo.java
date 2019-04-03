@@ -17,11 +17,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.value;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.CodeBlock;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.ExecutableElement;
@@ -53,7 +52,7 @@ public abstract class CommandInfo {
 
         Builder params(Collection<CommandParamInfo> params);
 
-        Builder condition(@Nullable CodeBlock condition);
+        Builder condition(@Nullable CommandCondInfo condition);
 
         CommandInfo build();
     }
@@ -73,6 +72,8 @@ public abstract class CommandInfo {
 
     public abstract ImmutableList<CommandParamInfo> getParams();
 
-    public abstract Optional<CodeBlock> getCondition();
+    public abstract Optional<CommandCondInfo> getCondition();
+
+    public abstract Builder toBuilder();
 
 }

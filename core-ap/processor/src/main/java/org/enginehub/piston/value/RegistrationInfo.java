@@ -17,28 +17,31 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.value;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import java.util.Collection;
 
 @AutoValue
-abstract class RegistrationInfo {
+public abstract class RegistrationInfo {
 
-    static Builder builder() {
+    public static Builder builder() {
         Builder builder = new AutoValue_RegistrationInfo.Builder();
         builder.injectedVariablesBuilder();
         builder.declaredFieldsBuilder();
+        builder.keyTypesBuilder();
         return builder;
     }
 
     @AutoValue.Builder
-    interface Builder {
+    public interface Builder {
 
         Builder name(String name);
 
@@ -64,6 +67,13 @@ abstract class RegistrationInfo {
             return this;
         }
 
+        ImmutableSet.Builder<TypeName> keyTypesBuilder();
+
+        default Builder addKeyType(TypeName typeName) {
+            keyTypesBuilder().add(typeName);
+            return this;
+        }
+
         RegistrationInfo build();
 
     }
@@ -71,20 +81,22 @@ abstract class RegistrationInfo {
     RegistrationInfo() {
     }
 
-    abstract String getName();
+    public abstract String getName();
 
-    abstract ClassName getTargetClassName();
-
-    @Nullable
-    abstract Modifier getClassVisibility();
+    public abstract ClassName getTargetClassName();
 
     @Nullable
-    abstract ClassName getJavaxInjectClassName();
+    public abstract Modifier getClassVisibility();
 
-    abstract ImmutableList<CommandInfo> getCommands();
+    @Nullable
+    public abstract ClassName getJavaxInjectClassName();
 
-    abstract ImmutableList<RequiredVariable> getInjectedVariables();
+    public abstract ImmutableList<CommandInfo> getCommands();
 
-    abstract ImmutableList<RequiredVariable> getDeclaredFields();
+    public abstract ImmutableList<RequiredVariable> getInjectedVariables();
+
+    public abstract ImmutableList<RequiredVariable> getDeclaredFields();
+
+    public abstract ImmutableSet<TypeName> getKeyTypes();
 
 }

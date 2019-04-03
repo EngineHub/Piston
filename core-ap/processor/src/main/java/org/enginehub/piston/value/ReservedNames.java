@@ -17,23 +17,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.value;
 
 import com.google.common.collect.ImmutableMultiset;
 
-class ReservedVariables {
-    static final String COMMAND_MANAGER = "commandManager";
-    static final String CONTAINER_INSTANCE = "containerInstance";
-    static final String PARAMETERS = "parameters";
+public class ReservedNames {
+    public static final String COMMAND_MANAGER = "commandManager";
+    public static final String CONTAINER_INSTANCE = "containerInstance";
+    public static final String PARAMETERS = "parameters";
+    public static final String GET_COMMAND_METHOD = "getCommandMethod";
 
     /**
-     * Names that are pre-reserved, and must not be used.
+     * Field names that are pre-reserved, and must not be used.
      */
-    static ImmutableMultiset<String> names() {
+    public static ImmutableMultiset<String> fieldNames() {
         return ImmutableMultiset.of(
             COMMAND_MANAGER,
             CONTAINER_INSTANCE,
             PARAMETERS
+        );
+    }
+
+    /**
+     * Method names that are pre-reserved, and must not be used.
+     */
+    public static ImmutableMultiset<String> methodNames() {
+        return ImmutableMultiset.of(
+            GET_COMMAND_METHOD
         );
     }
 }

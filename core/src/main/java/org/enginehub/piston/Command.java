@@ -67,28 +67,30 @@ public interface Command {
         /**
          * An condition that always returns true.
          */
-        Condition TRUE = () -> true;
+        Condition TRUE = p -> true;
 
         /**
          * An condition that always returns false.
          */
-        Condition FALSE = () -> false;
+        Condition FALSE = p -> false;
 
         /**
          * Determine if the condition is satisfied.
+         *
+         * @param parameters the command parameters
          */
-        boolean satisfied();
+        boolean satisfied(CommandParameters parameters);
 
         default Condition and(Condition other) {
-            return () -> satisfied() && other.satisfied();
+            return p -> satisfied(p) && other.satisfied(p);
         }
 
         default Condition or(Condition other) {
-            return () -> satisfied() || other.satisfied();
+            return p -> satisfied(p) || other.satisfied(p);
         }
 
         default Condition not() {
-            return () -> !satisfied();
+            return p -> !satisfied(p);
         }
 
     }

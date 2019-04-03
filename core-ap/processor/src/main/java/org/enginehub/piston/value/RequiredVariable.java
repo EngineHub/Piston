@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.value;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;

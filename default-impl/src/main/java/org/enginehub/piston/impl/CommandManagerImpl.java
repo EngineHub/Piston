@@ -232,9 +232,6 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     private int executeSubCommand(Command command, List<String> args) {
-        if (!command.getCondition().satisfied()) {
-            throw new ConditionFailedException(command);
-        }
         CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
             .injectedValues(Maps.transformValues(injectedValues, Supplier::get));
         CommandParseCache parseCache = commandCache.getUnchecked(command);
@@ -297,7 +294,12 @@ public class CommandManagerImpl implements CommandManager {
 
         // Run the command action.
         try {
-            return command.getAction().run(parameters.build());
+            CommandParametersImpl builtParams = parameters.build();
+            if (!command.getCondition().satisfied(builtParams)) {
+                throw new ConditionFailedException(command);
+            }
+
+            return command.getAction().run(builtParams);
         } catch (CommandException e) {
             throw e;
         } catch (Exception e) {

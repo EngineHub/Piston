@@ -19,69 +19,69 @@
 
 package org.enginehub.piston;
 
-import org.enginehub.piston.annotation.CommandConditionGenerator;
-import org.enginehub.piston.annotation.GenerationSupport;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.TypeName;
+import org.enginehub.piston.annotation.GenerationSupport;
 import org.enginehub.piston.util.ProcessingException;
+import org.enginehub.piston.util.SafeName;
+import org.enginehub.piston.value.CommandCondInfo;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
-import static com.google.auto.common.MoreTypes.asTypeElement;
+import static org.enginehub.piston.value.ReservedNames.GET_COMMAND_METHOD;
 
 class ConditionGenerator {
     private final AnnotationMirror conditionMirror;
     private final ExecutableElement method;
     private final GenerationSupport depSupport;
 
-    ConditionGenerator(AnnotationMirror conditionMirror, ExecutableElement method, GenerationSupport depSupport) {
+    ConditionGenerator(AnnotationMirror conditionMirror,
+                       ExecutableElement method,
+                       GenerationSupport depSupport) {
         this.conditionMirror = conditionMirror;
         this.method = method;
         this.depSupport = depSupport;
     }
 
-    CodeBlock generateCondition() {
-        String generatorClassName = getAnnotationValue(conditionMirror, "type")
-            .accept(new SimpleAnnotationValueVisitor8<String, Void>() {
+    CommandCondInfo generateCondition() {
+        TypeName generatorClassName = getAnnotationValue(conditionMirror, "value")
+            .accept(new SimpleAnnotationValueVisitor8<TypeName, Void>() {
                 @Override
-                public String visitType(TypeMirror t, Void aVoid) {
-                    return asTypeElement(t).getQualifiedName().toString();
+                public TypeName visitType(TypeMirror t, Void aVoid) {
+                    return TypeName.get(t);
                 }
             }, null);
         if (generatorClassName == null) {
             throw new ProcessingException("No generator class name.")
                 .withElement(method).withAnnotation(conditionMirror);
         }
-        Class<?> uncastGeneratorClass;
-        try {
-            uncastGeneratorClass = Class.forName(generatorClassName);
-        } catch (ClassNotFoundException e) {
-            throw new ProcessingException("Class " + generatorClassName + " not found", e)
-                .withElement(method).withAnnotation(conditionMirror);
-        }
-
-        Class<? extends CommandConditionGenerator> generatorClass;
-        try {
-            generatorClass = uncastGeneratorClass
-                .asSubclass(CommandConditionGenerator.class);
-        } catch (ClassCastException e) {
-            throw new ProcessingException("Class " + generatorClassName + " is not a CCG", e)
-                .withElement(method).withAnnotation(conditionMirror);
-        }
-
-        CommandConditionGenerator generator;
-        try {
-            generator = generatorClass.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException
-            | InvocationTargetException | NoSuchMethodException e) {
-            // too lazy to sort these, some of them shouldn't happen / aren't easy to cause
-            throw new ProcessingException("Problem with default constructor of " + generatorClassName, e)
-                .withElement(method).withAnnotation(conditionMirror);
-        }
-        return generator.generateCondition(conditionMirror, method, depSupport);
+        // Request an instance of the class. It can be shared if it's the same class.
+        String condGeneratorFieldName = depSupport.requestDependency(
+            generatorClassName, SafeName.getNameAsIdentifier(generatorClassName),
+            generatorClassName
+        );
+        String commandMethodField = "commandMethod";
+        String conditionField = "condition";
+        // Do the actual setup & store:
+        return CommandCondInfo.builder()
+            .condVariable(conditionField)
+            .construction(CodeBlock.builder()
+                .addStatement(
+                    "$T $L = $L($S)",
+                    Method.class, commandMethodField,
+                    GET_COMMAND_METHOD, method.getSimpleName().toString())
+                .addStatement(
+                    "$T $L = $L.generateCondition($L)",
+                    Command.Condition.class, conditionField,
+                    condGeneratorFieldName, commandMethodField
+                )
+                .build())
+            .build();
     }
+
 }
