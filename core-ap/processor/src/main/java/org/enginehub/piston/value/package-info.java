@@ -17,16 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.optimize;
+@NonnullByDefault
+package org.enginehub.piston.value;
 
-/**
- * Represents an optimization.
- *
- * @param <T>
- */
-@FunctionalInterface
-public interface Optimization<T> {
-
-    T optimize(T input);
-
-}
+import org.enginehub.piston.util.NonnullByDefault;

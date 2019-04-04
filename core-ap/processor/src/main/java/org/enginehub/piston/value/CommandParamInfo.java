@@ -21,6 +21,7 @@ package org.enginehub.piston.value;
 
 import com.google.auto.value.AutoValue;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.TypeName;
 import org.enginehub.piston.CommandParameters;
 
 import javax.annotation.Nullable;
@@ -39,7 +40,9 @@ public abstract class CommandParamInfo {
     @AutoValue.Builder
     public interface Builder {
 
-        Builder partVariable(@Nullable String variable);
+        Builder name(@Nullable String name);
+
+        Builder type(@Nullable TypeName type);
 
         Builder construction(@Nullable CodeBlock construction);
 
@@ -50,9 +53,17 @@ public abstract class CommandParamInfo {
 
     /**
      * Variable name, if used to store data.
+     *
+     * <p>This is merely a suggestion. Do not rely on this name existing in generated code.</p>
      */
     @Nullable
-    public abstract String getPartVariable();
+    public abstract String getName();
+
+    /**
+     * Type of the param variable, if used to store data.
+     */
+    @Nullable
+    public abstract TypeName getType();
 
     /**
      * Code for initializing data the extraction code uses.

@@ -34,6 +34,7 @@ import org.enginehub.piston.part.CommandParts;
 import org.enginehub.piston.util.SafeName;
 import org.enginehub.piston.value.CommandInfo;
 import org.enginehub.piston.value.CommandParamInfo;
+import org.enginehub.piston.value.ExtractSpec;
 import org.enginehub.piston.value.RegistrationInfo;
 import org.enginehub.piston.value.RequiredVariable;
 import org.enginehub.piston.value.ReservedNames;
@@ -54,6 +55,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.concat;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.enginehub.piston.util.CodeBlockUtil.listForGen;
 import static org.enginehub.piston.util.CodeBlockUtil.stringListForGen;
 
@@ -138,26 +140,30 @@ class CommandRegistrationGenerator {
 
     private Iterable<MethodSpec> getParameterMethods() {
         return cmdsFlatMap(cmd -> cmd.getParams().stream())
-            .map(CommandParamInfo::getExtractSpec)
-            .distinct()
-            .map(spec ->
-                MethodSpec.methodBuilder(spec.getName())
+            .map(param -> {
+                ExtractSpec spec = param.getExtractSpec();
+                return MethodSpec.methodBuilder(spec.getName())
                     .addModifiers(Modifier.PRIVATE)
                     .addParameter(CommandParameters.class, ReservedNames.PARAMETERS)
                     .returns(spec.getType())
-                    .addCode(spec.getExtractMethodBody())
-                    .build()
-            ).collect(toList());
+                    .addCode(spec.getExtractMethodBody().generate(param.getName()))
+                    .build();
+            })
+            .collect(toSet());
     }
 
     private Iterable<FieldSpec> generateFields() {
         Stream<FieldSpec> staticFields = getKeyTypeFields();
-        Stream<FieldSpec> instanceFields = concat(getInjectedVariables(), info.getDeclaredFields().stream())
+        Stream<FieldSpec> instanceFields = concat(
+            getInjectedVariables(),
+            info.getDeclaredFields().stream()
+        )
             .map(var -> FieldSpec.builder(
                 var.getType(), var.getName(),
                 Modifier.PRIVATE, Modifier.FINAL
             ).build());
-        return concat(staticFields, instanceFields).collect(toList());
+        Stream<FieldSpec> partFields = getPartFields();
+        return concat(staticFields, instanceFields, partFields).collect(toList());
     }
 
     private Stream<FieldSpec> getKeyTypeFields() {
@@ -175,6 +181,17 @@ class CommandRegistrationGenerator {
                     .build()
                 ).build();
             });
+    }
+
+    private Stream<FieldSpec> getPartFields() {
+        return cmdsFlatMap(c -> c.getParams().stream())
+            .filter(p -> p.getType() != null && p.getName() != null && p.getConstruction() != null)
+            .distinct()
+            .map(p -> FieldSpec.builder(
+                p.getType(), p.getName(),
+                Modifier.PRIVATE, Modifier.FINAL)
+                .initializer(CodeBlock.of("$[$L$]", p.getConstruction()))
+                .build());
     }
 
     private MethodSpec generateConstructor() {
@@ -197,10 +214,6 @@ class CommandRegistrationGenerator {
         }
 
         for (CommandInfo cmd : info.getCommands()) {
-            cmd.getParams().stream()
-                .map(CommandParamInfo::getConstruction)
-                .filter(Objects::nonNull)
-                .forEach(body::add);
             body.add(generateRegisterCommandCode(cmd));
         }
         return constr
@@ -227,7 +240,7 @@ class CommandRegistrationGenerator {
             lambda.addStatement("b.footer($S)", footer)
         );
         lambda.addStatement("b.parts($L)", listForGen(cmd.getParams().stream().map(
-            CommandParamInfo::getPartVariable
+            CommandParamInfo::getName
         ).filter(Objects::nonNull)));
         lambda.addStatement("b.action(this::$L)", SafeName.from(cmd.getName()));
         cmd.getCondition().ifPresent(cond -> {

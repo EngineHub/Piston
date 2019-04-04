@@ -146,8 +146,8 @@ public class CommandProcessor extends BasicAnnotationProcessor {
     private CommandInfoOptimization buildOptimizer(IdentifierTracker identifierTracker) {
         return new CommandInfoOptimization(
             new CommandParamInfoOptimization(
-                new ExtractSpecOptimization(identifierTracker)
-            )
+                new ExtractSpecOptimization(identifierTracker),
+                identifierTracker)
         );
     }
 

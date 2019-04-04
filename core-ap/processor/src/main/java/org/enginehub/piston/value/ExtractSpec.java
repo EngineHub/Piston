@@ -1,14 +1,49 @@
+/*
+ * Piston, a flexible command management system.
+ * Copyright (C) EngineHub <http://www.enginehub.com>
+ * Copyright (C) Piston contributors
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.enginehub.piston.value;
 
 import com.google.auto.value.AutoValue;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
+import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.function.Function;
+
 /**
  * Specification for extracting a value.
  */
 @AutoValue
 public abstract class ExtractSpec {
+
+    @FunctionalInterface
+    public interface ExtractMethodBody {
+
+        /**
+         * Generate extraction code, given that the parameter's part is stored in the given field.
+         *
+         * <p>{@code partFieldName} will be {@code null} if there is no field.</p>
+         */
+        CodeBlock generate(@Nullable String partFieldName);
+
+    }
 
     public static Builder builder() {
         return new AutoValue_ExtractSpec.Builder();
@@ -21,7 +56,7 @@ public abstract class ExtractSpec {
 
         Builder type(TypeName type);
 
-        Builder extractMethodBody(CodeBlock body);
+        Builder extractMethodBody(ExtractMethodBody body);
 
         ExtractSpec build();
     }
@@ -39,8 +74,31 @@ public abstract class ExtractSpec {
     /**
      * Code for the extract method, if generated.
      */
-    public abstract CodeBlock getExtractMethodBody();
+    public abstract ExtractMethodBody getExtractMethodBody();
 
     public abstract Builder toBuilder();
 
+    @Override
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ExtractSpec)) {
+            return false;
+        }
+        ExtractSpec spec = (ExtractSpec) obj;
+        boolean fastChecks = Objects.equals(getName(), spec.getName())
+            && Objects.equals(getType(), spec.getType());
+        if (!fastChecks) {
+            return false;
+        }
+        CodeBlock body = getExtractMethodBody().generate(getName());
+        CodeBlock otherBody = spec.getExtractMethodBody().generate(spec.getName());
+        return Objects.equals(body, otherBody);
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(getName(), getType(), getExtractMethodBody().generate(getName()));
+    }
 }

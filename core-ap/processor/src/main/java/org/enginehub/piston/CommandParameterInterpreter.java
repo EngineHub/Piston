@@ -22,7 +22,6 @@ package org.enginehub.piston;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -95,26 +94,20 @@ class CommandParameterInterpreter {
         }
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
-        String var = generationSupport.requestField(
-            ClassName.get(CommandArgument.class),
-            parameter.getSimpleName() + "Part",
-            null
-        );
         return CommandParamInfo.builder()
-            .partVariable(var)
-            .construction(CodeBlock.builder()
-                .addStatement("$L = $T.arg($S, $S)\n" +
+            .name(parameter.getSimpleName() + "Part")
+            .type(TypeName.get(CommandArgument.class))
+            .construction(
+                CodeBlock.of(
+                    "$T.arg($S, $S)\n" +
                         ".defaultsTo($L)\n" +
                         ".build()",
-                    var,
-                    CommandParts.class,
-                    name, desc,
-                    stringListForGen(defaults.stream()))
-                .build())
+                    CommandParts.class, name, desc,
+                    stringListForGen(defaults.stream())))
             .extractSpec(ExtractSpec.builder()
                 .name(parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(CodeBlock.builder()
+                .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.value($L).asSingle($L)",
                         var, ReservedNames.PARAMETERS, asKeyType(parameter.asType()))
                     .build())
@@ -133,28 +126,22 @@ class CommandParameterInterpreter {
         }
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
-        String var = generationSupport.requestField(
-            ClassName.get(ArgAcceptingCommandFlag.class),
-            parameter.getSimpleName() + "Part",
-            null
-        );
         return CommandParamInfo.builder()
-            .partVariable(var)
-            .construction(CodeBlock.builder()
-                .addStatement("$L = $T.flag('$L', $S)\n" +
-                        ".withRequiredArg()\n" +
-                        ".argNamed($S)\n" +
-                        ".defaultsTo($L)\n" +
-                        ".build()",
-                    var,
-                    CommandParts.class,
-                    name, desc, argName,
-                    stringListForGen(defaults.stream()))
-                .build())
+            .name(parameter.getSimpleName() + "Part")
+            .type(TypeName.get(ArgAcceptingCommandFlag.class))
+            .construction(CodeBlock.of(
+                "$T.flag('$L', $S)\n" +
+                    ".withRequiredArg()\n" +
+                    ".argNamed($S)\n" +
+                    ".defaultsTo($L)\n" +
+                    ".build()",
+                CommandParts.class, name, desc,
+                argName,
+                stringListForGen(defaults.stream())))
             .extractSpec(ExtractSpec.builder()
                 .name(parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(CodeBlock.builder()
+                .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.value($L).asSingle($L)",
                         var, ReservedNames.PARAMETERS, asKeyType(parameter.asType()))
                     .build())
@@ -170,23 +157,16 @@ class CommandParameterInterpreter {
                 new ProcessingException("Missing Switch annotation").withElement(parameter));
         char name = getValue(parameter, switchAnno, "name", char.class);
         String desc = getValue(parameter, switchAnno, "desc", String.class);
-        String var = generationSupport.requestField(
-            ClassName.get(NoArgCommandFlag.class),
-            parameter.getSimpleName() + "Part",
-            null
-        );
         return CommandParamInfo.builder()
-            .partVariable(var)
-            .construction(CodeBlock.builder()
-                .addStatement("$L = $T.flag('$L', $S).build()",
-                    var,
-                    CommandParts.class,
-                    name, desc)
-                .build())
+            .name(parameter.getSimpleName() + "Part")
+            .type(TypeName.get(NoArgCommandFlag.class))
+            .construction(CodeBlock.of(
+                "$T.flag('$L', $S).build()",
+                CommandParts.class, name, desc))
             .extractSpec(ExtractSpec.builder()
                 .name(parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(CodeBlock.builder()
+                .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.in($L)",
                         var, ReservedNames.PARAMETERS)
                     .build())
@@ -200,7 +180,7 @@ class CommandParameterInterpreter {
             .extractSpec(ExtractSpec.builder()
                 .name(parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(CodeBlock.builder()
+                .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.injectedValue($L)",
                         ReservedNames.PARAMETERS, asKeyType(parameter.asType()))
                     .build())
