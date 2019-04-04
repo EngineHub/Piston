@@ -94,7 +94,7 @@ public class AnnoValueExtraction {
             .accept(new SimpleAnnotationValueVisitor8<List<T>, Void>() {
                 @Override
                 public List<T> visitArray(List<? extends AnnotationValue> vals, Void unused) {
-                    ImmutableList.Builder<T> builder = ImmutableList.builderWithExpectedSize(vals.size());
+                    ImmutableList.Builder<T> builder = ImmutableList.builder();
                     for (AnnotationValue val : vals) {
                         builder.add(getValueCommon(
                             annotated,

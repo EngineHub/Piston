@@ -16,7 +16,6 @@ fun Project.applyCommonConfig() {
 
     configure<LicenseExtension> {
         header = rootProject.file("HEADER.txt")
-
     }
 
     tasks.withType<Test>().configureEach {
@@ -25,6 +24,12 @@ fun Project.applyCommonConfig() {
 
     repositories {
         jcenter()
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force(Libs.guava)
+        }
     }
 
     tasks.withType<JavaCompile>().configureEach {

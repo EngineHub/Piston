@@ -26,6 +26,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Primitives;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
@@ -50,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -135,6 +138,15 @@ public class CommandManagerImpl implements CommandManager {
 
     public CommandManagerImpl() {
         registerConverter(Key.get(String.class), ArgumentConverters.forString());
+        for (Class<?> wrapperType : ImmutableList.of(
+            Byte.class, Short.class, Integer.class, Long.class,
+            Float.class, Double.class,
+            Character.class, Boolean.class
+        )) {
+            @SuppressWarnings("unchecked") // just forcing the generic to work
+            Class<Object> fake = (Class<Object>) wrapperType;
+            registerConverter(Key.get(fake), ArgumentConverters.get(TypeToken.of(fake)));
+        }
     }
 
     @Override
@@ -233,7 +245,11 @@ public class CommandManagerImpl implements CommandManager {
 
     private int executeSubCommand(Command command, List<String> args) {
         CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
-            .injectedValues(Maps.transformValues(injectedValues, Supplier::get));
+            .injectedValues(
+                Maps.filterValues(
+                    Maps.transformValues(injectedValues, Supplier::get),
+                    Objects::nonNull)
+            );
         CommandParseCache parseCache = commandCache.getUnchecked(command);
 
         boolean flagsEnabled = true;

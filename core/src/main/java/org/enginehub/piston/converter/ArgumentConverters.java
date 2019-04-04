@@ -28,6 +28,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -86,7 +87,7 @@ public class ArgumentConverters {
                     // safe, the handle has a return type of `c`.
                     // `c`'s type is T.
                     @SuppressWarnings("unchecked")
-                    T result = (T) handle.invokeExact(arg);
+                    T result = (T) handle.invoke(arg);
                     return result;
                 } catch (Throwable throwable) {
                     Throwables.throwIfUnchecked(throwable);
@@ -103,7 +104,16 @@ public class ArgumentConverters {
 
     private static final List<ACProvider<Object>> PROVIDERS = ImmutableList.of(
         ArgumentConverters::valueOfConverters,
-        ArgumentConverters::constructorConverters
+        ArgumentConverters::constructorConverters,
+        type -> {
+            if (Objects.equals(type.wrap().getRawType(), Character.class)) {
+                return Optional.of(SimpleArgumentConverter.fromSingle(
+                    s -> s.charAt(0),
+                    "any character"
+                ));
+            }
+            return Optional.empty();
+        }
     );
 
     public static <T> ArgumentConverter<T> get(TypeToken<T> type) {
