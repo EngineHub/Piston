@@ -1,9 +1,10 @@
 language: java
 notifications:
   email: false
+env:
+  - JAVA_OPTS='-Dorg.gradle.console=plain'
 before_install:
   - chmod +x gradlew
-  - ./.travis-setup.sh
 script: ./gradlew build -s
 jdk:
   - oraclejdk8
