@@ -17,21 +17,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.impl;
+package org.enginehub.piston.gen.optimize;
 
-import com.google.auto.service.AutoService;
-import org.enginehub.piston.CommandManager;
-import org.enginehub.piston.CommandManagerService;
+import org.enginehub.piston.gen.IdentifierTracker;
+import org.enginehub.piston.gen.value.ExtractSpec;
 
-@AutoService(CommandManagerService.class)
-public class CommandManagerServiceImpl implements CommandManagerService {
-    @Override
-    public String id() {
-        return "default-impl";
+import java.util.HashMap;
+import java.util.Map;
+
+public class ExtractSpecOptimization implements Optimization<ExtractSpec> {
+
+    private final IdentifierTracker identifierTracker;
+    // map from an original spec to one with the modified name
+    private final Map<ExtractSpec, ExtractSpec> newSpecMapping = new HashMap<>();
+
+    public ExtractSpecOptimization(IdentifierTracker identifierTracker) {
+        this.identifierTracker = identifierTracker;
     }
 
     @Override
-    public CommandManager newCommandManager() {
-        return new CommandManagerImpl();
+    public ExtractSpec optimize(ExtractSpec input) {
+        return newSpecMapping.computeIfAbsent(input, i ->
+            i.toBuilder().name(identifierTracker.methodName(i.getName())).build()
+        );
     }
 }

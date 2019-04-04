@@ -17,30 +17,44 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.part;
+package org.enginehub.piston.gen.value;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
-import org.enginehub.piston.CommandParameters;
-import org.enginehub.piston.CommandValue;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.TypeName;
 
-public interface ArgAcceptingCommandPart extends CommandPart {
+import java.util.Collection;
 
-    default CommandValue value(CommandParameters parameters) {
-        return parameters.valueOf(this);
+@AutoValue
+public abstract class RequiredVariable {
+
+    public static Builder builder() {
+        return new AutoValue_RequiredVariable.Builder()
+            .annotations(ImmutableList.of());
     }
 
-    /**
-     * All possible types for this argument. This allows for completions to
-     * be filled from converters registered with the manager.
-     *
-     * <p>
-     * This set may be empty, in which case there will be no completions.
-     * </p>
-     */
-    ImmutableSet<Key<?>> getTypes();
+    @AutoValue.Builder
+    public interface Builder {
 
-    ImmutableList<String> getDefaults();
+        Builder type(TypeName type);
+
+        Builder name(String name);
+
+        Builder annotations(Collection<AnnotationSpec> annotations);
+
+        RequiredVariable build();
+
+    }
+
+    RequiredVariable() {
+    }
+
+    public abstract TypeName getType();
+
+    public abstract String getName();
+
+    public abstract ImmutableList<AnnotationSpec> getAnnotations();
+
 
 }

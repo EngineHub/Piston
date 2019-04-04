@@ -20,6 +20,7 @@
 package org.enginehub.piston.annotation;
 
 import org.enginehub.piston.Command.Condition;
+import org.enginehub.piston.gen.CommandConditionGenerator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

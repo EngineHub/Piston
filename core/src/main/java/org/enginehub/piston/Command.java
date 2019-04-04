@@ -19,8 +19,8 @@
 
 package org.enginehub.piston;
 
-import org.enginehub.piston.part.CommandPart;
 import com.google.common.collect.ImmutableList;
+import org.enginehub.piston.part.CommandPart;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

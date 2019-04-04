@@ -19,10 +19,10 @@
 
 package org.enginehub.piston;
 
+import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
-import com.google.common.collect.ImmutableList;
 
 import static org.enginehub.piston.part.CommandParts.arg;
 import static org.enginehub.piston.part.CommandParts.flag;

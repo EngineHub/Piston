@@ -19,12 +19,12 @@
 
 package org.enginehub.piston.impl;
 
+import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
-import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableList;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -32,8 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.enginehub.piston.Command.Action.NULL_ACTION;
 import static com.google.common.base.Preconditions.checkState;
+import static org.enginehub.piston.Command.Action.NULL_ACTION;
 
 @AutoValue
 abstract class CommandImpl implements Command {

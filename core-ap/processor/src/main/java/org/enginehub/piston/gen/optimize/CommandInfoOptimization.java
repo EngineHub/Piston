@@ -17,30 +17,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.part;
+package org.enginehub.piston.gen.optimize;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
-import org.enginehub.piston.CommandParameters;
-import org.enginehub.piston.CommandValue;
+import org.enginehub.piston.gen.value.CommandInfo;
 
-public interface ArgAcceptingCommandPart extends CommandPart {
+public class CommandInfoOptimization implements CollectionOptimization<CommandInfo> {
 
-    default CommandValue value(CommandParameters parameters) {
-        return parameters.valueOf(this);
+    private final CommandParamInfoOptimization commandParamInfoOptimization;
+
+    public CommandInfoOptimization(CommandParamInfoOptimization commandParamInfoOptimization) {
+        this.commandParamInfoOptimization = commandParamInfoOptimization;
     }
 
-    /**
-     * All possible types for this argument. This allows for completions to
-     * be filled from converters registered with the manager.
-     *
-     * <p>
-     * This set may be empty, in which case there will be no completions.
-     * </p>
-     */
-    ImmutableSet<Key<?>> getTypes();
-
-    ImmutableList<String> getDefaults();
-
+    @Override
+    public CommandInfo optimizeSingle(CommandInfo input) {
+        return input.toBuilder()
+            .params(commandParamInfoOptimization.optimize(input.getParams()))
+            .build();
+    }
 }

@@ -17,34 +17,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.gen.value;
 
-import com.google.inject.Key;
-import org.enginehub.piston.part.ArgAcceptingCommandPart;
-import org.enginehub.piston.part.CommandPart;
+import com.google.auto.value.AutoValue;
+import com.squareup.javapoet.CodeBlock;
 
-public interface CommandParameters {
+/**
+ * Information that can be used to supply the condition for a
+ * registered command method.
+ */
+@AutoValue
+public abstract class CommandCondInfo {
+
+    public static Builder builder() {
+        return new AutoValue_CommandCondInfo.Builder();
+    }
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder condVariable(String variable);
+
+        Builder construction(CodeBlock construction);
+
+        CommandCondInfo build();
+    }
 
     /**
-     * Checks if the parameters contain the specified part.
-     *
-     * @param part - the part to look for
-     * @return if the parameters contain the specified part
+     * Variable name the condition is stored under.
      */
-    boolean has(CommandPart part);
+    public abstract String getCondVariable();
 
     /**
-     * Gets the value of the specified part, throwing if it
-     * is not {@linkplain #has(CommandPart) present} or if
-     * there are multiple values.
-     *
-     * @param part - the part to look for
-     * @return the value
+     * Code for initializing the condition.
      */
-    CommandValue valueOf(ArgAcceptingCommandPart part);
+    public abstract CodeBlock getConstruction();
 
-    /**
-     * Get an injected value. Provide value injectors to the manager.
-     */
-    <T> T injectedValue(Key<T> key);
 }

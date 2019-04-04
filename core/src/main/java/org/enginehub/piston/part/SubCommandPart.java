@@ -21,7 +21,6 @@ package org.enginehub.piston.part;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import org.enginehub.piston.Command;
 
 import java.util.Collection;

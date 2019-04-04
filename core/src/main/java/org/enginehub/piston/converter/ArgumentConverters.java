@@ -19,10 +19,10 @@
 
 package org.enginehub.piston.converter;
 
-import org.enginehub.piston.util.CaseHelper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import org.enginehub.piston.util.CaseHelper;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

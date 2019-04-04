@@ -17,30 +17,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.part;
+package org.enginehub.piston.gen.util;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
-import org.enginehub.piston.CommandParameters;
-import org.enginehub.piston.CommandValue;
+import com.squareup.javapoet.CodeBlock;
 
-public interface ArgAcceptingCommandPart extends CommandPart {
+import java.util.stream.Stream;
 
-    default CommandValue value(CommandParameters parameters) {
-        return parameters.valueOf(this);
+import static java.util.stream.Collectors.joining;
+
+public class CodeBlockUtil {
+    public static CodeBlock stringListForGen(Stream<String> strings) {
+        return listForGen(strings.map(x -> CodeBlock.of("$S", x).toString()));
     }
 
-    /**
-     * All possible types for this argument. This allows for completions to
-     * be filled from converters registered with the manager.
-     *
-     * <p>
-     * This set may be empty, in which case there will be no completions.
-     * </p>
-     */
-    ImmutableSet<Key<?>> getTypes();
-
-    ImmutableList<String> getDefaults();
-
+    public static CodeBlock listForGen(Stream<String> rawCode) {
+        return CodeBlock.of("$T.of($L)", ImmutableList.class,
+            rawCode.collect(joining(", ")));
+    }
 }

@@ -17,34 +17,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.gen;
 
-import com.google.inject.Key;
-import org.enginehub.piston.part.ArgAcceptingCommandPart;
-import org.enginehub.piston.part.CommandPart;
+import org.enginehub.piston.Command;
 
-public interface CommandParameters {
+import java.lang.reflect.Method;
+
+public interface CommandConditionGenerator {
 
     /**
-     * Checks if the parameters contain the specified part.
+     * Bake the parameters given by the annotations on a command action into a fast runtime check.
      *
-     * @param part - the part to look for
-     * @return if the parameters contain the specified part
+     * @param commandMethod the method that is annotated
+     * @return a condition object for checking the condition
      */
-    boolean has(CommandPart part);
+    Command.Condition generateCondition(Method commandMethod);
 
-    /**
-     * Gets the value of the specified part, throwing if it
-     * is not {@linkplain #has(CommandPart) present} or if
-     * there are multiple values.
-     *
-     * @param part - the part to look for
-     * @return the value
-     */
-    CommandValue valueOf(ArgAcceptingCommandPart part);
-
-    /**
-     * Get an injected value. Provide value injectors to the manager.
-     */
-    <T> T injectedValue(Key<T> key);
 }

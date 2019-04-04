@@ -3,6 +3,7 @@ applyCommonConfig()
 dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":core-ap:core-ap-annotations"))
+    "implementation"(project(":core-ap:core-ap-runtime"))
     "implementation"(Libs.guava)
     "implementation"(Libs.javapoet)
     "implementation"(Libs.autoCommon)

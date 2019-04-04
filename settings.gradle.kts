@@ -1,6 +1,7 @@
 rootProject.name = "piston"
 
 include(":core", ":default-impl")
-include(":core-ap:annotations", ":core-ap:processor")
-project(":core-ap:annotations").name = "core-ap-annotations"
-project(":core-ap:processor").name = "core-ap-processor"
+listOf("annotations", "processor", "runtime").forEach {
+    include(":core-ap:$it")
+    project(":core-ap:$it").name = "core-ap-$it"
+}
