@@ -241,9 +241,11 @@ class CommandRegistrationGenerator {
         cmd.getFooter().ifPresent(footer ->
             lambda.addStatement("b.footer($S)", footer)
         );
-        lambda.addStatement("b.parts($L)", listForGen(cmd.getParams().stream().map(
-            CommandParamInfo::getName
-        ).filter(Objects::nonNull)));
+        lambda.addStatement("b.parts($L)",
+            listForGen(cmd.getParams().stream()
+                .map(CommandParamInfo::getName)
+                .filter(Objects::nonNull)
+                .map(name -> CodeBlock.of("$L", name))));
         lambda.addStatement("b.action(this::$L)", SafeName.from(cmd.getName()));
         cmd.getCondition().ifPresent(cond -> {
             lambda.add(cond.getConstruction());
@@ -310,10 +312,12 @@ class CommandRegistrationGenerator {
             .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
             .returns(Method.class)
             .addParameter(String.class, "methodName")
+            .addParameter(Class[].class, "parameterTypes")
+            .varargs()
             .addCode(CodeBlock.builder()
                 .beginControlFlow("try")
                 .addStatement(
-                    "return $T.class.getDeclaredMethod(methodName)",
+                    "return $T.class.getDeclaredMethod(methodName, parameterTypes)",
                     info.getTargetClassName())
                 .nextControlFlow("catch ($T e)", NoSuchMethodException.class)
                 .addStatement(

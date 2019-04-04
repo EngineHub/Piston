@@ -22,6 +22,7 @@ package org.enginehub.piston.gen;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import org.enginehub.piston.Command;
+import org.enginehub.piston.gen.util.CodeBlockUtil;
 import org.enginehub.piston.gen.util.ProcessingException;
 import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.gen.value.CommandCondInfo;
@@ -72,9 +73,13 @@ class ConditionGenerator {
             .condVariable(conditionField)
             .construction(CodeBlock.builder()
                 .addStatement(
-                    "$T $L = $L($S)",
+                    "$T $L = $L($S, $L)",
                     Method.class, commandMethodField,
-                    GET_COMMAND_METHOD, method.getSimpleName().toString())
+                    GET_COMMAND_METHOD, method.getSimpleName().toString(),
+                    method.getParameters().stream()
+                        .map(param -> TypeName.get(param.asType()))
+                        .map(type -> CodeBlock.of("$T.class", type))
+                        .collect(CodeBlockUtil.joining(", ")))
                 .addStatement(
                     "$T $L = $L.generateCondition($L)",
                     Command.Condition.class, conditionField,
