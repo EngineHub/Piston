@@ -21,17 +21,17 @@ package org.enginehub.piston;
 
 import com.google.inject.Key;
 import org.enginehub.piston.converter.ArgumentConverter;
+import org.enginehub.piston.util.ValueProvider;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * Responsible for holding all commands, as well as parsing and dispatching from user input.
  */
-public interface CommandManager {
+public interface CommandManager extends InjectedValueAccess {
 
     /**
      * Create a new command builder, using the default implementation of this manager.
@@ -93,13 +93,13 @@ public interface CommandManager {
 
     /**
      * Inject a value into this manager. It will be provided by
-     * {@link CommandParameters#injectedValue(Key)}.
+     * {@link InjectedValueAccess#injectedValue(Key)}.
      *
      * @param key the key for the value
-     * @param supplier the supplier of the value
+     * @param provider the provider of the value
      * @param <T> the type of the value
      */
-    <T> void injectValue(Key<T> key, Supplier<T> supplier);
+    <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider);
 
     /**
      * Retrieve all commands that are registered.

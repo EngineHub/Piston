@@ -25,12 +25,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.primitives.Primitives;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
+import org.enginehub.piston.InjectedValueAccess;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverters;
 import org.enginehub.piston.exception.CommandException;
@@ -45,6 +44,7 @@ import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
+import org.enginehub.piston.util.ValueProvider;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -52,16 +52,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Maps.immutableEntry;
+import static java.util.stream.Collectors.toMap;
 
 public class CommandManagerImpl implements CommandManager {
 
@@ -133,7 +134,7 @@ public class CommandManagerImpl implements CommandManager {
     private final LoadingCache<Command, CommandParseCache> commandCache = CacheBuilder.newBuilder()
         .softValues()
         .build(CacheLoader.from(CommandManagerImpl::cacheCommand));
-    private final Map<Key<?>, Supplier<?>> injectedValues = new HashMap<>();
+    private final Map<Key<?>, ValueProvider<InjectedValueAccess, ?>> injectedValues = new HashMap<>();
     private final Map<Key<?>, ArgumentConverter<?>> converters = new HashMap<>();
 
     public CommandManagerImpl() {
@@ -143,7 +144,8 @@ public class CommandManagerImpl implements CommandManager {
             Float.class, Double.class,
             Character.class, Boolean.class
         )) {
-            @SuppressWarnings("unchecked") // just forcing the generic to work
+            // just forcing the generic to work
+            @SuppressWarnings("unchecked")
             Class<Object> fake = (Class<Object>) wrapperType;
             registerConverter(Key.get(fake), ArgumentConverters.get(TypeToken.of(fake)));
         }
@@ -207,13 +209,22 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public <T> void injectValue(Key<T> key, Supplier<T> supplier) {
+    public <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> supplier) {
+        checkNotNull(key, "key cannot be null");
+        checkNotNull(supplier, "supplier cannot be null");
         lock.writeLock().lock();
         try {
             injectedValues.put(key, supplier);
         } finally {
             lock.writeLock().unlock();
         }
+    }
+
+    @Override
+    // stored only by injectValue, with matching T, so this is safe
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> injectedValue(Key<T> key) {
+        return (Optional<T>) injectedValues.get(key).value(this);
     }
 
     @Override
@@ -246,9 +257,10 @@ public class CommandManagerImpl implements CommandManager {
     private int executeSubCommand(Command command, List<String> args) {
         CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
             .injectedValues(
-                Maps.filterValues(
-                    Maps.transformValues(injectedValues, Supplier::get),
-                    Objects::nonNull)
+                injectedValues.entrySet().stream()
+                    .map(e -> immutableEntry(e.getKey(), e.getValue().value(this)))
+                    .filter(e -> e.getValue().isPresent())
+                    .collect(toMap(Map.Entry::getKey, e -> e.getValue().get()))
             );
         CommandParseCache parseCache = commandCache.getUnchecked(command);
 

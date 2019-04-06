@@ -19,11 +19,13 @@
 
 package org.enginehub.piston;
 
-import com.google.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 
-public interface CommandParameters {
+/**
+ * Access to part values derived from user input.
+ */
+public interface CommandParameters extends InjectedValueAccess {
 
     /**
      * Checks if the parameters contain the specified part.
@@ -43,8 +45,4 @@ public interface CommandParameters {
      */
     CommandValue valueOf(ArgAcceptingCommandPart part);
 
-    /**
-     * Get an injected value. Provide value injectors to the manager.
-     */
-    <T> T injectedValue(Key<T> key);
 }

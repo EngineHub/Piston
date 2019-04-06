@@ -30,6 +30,7 @@ import org.enginehub.piston.part.CommandPart;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @AutoValue
 abstract class CommandParametersImpl implements CommandParameters {
@@ -84,12 +85,9 @@ abstract class CommandParametersImpl implements CommandParameters {
     }
 
     @Override
-    public final <T> T injectedValue(Key<T> key) {
+    public final <T> Optional<T> injectedValue(Key<T> key) {
         @SuppressWarnings("unchecked")
         T value = (T) injectedValues().get(key);
-        if (value == null) {
-            throw new NoSuchElementException("No injected value for " + key);
-        }
-        return value;
+        return Optional.ofNullable(value);
     }
 }
