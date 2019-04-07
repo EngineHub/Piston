@@ -30,8 +30,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
+import org.enginehub.piston.gen.util.CodeBlockUtil;
 import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.gen.value.CommandInfo;
 import org.enginehub.piston.gen.value.CommandParamInfo;
@@ -43,21 +45,28 @@ import org.enginehub.piston.part.CommandParts;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.time.Instant;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.concat;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
 import static org.enginehub.piston.gen.util.CodeBlockUtil.listForGen;
 import static org.enginehub.piston.gen.util.CodeBlockUtil.stringListForGen;
 
@@ -72,16 +81,27 @@ import static org.enginehub.piston.gen.util.CodeBlockUtil.stringListForGen;
  * of annotation-based configuration.
  * </p>
  */
+/*
+ TODO
+ - Remake this as a builder, where there is no end product -- the build method just
+ does what the constructor does right now.
+ - Add Listeners as a possible input to the builder
+ - Call listeners for every command method generated, possibly using another static method.
+ */
 class CommandRegistrationGenerator {
     private static final ParameterSpec COMMAND_PARAMETERS_SPEC
         = ParameterSpec.builder(CommandParameters.class, "parameters").build();
-    private final IdentifierTracker identifierTracker;
+    public static final RequiredVariable LISTENERS_REQ_VAR = RequiredVariable.builder()
+        .name(ReservedNames.LISTENERS)
+        .type(ParameterizedTypeName.get(
+            ImmutableList.class,
+            CommandCallListener.class
+        ))
+        .build();
     private final RegistrationInfo info;
     private final ImmutableList<RequiredVariable> injectedVariables;
 
-    CommandRegistrationGenerator(IdentifierTracker identifierTracker,
-                                 RegistrationInfo info) {
-        this.identifierTracker = identifierTracker;
+    CommandRegistrationGenerator(RegistrationInfo info) {
         this.info = info;
         this.injectedVariables = concat(
             additionalVariables(info),
@@ -99,14 +119,10 @@ class CommandRegistrationGenerator {
             .type(ClassName.get(CommandManager.class))
             .name(ReservedNames.COMMAND_MANAGER)
             .build());
-        if (!info.getCommands().stream()
-            .allMatch(CommandRegistrationGenerator::isCommandStatic)) {
-            // we need the instance too
-            b.add(RequiredVariable.builder()
-                .type(info.getTargetClassName())
-                .name(ReservedNames.CONTAINER_INSTANCE)
-                .build());
-        }
+        b.add(RequiredVariable.builder()
+            .type(info.getTargetClassName())
+            .name(ReservedNames.CONTAINER_INSTANCE)
+            .build());
         return b.build();
     }
 
@@ -115,20 +131,53 @@ class CommandRegistrationGenerator {
     }
 
     private static boolean isCommandStatic(CommandInfo info) {
-        return info.getCommandMethod().getModifiers().contains(Modifier.STATIC);
+        return info.getCommandMethod().getModifiers().contains(STATIC);
+    }
+
+    private Modifier[] getApiVisibilityModifiers() {
+        return info.getClassVisibility() == null
+            ? new Modifier[0]
+            : new Modifier[] {info.getClassVisibility()};
+    }
+
+    private ClassName getThisClass() {
+        return info.getTargetClassName().peerClass(info.getName());
     }
 
     void generate(Element originalElement, String pkgName, Filer filer) throws IOException {
         TypeSpec.Builder spec = TypeSpec.classBuilder(info.getName())
-            .addOriginatingElement(originalElement);
+            .addOriginatingElement(originalElement)
+            .addModifiers(FINAL)
+            .addModifiers(getApiVisibilityModifiers())
+            .addSuperinterface(ParameterizedTypeName.get(
+                ClassName.get(CommandRegistration.class),
+                info.getTargetClassName()
+            ));
 
-        if (info.getClassVisibility() != null) {
-            spec.addModifiers(info.getClassVisibility());
+        boolean hasSuperClass = false;
+        for (TypeElement superType : info.getSuperTypes()) {
+            if (superType.getKind() == ElementKind.CLASS) {
+                checkState(!hasSuperClass, "Super class already present");
+                hasSuperClass = true;
+                spec.superclass(TypeName.get(superType.asType()));
+            } else if (superType.getKind() == ElementKind.INTERFACE) {
+                spec.addSuperinterface(TypeName.get(superType.asType()));
+            } else {
+                throw new IllegalStateException("Not a possible super-type: "
+                    + superType.getKind() + " " + superType.getQualifiedName().toString());
+            }
         }
 
         spec.addFields(generateFields());
-        spec.addMethod(generateGetCommandMethod());
         spec.addMethod(generateConstructor());
+        // static methods
+        spec.addMethod(generateNewBuilderMethod());
+        spec.addMethod(generateRequireOptionalMethod());
+        spec.addMethod(generateGetCommandMethod());
+
+        // instance methods
+        spec.addMethods(generateBuilderSetMethods());
+        spec.addMethod(generateBuildMethod());
         spec.addMethods(generateCommandBindings());
         spec.addMethods(getParameterMethods());
 
@@ -140,12 +189,54 @@ class CommandRegistrationGenerator {
             .writeTo(filer);
     }
 
+    private MethodSpec generateConstructor() {
+        return MethodSpec.constructorBuilder()
+            .addModifiers(PRIVATE)
+            .addStatement("this.$L = $T.of()",
+                ReservedNames.LISTENERS, ImmutableList.class)
+            .build();
+    }
+
+    private MethodSpec.Builder setSpec(RequiredVariable var) {
+        return MethodSpec.methodBuilder(var.getName())
+            .addModifiers(getApiVisibilityModifiers())
+            .returns(getThisClass());
+    }
+
+    private Iterable<MethodSpec> generateBuilderSetMethods() {
+        Stream<MethodSpec> injectedVariableSets = getInjectedVariables()
+            .map(var ->
+                setSpec(var)
+                    .addParameter(ParameterSpec.builder(var.getType(), var.getName())
+                        .addAnnotations(var.getAnnotations())
+                        .build())
+                    .addStatement("this.$1L = $1L", var.getName())
+                    .addStatement("return this")
+                    .build()
+            );
+        Stream<MethodSpec> customSets = Stream.of(
+            setSpec(LISTENERS_REQ_VAR)
+                .addParameter(ParameterizedTypeName.get(
+                    Collection.class,
+                    CommandCallListener.class
+                ), LISTENERS_REQ_VAR.getName())
+                .addStatement("this.$1L = $2T.copyOf($1L)",
+                    LISTENERS_REQ_VAR.getName(), ImmutableList.class)
+                .addStatement("return this")
+                .build()
+        );
+        return concat(
+            injectedVariableSets,
+            customSets
+        ).collect(toList());
+    }
+
     private Iterable<MethodSpec> getParameterMethods() {
         return cmdsFlatMap(cmd -> cmd.getParams().stream())
             .map(param -> {
                 ExtractSpec spec = param.getExtractSpec();
                 return MethodSpec.methodBuilder(spec.getName())
-                    .addModifiers(Modifier.PRIVATE)
+                    .addModifiers(PRIVATE)
                     .addParameter(CommandParameters.class, ReservedNames.PARAMETERS)
                     .returns(spec.getType())
                     .addCode(spec.getExtractMethodBody().generate(param.getName()))
@@ -158,12 +249,12 @@ class CommandRegistrationGenerator {
         Stream<FieldSpec> staticFields = getKeyTypeFields();
         Stream<FieldSpec> instanceFields = concat(
             getInjectedVariables(),
-            info.getDeclaredFields().stream()
-        )
-            .map(var -> FieldSpec.builder(
-                var.getType(), var.getName(),
-                Modifier.PRIVATE, Modifier.FINAL
-            ).build());
+            info.getDeclaredFields().stream(),
+            Stream.of(LISTENERS_REQ_VAR)
+        ).map(var -> FieldSpec.builder(
+            var.getType(), var.getName(),
+            PRIVATE
+        ).build());
         Stream<FieldSpec> partFields = getPartFields();
         return concat(staticFields, instanceFields, partFields).collect(toList());
     }
@@ -177,7 +268,7 @@ class CommandRegistrationGenerator {
                 );
                 return FieldSpec.builder(
                     keyPType, SafeName.getNameAsIdentifier(keyType) + "Key",
-                    Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL
+                    PRIVATE, STATIC, FINAL
                 ).initializer("$L", TypeSpec.anonymousClassBuilder("")
                     .superclass(keyPType)
                     .build()
@@ -191,37 +282,21 @@ class CommandRegistrationGenerator {
             .distinct()
             .map(p -> FieldSpec.builder(
                 p.getType(), p.getName(),
-                Modifier.PRIVATE, Modifier.FINAL)
+                PRIVATE, FINAL)
                 .initializer(CodeBlock.of("$[$L$]", p.getConstruction()))
                 .build());
     }
 
-    private MethodSpec generateConstructor() {
-        List<ParameterSpec> params = getInjectedVariables()
-            .map(var -> ParameterSpec.builder(var.getType(), var.getName())
-                .addAnnotations(var.getAnnotations())
-                .build())
-            .collect(toList());
-        CodeBlock.Builder body = getInjectedVariables()
-            .map(var -> CodeBlock.of("this.$1L = $1L;\n", var.getName()))
-            .reduce(CodeBlock.of(""), (a, b) -> a.toBuilder().add(b).build())
-            .toBuilder();
-        MethodSpec.Builder constr = MethodSpec.constructorBuilder();
-        if (info.getJavaxInjectClassName() != null) {
-            constr.addAnnotation(info.getJavaxInjectClassName());
-        }
-
+    private MethodSpec generateBuildMethod() {
+        MethodSpec.Builder build = MethodSpec.methodBuilder("build");
         if (info.getClassVisibility() != null) {
-            constr.addModifiers(info.getClassVisibility());
+            build.addModifiers(info.getClassVisibility());
         }
 
         for (CommandInfo cmd : info.getCommands()) {
-            body.add(generateRegisterCommandCode(cmd));
+            build.addCode(generateRegisterCommandCode(cmd));
         }
-        return constr
-            .addParameters(params)
-            .addCode(body.build())
-            .build();
+        return build.build();
     }
 
     private CodeBlock generateRegisterCommandCode(CommandInfo cmd) {
@@ -261,34 +336,61 @@ class CommandRegistrationGenerator {
     }
 
     private MethodSpec generateCommandBinding(CommandInfo commandInfo) {
-        MethodSpec.Builder spec = MethodSpec.methodBuilder(SafeName.from(commandInfo.getName()))
-            .addModifiers(Modifier.PRIVATE)
+        String safeCmdName = SafeName.from(commandInfo.getName());
+        MethodSpec.Builder spec = MethodSpec.methodBuilder(safeCmdName)
+            .addModifiers(PRIVATE)
             .returns(int.class)
             .addParameter(COMMAND_PARAMETERS_SPEC);
         for (TypeMirror thrownType : commandInfo.getCommandMethod().getThrownTypes()) {
             spec.addException(TypeName.get(thrownType));
         }
 
+        CodeBlock.Builder body = CodeBlock.builder();
+
+        // grab the command method
+        body.add(CodeBlockUtil.scopeCommandMethod(commandInfo.getCommandMethod(), "cmdMethod"));
+
+        // call beforeCall
+        body.addStatement("$L.forEach(l -> l.beforeCall($L, $L))",
+            ReservedNames.LISTENERS, "cmdMethod", ReservedNames.PARAMETERS);
+
+        // open up a `try` for calling after* listeners
+        body.beginControlFlow("try");
+        body.addStatement("$T result", int.class);
+
         CodeBlock callCommandMethod = generateCallCommandMethod(commandInfo);
         TypeName rawReturnType = TypeName.get(commandInfo.getCommandMethod().getReturnType()).unbox();
         if (TypeName.INT.equals(rawReturnType)) {
             // call the method, return what it does
-            spec.addCode(CodeBlock.builder()
-                .addStatement("return $L", callCommandMethod)
-                .build());
+            body.addStatement("result = $L", callCommandMethod);
         } else {
             // call the method, return 1
-            spec.addCode(CodeBlock.builder()
-                .addStatement(callCommandMethod)
-                .addStatement("return 1")
-                .build());
+            body.addStatement(callCommandMethod)
+                .addStatement("result = 1");
         }
+
+        // call afterCall
+        body.addStatement("$L.forEach(l -> l.afterCall($L, $L))",
+            ReservedNames.LISTENERS, "cmdMethod", ReservedNames.PARAMETERS)
+            .addStatement("return result");
+
+        body.nextControlFlow("catch ($T t)", Throwable.class);
+
+        // call afterThrow & re-throw
+        body.addStatement("$L.forEach(l -> l.afterThrow($L, $L, $L))",
+            ReservedNames.LISTENERS, "cmdMethod", ReservedNames.PARAMETERS, "t")
+            .addStatement("throw t");
+
+        body.endControlFlow();
+
+        spec.addCode(body.build());
+
         return spec.build();
     }
 
     private CodeBlock generateCallCommandMethod(CommandInfo commandInfo) {
         CodeBlock target;
-        if (commandInfo.getCommandMethod().getModifiers().contains(Modifier.STATIC)) {
+        if (commandInfo.getCommandMethod().getModifiers().contains(STATIC)) {
             // call it statically
             target = CodeBlock.of("$T", info.getTargetClassName());
         } else {
@@ -307,9 +409,19 @@ class CommandRegistrationGenerator {
             args);
     }
 
+    private MethodSpec generateNewBuilderMethod() {
+        ClassName thisClass = getThisClass();
+        return MethodSpec.methodBuilder(ReservedNames.BUILDER)
+            .addModifiers(getApiVisibilityModifiers())
+            .addModifiers(STATIC)
+            .returns(thisClass)
+            .addStatement("return new $T()", thisClass)
+            .build();
+    }
+
     private MethodSpec generateGetCommandMethod() {
         return MethodSpec.methodBuilder(ReservedNames.GET_COMMAND_METHOD)
-            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .addModifiers(PRIVATE, STATIC)
             .returns(Method.class)
             .addParameter(String.class, "methodName")
             .addParameter(Class[].class, "parameterTypes")
@@ -325,6 +437,22 @@ class CommandRegistrationGenerator {
                     IllegalStateException.class, "Missing command method: ")
                 .endControlFlow()
                 .build())
+            .build();
+    }
+
+    private MethodSpec generateRequireOptionalMethod() {
+        TypeVariableName containedType = TypeVariableName.get("T");
+        return MethodSpec.methodBuilder(ReservedNames.REQUIRE_OPTIONAL)
+            .addModifiers(PRIVATE, STATIC)
+            .addTypeVariable(containedType)
+            .returns(containedType)
+            .addParameter(ParameterizedTypeName.get(
+                ClassName.get(Optional.class),
+                containedType
+            ), "optional")
+            .addParameter(String.class, "name")
+            .addStatement("return optional.orElseThrow(() -> new $T($S + name))",
+                IllegalStateException.class, "No injected value for ")
             .build();
     }
 

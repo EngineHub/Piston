@@ -181,8 +181,9 @@ class CommandParameterInterpreter {
                 .name(parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> CodeBlock.builder()
-                    .addStatement("return $L.injectedValue($L)",
-                        ReservedNames.PARAMETERS, asKeyType(parameter.asType()))
+                    .addStatement("return requireOptional($L.injectedValue($L), $S)",
+                        ReservedNames.PARAMETERS, asKeyType(parameter.asType()),
+                        parameter.getSimpleName())
                     .build())
                 .build())
             .build();

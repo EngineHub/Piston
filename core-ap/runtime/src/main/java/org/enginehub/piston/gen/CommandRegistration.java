@@ -17,19 +17,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.util;
+package org.enginehub.piston.gen;
 
-import java.util.Optional;
+import org.enginehub.piston.CommandManager;
+
+import java.util.Collection;
 
 /**
- * Provides a value, given a context argument.
+ * Common interface for generated command registration builders.
+ *
+ * <p>
+ * This interfaces allows easy initialization of common registration dependencies.
+ * </p>
+ *
+ * @param <CI> container instance type
  */
-public interface ValueProvider<C, T> {
+public interface CommandRegistration<CI> {
+
+    CommandRegistration<CI> commandManager(CommandManager manager);
+
+    CommandRegistration<CI> containerInstance(CI containerInstance);
+
+    CommandRegistration<CI> listeners(Collection<CommandCallListener> listeners);
+
     /**
-     * Compute the value from the context.
-     *
-     * @param context the context, never {@code null}
-     * @return the value, may be {@link Optional#empty()} to indicate no value
+     * Build & register the associated commands.
      */
-    Optional<T> value(C context);
+    void build();
+
 }

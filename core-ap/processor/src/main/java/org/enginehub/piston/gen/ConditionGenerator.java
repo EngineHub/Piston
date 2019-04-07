@@ -40,6 +40,7 @@ class ConditionGenerator {
     private final AnnotationMirror conditionMirror;
     private final ExecutableElement method;
     private final GenerationSupport depSupport;
+    public static final String COMMAND_METHOD_FIELD = "commandMethod";
 
     ConditionGenerator(AnnotationMirror conditionMirror,
                        ExecutableElement method,
@@ -66,24 +67,16 @@ class ConditionGenerator {
             generatorClassName, SafeName.getNameAsIdentifier(generatorClassName),
             generatorClassName
         );
-        String commandMethodField = "commandMethod";
         String conditionField = "condition";
         // Do the actual setup & store:
         return CommandCondInfo.builder()
             .condVariable(conditionField)
             .construction(CodeBlock.builder()
-                .addStatement(
-                    "$T $L = $L($S, $L)",
-                    Method.class, commandMethodField,
-                    GET_COMMAND_METHOD, method.getSimpleName().toString(),
-                    method.getParameters().stream()
-                        .map(param -> TypeName.get(param.asType()))
-                        .map(type -> CodeBlock.of("$T.class", type))
-                        .collect(CodeBlockUtil.joining(", ")))
+                .add(CodeBlockUtil.scopeCommandMethod(method, COMMAND_METHOD_FIELD))
                 .addStatement(
                     "$T $L = $L.generateCondition($L)",
                     Command.Condition.class, conditionField,
-                    condGeneratorFieldName, commandMethodField
+                    condGeneratorFieldName, COMMAND_METHOD_FIELD
                 )
                 .build())
             .build();

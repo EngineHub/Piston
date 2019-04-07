@@ -19,6 +19,8 @@
 
 package org.enginehub.piston;
 
+import org.enginehub.piston.gen.CommandRegistration;
+
 import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -26,6 +28,10 @@ import java.util.function.Consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 final class TestCommandConfig<CMD> {
+
+    static <CMD> BiConsumer<CommandManager, CMD> ezRegister(CommandRegistration<CMD> reg) {
+        return (manager, cmd) -> reg.commandManager(manager).containerInstance(cmd).build();
+    }
 
     @Nullable
     private String commandLine;

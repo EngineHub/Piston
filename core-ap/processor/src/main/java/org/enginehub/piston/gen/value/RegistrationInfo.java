@@ -27,6 +27,7 @@ import com.squareup.javapoet.TypeName;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import java.util.Collection;
 
 @AutoValue
@@ -48,8 +49,6 @@ public abstract class RegistrationInfo {
         Builder targetClassName(ClassName className);
 
         Builder classVisibility(@Nullable Modifier visibility);
-
-        Builder javaxInjectClassName(@Nullable ClassName className);
 
         Builder commands(Collection<CommandInfo> commands);
 
@@ -74,6 +73,13 @@ public abstract class RegistrationInfo {
             return this;
         }
 
+        ImmutableSet.Builder<TypeElement> superTypesBuilder();
+
+        default Builder addSuperType(TypeElement superType) {
+            superTypesBuilder().add(superType);
+            return this;
+        }
+
         RegistrationInfo build();
 
     }
@@ -88,9 +94,6 @@ public abstract class RegistrationInfo {
     @Nullable
     public abstract Modifier getClassVisibility();
 
-    @Nullable
-    public abstract ClassName getJavaxInjectClassName();
-
     public abstract ImmutableList<CommandInfo> getCommands();
 
     public abstract ImmutableList<RequiredVariable> getInjectedVariables();
@@ -98,5 +101,7 @@ public abstract class RegistrationInfo {
     public abstract ImmutableList<RequiredVariable> getDeclaredFields();
 
     public abstract ImmutableSet<TypeName> getKeyTypes();
+
+    public abstract ImmutableSet<TypeElement> getSuperTypes();
 
 }

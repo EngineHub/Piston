@@ -51,6 +51,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -62,6 +63,7 @@ import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
 import static com.google.auto.common.MoreElements.getPackage;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
+import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getValue;
@@ -105,14 +107,15 @@ public class CommandProcessor extends BasicAnnotationProcessor {
     }
 
     private Set<Element> doProcess(Set<Element> elements) {
-        ClassName javaxInjectClassName = findJavaxInject();
         for (Element element : elements) {
             TypeElement type = asType(element);
+
             RegistrationInfo.Builder registration = RegistrationInfo.builder();
             IdentifierTracker identifierTracker = new IdentifierTracker();
             GenerationSupport generationSupport = new GenerationSupportImpl(
                 identifierTracker, registration
             );
+
             ImmutableList<CommandInfo> info = type.getEnclosedElements().stream()
                 .filter(enclosedElement -> enclosedElement.getKind() == ElementKind.METHOD)
                 .filter(m -> isAnnotationPresent(m, org.enginehub.piston.annotation.Command.class))
@@ -121,15 +124,22 @@ public class CommandProcessor extends BasicAnnotationProcessor {
                 .collect(toImmutableList());
             CommandInfoOptimization rootOptimization = buildOptimizer(identifierTracker);
             info = ImmutableList.copyOf(rootOptimization.optimize(info));
+
+            AnnotationMirror container = getAnnotationMirror(element, CommandContainer.class)
+                .toJavaUtil().orElseThrow(() ->
+                    new ProcessingException("Missing CommandContainer annotation")
+                        .withElement(element));
+            getList(
+                element, container, "superTypes", TypeMirror.class
+            ).forEach(t -> registration.addSuperType(asTypeElement(t)));
+
             try {
                 new CommandRegistrationGenerator(
-                    identifierTracker,
                     registration
                         .name(type.getSimpleName() + "Registration")
                         .targetClassName(ClassName.get(type))
                         .classVisibility(visibility(type.getModifiers()))
                         .commands(info)
-                        .javaxInjectClassName(javaxInjectClassName)
                         .build())
                     .generate(element,
                         getPackage(element).getQualifiedName().toString(),
@@ -163,13 +173,6 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             .findAny().orElse(null);
     }
 
-    @Nullable
-    private ClassName findJavaxInject() {
-        return Optional.ofNullable(processingEnv.getElementUtils().getTypeElement("javax.inject.Inject"))
-            .map(ClassName::get)
-            .orElse(null);
-    }
-
     private CommandInfo getCommandInfo(ExecutableElement method, GenerationSupport generationSupport) {
         AnnotationMirror mirror = getAnnotationMirror(method, Command.class)
             .toJavaUtil().orElseThrow(() -> new IllegalStateException("Should have a value"));
@@ -182,7 +185,6 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         ).orElse(null));
 
         String name = getValue(method, mirror, "name", String.class);
-        @SuppressWarnings("unchecked")
         List<String> aliasesList = getList(method, mirror, "aliases", String.class);
         ImmutableList<String> aliases = ImmutableList.copyOf(
             aliasesList

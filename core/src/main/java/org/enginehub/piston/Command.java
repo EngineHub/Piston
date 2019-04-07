@@ -55,7 +55,7 @@ public interface Command {
          * @param parameters the command parameters
          * @return a count for the number of things done by the action
          */
-        int run(InjectedValueAccess parameters) throws Exception;
+        int run(CommandParameters parameters) throws Exception;
 
     }
 
@@ -79,7 +79,7 @@ public interface Command {
          *
          * @param parameters the command parameters
          */
-        boolean satisfied(InjectedValueAccess parameters);
+        boolean satisfied(CommandParameters parameters);
 
         default Condition and(Condition other) {
             return p -> satisfied(p) && other.satisfied(p);

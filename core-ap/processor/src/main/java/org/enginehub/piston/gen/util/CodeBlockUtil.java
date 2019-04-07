@@ -21,14 +21,39 @@ package org.enginehub.piston.gen.util;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.TypeName;
 
 import javax.annotation.Nullable;
+import javax.lang.model.element.ExecutableElement;
+import java.lang.reflect.Method;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.enginehub.piston.gen.value.ReservedNames.GET_COMMAND_METHOD;
 
 public class CodeBlockUtil {
+
+    public static CodeBlock scopeCommandMethod(ExecutableElement method, String varName) {
+        return CodeBlock.builder()
+            .addStatement(
+                "$T $L = $L($S$L)",
+                Method.class, varName,
+                GET_COMMAND_METHOD, method.getSimpleName().toString(),
+                method.getParameters().stream()
+                    .map(param -> TypeName.get(param.asType()))
+                    .map(type -> CodeBlock.of("$T.class", type))
+                    .collect(joining(() ->
+                        new CodeBlockJoiner(
+                            CodeBlock.of(", "),
+                            CodeBlock.of(", "),
+                            CodeBlock.of("")
+                        ).setEmptyValue(CodeBlock.of(""))
+                    )))
+            .build();
+    }
+
     public static CodeBlock stringListForGen(Stream<String> strings) {
         return listForGen(strings.map(x -> CodeBlock.of("$S", x)));
     }
@@ -36,20 +61,26 @@ public class CodeBlockUtil {
     public static CodeBlock listForGen(Stream<CodeBlock> rawCode) {
         return rawCode.collect(joining(
             CodeBlock.of("$T.of(", ImmutableList.class),
-            CodeBlock.of(")"),
-            CodeBlock.of(", ")
+            CodeBlock.of(", "),
+            CodeBlock.of(")")
         ));
     }
 
     public static Collector<CodeBlock, ?, CodeBlock> joining(String delimiter) {
-        return joining(CodeBlock.of(""), CodeBlock.of(""), CodeBlock.of("$L", delimiter));
+        return joining(CodeBlock.of(""), CodeBlock.of("$L", delimiter), CodeBlock.of(""));
     }
 
     public static Collector<CodeBlock, ?, CodeBlock> joining(
-        CodeBlock prefix, CodeBlock suffix, CodeBlock delimiter
+        CodeBlock prefix, CodeBlock delimiter, CodeBlock suffix
+    ) {
+        return joining(() -> new CodeBlockJoiner(prefix, delimiter, suffix));
+    }
+
+    public static Collector<CodeBlock, ?, CodeBlock> joining(
+        Supplier<CodeBlockJoiner> joiner
     ) {
         return Collector.of(
-            () -> new CodeBlockJoiner(prefix, suffix, delimiter),
+            joiner,
             CodeBlockJoiner::add,
             CodeBlockJoiner::merge,
             CodeBlockJoiner::finish
@@ -59,15 +90,22 @@ public class CodeBlockUtil {
     private static final class CodeBlockJoiner {
 
         private final CodeBlock prefix;
-        private final CodeBlock suffix;
         private final CodeBlock delimiter;
+        private final CodeBlock suffix;
+        @Nullable
+        private CodeBlock emptyValue;
         @Nullable
         private CodeBlock.Builder value;
 
-        CodeBlockJoiner(CodeBlock prefix, CodeBlock suffix, CodeBlock delimiter) {
+        CodeBlockJoiner(CodeBlock prefix, CodeBlock delimiter, CodeBlock suffix) {
             this.prefix = requireNonNull(prefix);
-            this.suffix = requireNonNull(suffix);
             this.delimiter = requireNonNull(delimiter);
+            this.suffix = requireNonNull(suffix);
+        }
+
+        public CodeBlockJoiner setEmptyValue(@Nullable CodeBlock emptyValue) {
+            this.emptyValue = emptyValue;
+            return this;
         }
 
         private CodeBlock.Builder prepareBuilder() {
@@ -99,6 +137,9 @@ public class CodeBlockUtil {
         }
 
         public CodeBlock finish() {
+            if (value == null && emptyValue != null) {
+                return emptyValue;
+            }
             return prefix.toBuilder()
                 .add(finishRaw().build())
                 .add(suffix)

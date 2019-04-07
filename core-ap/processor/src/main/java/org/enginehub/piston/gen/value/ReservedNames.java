@@ -24,8 +24,11 @@ import com.google.common.collect.ImmutableMultiset;
 public class ReservedNames {
     public static final String COMMAND_MANAGER = "commandManager";
     public static final String CONTAINER_INSTANCE = "containerInstance";
+    public static final String LISTENERS = "listeners";
     public static final String PARAMETERS = "parameters";
     public static final String GET_COMMAND_METHOD = "getCommandMethod";
+    public static final String REQUIRE_OPTIONAL = "requireOptional";
+    public static final String BUILDER = "builder";
 
     /**
      * Field names that are pre-reserved, and must not be used.
@@ -34,6 +37,7 @@ public class ReservedNames {
         return ImmutableMultiset.of(
             COMMAND_MANAGER,
             CONTAINER_INSTANCE,
+            LISTENERS,
             PARAMETERS
         );
     }
@@ -43,7 +47,10 @@ public class ReservedNames {
      */
     public static ImmutableMultiset<String> methodNames() {
         return ImmutableMultiset.of(
-            GET_COMMAND_METHOD
+            GET_COMMAND_METHOD,
+            REQUIRE_OPTIONAL,
+            LISTENERS,
+            BUILDER
         );
     }
 }

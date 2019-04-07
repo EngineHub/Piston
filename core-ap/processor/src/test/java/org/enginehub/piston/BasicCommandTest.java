@@ -55,7 +55,7 @@ class BasicCommandTest {
         testCommand(
             new TestCommandConfig<>(
                 NoArgCommand.class,
-                NoArgCommandRegistration::new,
+                TestCommandConfig.ezRegister(NoArgCommandRegistration.builder()),
                 cmd -> verify(cmd).noArg())
                 .setCommandLine("no-arg")
         );
@@ -67,11 +67,11 @@ class BasicCommandTest {
         testCommand(
             new TestCommandConfig<>(
                 NoArgWithInjectedCommand.class,
-                NoArgWithInjectedCommandRegistration::new,
+                TestCommandConfig.ezRegister(NoArgWithInjectedCommandRegistration.builder()),
                 cmd -> verify(cmd).noArg(injected))
                 .setCommandLine("no-arg-injected")
                 .setManagerSetup(commandManager -> commandManager.injectValue(
-                    Key.get(String.class), () -> injected
+                    Key.get(String.class), access -> Optional.of(injected)
                 ))
         );
     }
@@ -82,25 +82,26 @@ class BasicCommandTest {
         testCommand(
             new TestCommandConfig<>(
                 SingleArgCommand.class,
-                SingleArgCommandRegistration::new,
+                TestCommandConfig.ezRegister(SingleArgCommandRegistration.builder()),
                 cmd -> verify(cmd).singleArg(testString))
                 .setCommandLine("single-arg " + testString)
         );
     }
+
     @Test
     void singleOptionalArgCommand() {
         String testString = "somethingnotspaced";
         testCommand(
             new TestCommandConfig<>(
                 SingleOptionalArgCommand.class,
-                SingleOptionalArgCommandRegistration::new,
+                TestCommandConfig.ezRegister(SingleOptionalArgCommandRegistration.builder()),
                 cmd -> verify(cmd).singleArg(""))
                 .setCommandLine("single-arg-opt")
         );
         testCommand(
             new TestCommandConfig<>(
                 SingleOptionalArgCommand.class,
-                SingleOptionalArgCommandRegistration::new,
+                TestCommandConfig.ezRegister(SingleOptionalArgCommandRegistration.builder()),
                 cmd -> verify(cmd).singleArg(testString))
                 .setCommandLine("single-arg-opt " + testString)
         );

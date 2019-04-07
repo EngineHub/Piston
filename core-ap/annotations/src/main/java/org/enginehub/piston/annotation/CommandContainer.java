@@ -19,6 +19,9 @@
 
 package org.enginehub.piston.annotation;
 
+import org.enginehub.piston.gen.CommandConditionGenerator;
+import org.enginehub.piston.gen.CommandRegistration;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,4 +33,27 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface CommandContainer {
+
+    /**
+     * Super-types for the generated registration class to implement.
+     *
+     * <p>
+     * Note that this does not force the class to implement new methods,
+     * but if you add an interface that matches existing methods, then
+     * those will be overriden, allowing for more generic configuration.
+     * </p>
+     * <p>
+     * For example, you could add an interface representing the addition
+     * of a {@link CommandConditionGenerator} to the registration builder,
+     * and then you will be able to inject all builders using a single method.
+     * </p>
+     * <p>
+     * N.B.: The registration class always implements {@link CommandRegistration},
+     * regardless of the content of this array.
+     * </p>
+     *
+     * @return the super-types for the generated registration class
+     */
+    Class<?>[] superTypes() default {};
+
 }
