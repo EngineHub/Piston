@@ -74,8 +74,7 @@ import static org.enginehub.piston.gen.util.CodeBlockUtil.stringListForGen;
  * Class that handles the generation of command registration classes.
  *
  * <p>
- * These classes are named {@code [CommandContainer class name] + "Registration"}. They are
- * guaranteed to have one method with signature {@code public void register(CommandManager)}.
+ * These classes are named {@code [CommandContainer class name] + "Registration"}.
  * Generated methods will be used to convert the annotation-based configuration into a runtime
  * configuration, allowing for type-safe and efficient implementation while maintaining the ease
  * of annotation-based configuration.
