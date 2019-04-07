@@ -81,13 +81,6 @@ import static org.enginehub.piston.gen.util.CodeBlockUtil.stringListForGen;
  * of annotation-based configuration.
  * </p>
  */
-/*
- TODO
- - Remake this as a builder, where there is no end product -- the build method just
- does what the constructor does right now.
- - Add Listeners as a possible input to the builder
- - Call listeners for every command method generated, possibly using another static method.
- */
 class CommandRegistrationGenerator {
     private static final ParameterSpec COMMAND_PARAMETERS_SPEC
         = ParameterSpec.builder(CommandParameters.class, "parameters").build();
