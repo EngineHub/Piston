@@ -1,27 +1,24 @@
 import net.minecrell.gradle.licenser.LicenseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
+import org.gradle.external.javadoc.CoreJavadocOptions
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.artifacts
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.repositories
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
-import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.DoubleDelegateWrapper
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
@@ -63,6 +60,12 @@ fun Project.applyCommonConfig(
         targetCompatibility = JavaVersion.VERSION_1_8.toString()
     }
 
+    if (JavaVersion.current().isJava8Compatible) {
+        tasks.withType<Javadoc>().configureEach {
+            (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
+        }
+    }
+
     dependencies {
         "testImplementation"(Libs.junitApi)
         "testImplementation"(Libs.junitEngine)
@@ -74,15 +77,18 @@ fun Project.applyCommonConfig(
 }
 
 private fun Project.addExtraArchiveArtifacts() {
-    tasks.register<Jar>("sourcesJar") {
+    val sourcesJar = tasks.register<Jar>("sourcesJar") {
         dependsOn("classes")
         archiveClassifier.set("sources")
         from(project.the<SourceSetContainer>().getByName("main").allSource)
     }
-    tasks.register<Jar>("javadocJar") {
+    val javadocJar = tasks.register<Jar>("javadocJar") {
         dependsOn("javadoc")
         archiveClassifier.set("javadoc")
         from(tasks.getByName("javadoc"))
+    }
+    tasks.named("build") {
+        dependsOn(sourcesJar, javadocJar)
     }
 }
 
