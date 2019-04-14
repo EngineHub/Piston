@@ -240,6 +240,16 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
+    public boolean containsCommand(String name) {
+        lock.readLock().lock();
+        try {
+            return commands.containsKey(name);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
     public int execute(List<String> args) {
         lock.readLock().lock();
         try {

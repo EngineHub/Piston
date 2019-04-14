@@ -107,6 +107,16 @@ public interface CommandManager extends InjectedValueAccess {
     Stream<Command> getAllCommands();
 
     /**
+     * Determine if this manager knows of a command with name {@code name}.
+     *
+     * <p>Includes aliases.</p>
+     *
+     * @param name the name to check
+     * @return {@code true} if a command has this name, either primarily or by alias
+     */
+    boolean containsCommand(String name);
+
+    /**
      * Execute a command, given a set of arguments.
      *
      * <p>
