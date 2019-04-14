@@ -1,4 +1,4 @@
-applyCommonConfig()
+applyCoreApConfig()
 
 dependencies {
     "api"(project(":core"))

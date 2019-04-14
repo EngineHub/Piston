@@ -1,9 +1,9 @@
-applyCommonConfig()
+applyCoreApConfig()
 
 dependencies {
     "implementation"(project(":core"))
-    "implementation"(project(":core-ap:core-ap-annotations"))
-    "implementation"(project(":core-ap:core-ap-runtime"))
+    "implementation"(project(":core-ap:annotations"))
+    "implementation"(project(":core-ap:runtime"))
     "implementation"(Libs.guava)
     "implementation"(Libs.javapoet)
     "implementation"(Libs.autoCommon)
@@ -15,7 +15,7 @@ dependencies {
     "testImplementation"(Libs.compileTesting)
     "testImplementation"(Libs.mockito)
     "testImplementation"(project(":default-impl"))
-    "testAnnotationProcessor"(project(":core-ap:core-ap-processor"))
+    "testAnnotationProcessor"(project(":core-ap:processor"))
 }
 
 configurations.getByName("testAnnotationProcessor")

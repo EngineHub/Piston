@@ -1,6 +1,6 @@
-applyCommonConfig()
+applyCoreApConfig()
 
 dependencies {
     "api"(project(":core"))
-    "api"(project(":core-ap:core-ap-runtime"))
+    "api"(project(":core-ap:runtime"))
 }
