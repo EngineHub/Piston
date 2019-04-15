@@ -114,7 +114,20 @@ public interface CommandManager extends InjectedValueAccess {
      * @param name the name to check
      * @return {@code true} if a command has this name, either primarily or by alias
      */
-    boolean containsCommand(String name);
+    default boolean containsCommand(String name) {
+        return getCommand(name).isPresent();
+    }
+
+    /**
+     * Get the command with name {@code name}, if registered.
+     *
+     * <p>Includes aliases.</p>
+     *
+     * @param name the name to check
+     * @return {@link Optional#of(Object)} the command if registered,
+     *     otherwise {@link Optional#empty()}
+     */
+    Optional<Command> getCommand(String name);
 
     /**
      * Execute a command, given a set of arguments.

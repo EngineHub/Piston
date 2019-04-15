@@ -17,85 +17,66 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.impl;
+package org.enginehub.piston;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Key;
-import org.enginehub.piston.CommandMetadata;
-import org.enginehub.piston.CommandParameters;
-import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * An implementation of {@link CommandParameters} for situations where it is needed,
+ * but there is no user input available.
+ */
 @AutoValue
-abstract class CommandParametersImpl implements CommandParameters {
+public abstract class NoInputCommandParameters implements CommandParameters {
 
-    static Builder builder() {
-        return new AutoValue_CommandParametersImpl.Builder();
+    public static Builder builder() {
+        return new AutoValue_NoInputCommandParameters.Builder();
     }
 
     @AutoValue.Builder
-    interface Builder {
-
-        default Builder addPresentPart(CommandPart part) {
-            presentPartsBuilder().add(part);
-            return this;
-        }
-
-        ImmutableSet.Builder<CommandPart> presentPartsBuilder();
-
-        default Builder addValue(CommandPart part, CommandValue value) {
-            valuesBuilder().put(part, value);
-            return this;
-        }
-
-        ImmutableMap.Builder<CommandPart, CommandValue> valuesBuilder();
+    public interface Builder {
 
         Builder injectedValues(Map<Key<?>, Object> values);
 
-        Builder metadata(CommandMetadata metadata);
+        Builder metadata(@Nullable CommandMetadata metadata);
 
-        CommandParametersImpl build();
+        NoInputCommandParameters build();
     }
 
-    CommandParametersImpl() {
+    NoInputCommandParameters() {
     }
-
-    abstract ImmutableSet<CommandPart> presentParts();
-
-    abstract ImmutableMap<CommandPart, CommandValue> values();
 
     abstract ImmutableMap<Key<?>, Object> injectedValues();
 
+    @Nullable
     abstract CommandMetadata metadata();
 
     @Override
-    public final boolean has(CommandPart part) {
-        return presentParts().contains(part);
+    public boolean has(CommandPart part) {
+        return false;
     }
 
     @Override
-    public final CommandValue valueOf(ArgAcceptingCommandPart part) {
-        CommandValue value = values().get(part);
-        if (value == null) {
-            throw new NoSuchElementException("No value for " + part);
-        }
-        return value;
+    public CommandValue valueOf(ArgAcceptingCommandPart part) {
+        throw new NoSuchElementException();
     }
 
     @Override
+    @Nullable
     public CommandMetadata getMetadata() {
         return metadata();
     }
 
     @Override
-    public final <T> Optional<T> injectedValue(Key<T> key) {
+    public <T> Optional<T> injectedValue(Key<T> key) {
         @SuppressWarnings("unchecked")
         T value = (T) injectedValues().get(key);
         return Optional.ofNullable(value);

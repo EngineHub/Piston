@@ -93,6 +93,23 @@ public interface Command {
             return p -> !satisfied(p);
         }
 
+        /**
+         * Retrieve this condition as a more specific type, if possible.
+         *
+         * @param type the class to cast to
+         * @param <T> the type of the output
+         * @return this as {@code T}, if possible
+         */
+        default <T extends Condition> Optional<T> as(Class<T> type) {
+            if (type.isInstance(this)) {
+                // checked in `if` above
+                @SuppressWarnings("unchecked")
+                Optional<T> t = Optional.of((T) this);
+                return t;
+            }
+            return Optional.empty();
+        }
+
     }
 
     /**

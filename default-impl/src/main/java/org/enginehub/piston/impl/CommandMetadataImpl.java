@@ -17,26 +17,37 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.util;
+package org.enginehub.piston.impl;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
+import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
+import org.enginehub.piston.CommandMetadata;
 
-/**
- * Provides a value, given a context argument.
- */
-public interface ValueProvider<C, T> {
+import java.util.Collection;
 
-    static <C, T> ValueProvider<C, T> constant(@Nullable T value) {
-        Optional<T> opt = Optional.ofNullable(value);
-        return context -> opt;
+@AutoValue
+abstract class CommandMetadataImpl implements CommandMetadata {
+
+    static Builder builder() {
+        return new AutoValue_CommandMetadataImpl.Builder();
     }
 
-    /**
-     * Compute the value from the context.
-     *
-     * @param context the context, never {@code null}
-     * @return the value, may be {@link Optional#empty()} to indicate no value
-     */
-    Optional<T> value(C context);
+    @AutoValue.Builder
+    interface Builder {
+
+        Builder calledName(String name);
+
+        Builder arguments(Collection<String> args);
+
+        CommandMetadataImpl build();
+    }
+
+    CommandMetadataImpl() {
+    }
+
+    @Override
+    public abstract String getCalledName();
+
+    @Override
+    public abstract ImmutableList<String> getArguments();
 }

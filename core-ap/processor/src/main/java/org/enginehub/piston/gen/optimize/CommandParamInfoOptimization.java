@@ -21,6 +21,7 @@ package org.enginehub.piston.gen.optimize;
 
 import org.enginehub.piston.gen.IdentifierTracker;
 import org.enginehub.piston.gen.value.CommandParamInfo;
+import org.enginehub.piston.gen.value.ExtractSpec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,12 +46,15 @@ public class CommandParamInfoOptimization implements CollectionOptimization<Comm
     public CommandParamInfo optimizeSingle(CommandParamInfo input) {
         return newSpecMapping.computeIfAbsent(input, i -> {
             CommandParamInfo.Builder builder = i.toBuilder();
+            ExtractSpec extractSpec = i.getExtractSpec();
             if (i.getName() != null) {
-                builder.name(identifierTracker.methodName(i.getName()));
+                String newName = identifierTracker.fieldName(i.getName());
+                builder.name(newName);
+                extractSpec = extractSpec.toBuilder()
+                    .name(identifierTracker.methodName(extractSpec.getName()))
+                    .build();
             }
-            return builder.extractSpec(
-                extractSpecOptimization.optimize(i.getExtractSpec())
-            ).build();
+            return builder.extractSpec(extractSpec).build();
         });
     }
 }

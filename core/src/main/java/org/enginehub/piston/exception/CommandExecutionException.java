@@ -17,26 +17,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.util;
+package org.enginehub.piston.exception;
+
+import org.enginehub.piston.Command;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 /**
- * Provides a value, given a context argument.
+ * Thrown when a command action throws an exception.
+ *
+ * <p>The thrown exception is the {@link #getCause() cause} of this exception</p>
  */
-public interface ValueProvider<C, T> {
+public class CommandExecutionException extends CommandException {
 
-    static <C, T> ValueProvider<C, T> constant(@Nullable T value) {
-        Optional<T> opt = Optional.ofNullable(value);
-        return context -> opt;
+    public CommandExecutionException(Throwable cause, @Nullable Command command) {
+        super(cause, command);
     }
 
-    /**
-     * Compute the value from the context.
-     *
-     * @param context the context, never {@code null}
-     * @return the value, may be {@link Optional#empty()} to indicate no value
-     */
-    Optional<T> value(C context);
 }

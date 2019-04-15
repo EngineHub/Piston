@@ -29,10 +29,12 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
+import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.InjectedValueAccess;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverters;
 import org.enginehub.piston.exception.CommandException;
+import org.enginehub.piston.exception.CommandExecutionException;
 import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.exception.NoSuchCommandException;
 import org.enginehub.piston.exception.NoSuchFlagException;
@@ -240,10 +242,10 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public boolean containsCommand(String name) {
+    public Optional<Command> getCommand(String name) {
         lock.readLock().lock();
         try {
-            return commands.containsKey(name);
+            return Optional.ofNullable(commands.get(name));
         } finally {
             lock.readLock().unlock();
         }
@@ -258,13 +260,13 @@ public class CommandManagerImpl implements CommandManager {
             if (command == null) {
                 throw new NoSuchCommandException(name);
             }
-            return executeSubCommand(command, args.subList(1, args.size()));
+            return executeSubCommand(name, command, args.subList(1, args.size()));
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    private int executeSubCommand(Command command, List<String> args) {
+    private int executeSubCommand(String calledName, Command command, List<String> args) {
         CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
             .injectedValues(
                 injectedValues.entrySet().stream()
@@ -305,7 +307,7 @@ public class CommandManagerImpl implements CommandManager {
                     throw new UsageException("Bad sub-command. Acceptable commands: "
                         + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
                 }
-                return executeSubCommand(sub, ImmutableList.copyOf(argIter));
+                return executeSubCommand(next, sub, ImmutableList.copyOf(argIter));
             }
             CommandArgument nextPart = partIter.next();
             addValueFull(parameters, command, nextPart, v -> v.value(next));
@@ -332,7 +334,11 @@ public class CommandManagerImpl implements CommandManager {
 
         // Run the command action.
         try {
-            CommandParametersImpl builtParams = parameters.build();
+            CommandMetadata metadata = CommandMetadataImpl.builder()
+                .calledName(calledName)
+                .arguments(args)
+                .build();
+            CommandParametersImpl builtParams = parameters.metadata(metadata).build();
             if (!command.getCondition().satisfied(builtParams)) {
                 throw new ConditionFailedException(command);
             }
@@ -341,7 +347,7 @@ public class CommandManagerImpl implements CommandManager {
         } catch (CommandException e) {
             throw e;
         } catch (Exception e) {
-            throw new CommandException(e, command);
+            throw new CommandExecutionException(e, command);
         }
     }
 

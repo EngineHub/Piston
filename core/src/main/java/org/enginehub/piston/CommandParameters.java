@@ -22,6 +22,8 @@ package org.enginehub.piston;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 
+import javax.annotation.Nullable;
+
 /**
  * Access to part values derived from user input.
  */
@@ -44,5 +46,13 @@ public interface CommandParameters extends InjectedValueAccess {
      * @return the value
      */
     CommandValue valueOf(ArgAcceptingCommandPart part);
+
+    /**
+     * Gets the metadata for the command being called.
+     *
+     * @return the command metadata, if it exists
+     */
+    @Nullable
+    CommandMetadata getMetadata();
 
 }

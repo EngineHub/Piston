@@ -17,26 +17,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.util;
+package org.enginehub.piston;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
+import com.google.common.collect.ImmutableList;
 
 /**
- * Provides a value, given a context argument.
+ * Metadata for a called command. Includes information such as
+ * the command name used and the argument list.
  */
-public interface ValueProvider<C, T> {
+public interface CommandMetadata {
 
-    static <C, T> ValueProvider<C, T> constant(@Nullable T value) {
-        Optional<T> opt = Optional.ofNullable(value);
-        return context -> opt;
-    }
+    String getCalledName();
 
-    /**
-     * Compute the value from the context.
-     *
-     * @param context the context, never {@code null}
-     * @return the value, may be {@link Optional#empty()} to indicate no value
-     */
-    Optional<T> value(C context);
+    ImmutableList<String> getArguments();
+
 }
