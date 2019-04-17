@@ -21,7 +21,8 @@ package org.enginehub.piston;
 
 import com.google.inject.Key;
 import org.enginehub.piston.converter.ArgumentConverter;
-import org.enginehub.piston.util.ValueProvider;
+import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.inject.InjectedValueStore;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ import java.util.stream.Stream;
 /**
  * Responsible for holding all commands, as well as parsing and dispatching from user input.
  */
-public interface CommandManager extends InjectedValueAccess {
+public interface CommandManager extends InjectedValueStore {
 
     /**
      * Create a new command builder, using the default implementation of this manager.
@@ -92,16 +93,6 @@ public interface CommandManager extends InjectedValueAccess {
     <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key);
 
     /**
-     * Inject a value into this manager. It will be provided by
-     * {@link InjectedValueAccess#injectedValue(Key)}.
-     *
-     * @param key the key for the value
-     * @param provider the provider of the value
-     * @param <T> the type of the value
-     */
-    <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider);
-
-    /**
      * Retrieve all commands that are registered.
      */
     Stream<Command> getAllCommands();
@@ -130,16 +121,17 @@ public interface CommandManager extends InjectedValueAccess {
     Optional<Command> getCommand(String name);
 
     /**
-     * Execute a command, given a set of arguments.
+     * Execute a command, given a set of arguments and a context.
      *
      * <p>
      * Argument zero is the command name, without any leading slash.
      * The rest of the arguments will be parsed into the correct parts.
      * </p>
      *
+     * @param context the injected value context
      * @param args the arguments to include
      * @return the count from the executed command
      */
-    int execute(List<String> args);
+    int execute(InjectedValueAccess context, List<String> args);
 
 }

@@ -26,10 +26,10 @@ import com.google.inject.Key;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandValue;
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -57,7 +57,7 @@ abstract class CommandParametersImpl implements CommandParameters {
 
         ImmutableMap.Builder<CommandPart, CommandValue> valuesBuilder();
 
-        Builder injectedValues(Map<Key<?>, Object> values);
+        Builder injectedValues(InjectedValueAccess values);
 
         Builder metadata(CommandMetadata metadata);
 
@@ -71,7 +71,7 @@ abstract class CommandParametersImpl implements CommandParameters {
 
     abstract ImmutableMap<CommandPart, CommandValue> values();
 
-    abstract ImmutableMap<Key<?>, Object> injectedValues();
+    abstract InjectedValueAccess injectedValues();
 
     abstract CommandMetadata metadata();
 
@@ -95,9 +95,8 @@ abstract class CommandParametersImpl implements CommandParameters {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public final <T> Optional<T> injectedValue(Key<T> key) {
-        @SuppressWarnings("unchecked")
-        T value = (T) injectedValues().get(key);
-        return Optional.ofNullable(value);
+        return injectedValues().injectedValue(key);
     }
 }

@@ -19,6 +19,7 @@
 
 package org.enginehub.piston;
 
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 

@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston;
+package org.enginehub.piston.inject;
 
 import com.google.inject.Key;
 import org.enginehub.piston.util.ValueProvider;
@@ -28,15 +28,18 @@ import java.util.Optional;
  * Common access declarations for injected values.
  */
 public interface InjectedValueAccess {
+
+    InjectedValueAccess EMPTY = EmptyInjectedValueAccess.INSTANCE;
+
     /**
      * Get an injected value.
      *
      * <p>
-     * Provide value injectors to the {@linkplain CommandManager manager}.
+     * Provide value injectors to a {@linkplain InjectedValueStore store}.
      * </p>
      *
      * @return the value, or {@link Optional#empty()} if not provided
-     * @see CommandManager#injectValue(Key, ValueProvider)
+     * @see InjectedValueStore#injectValue(Key, ValueProvider)
      */
     <T> Optional<T> injectedValue(Key<T> key);
 }

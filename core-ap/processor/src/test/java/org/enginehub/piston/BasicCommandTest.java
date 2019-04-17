@@ -29,6 +29,7 @@ import org.enginehub.piston.commands.SingleArgCommand;
 import org.enginehub.piston.commands.SingleArgCommandRegistration;
 import org.enginehub.piston.commands.SingleOptionalArgCommand;
 import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration;
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -45,7 +46,10 @@ class BasicCommandTest {
         Optional.ofNullable(config.getManagerSetup())
             .ifPresent(setup -> setup.accept(manager));
         config.getRegistration().accept(manager, mock);
-        manager.execute(Splitter.on(' ').splitToList(config.getCommandLine()));
+        manager.execute(
+            InjectedValueAccess.EMPTY,
+            Splitter.on(' ').splitToList(config.getCommandLine())
+        );
         config.getVerification().accept(mock);
         verifyNoMoreInteractions(mock);
     }

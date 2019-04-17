@@ -30,7 +30,6 @@ import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandMetadata;
-import org.enginehub.piston.InjectedValueAccess;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverters;
 import org.enginehub.piston.exception.CommandException;
@@ -39,6 +38,9 @@ import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.exception.NoSuchCommandException;
 import org.enginehub.piston.exception.NoSuchFlagException;
 import org.enginehub.piston.exception.UsageException;
+import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.inject.MemoizingValueAccess;
+import org.enginehub.piston.inject.MergedValueAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandArgument;
@@ -63,8 +65,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.immutableEntry;
-import static java.util.stream.Collectors.toMap;
 
 public class CommandManagerImpl implements CommandManager {
 
@@ -252,7 +252,7 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public int execute(List<String> args) {
+    public int execute(InjectedValueAccess context, List<String> args) {
         lock.readLock().lock();
         try {
             String name = args.get(0);
@@ -260,20 +260,21 @@ public class CommandManagerImpl implements CommandManager {
             if (command == null) {
                 throw new NoSuchCommandException(name);
             }
-            return executeSubCommand(name, command, args.subList(1, args.size()));
+            // order given context first, then resolve manager values
+            // cache all values
+            InjectedValueAccess fullContext = MemoizingValueAccess.wrap(
+                MergedValueAccess.of(context, this)
+            );
+            return executeSubCommand(name, command, fullContext, args.subList(1, args.size()));
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    private int executeSubCommand(String calledName, Command command, List<String> args) {
+    private int executeSubCommand(String calledName, Command command,
+                                  InjectedValueAccess context, List<String> args) {
         CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
-            .injectedValues(
-                injectedValues.entrySet().stream()
-                    .map(e -> immutableEntry(e.getKey(), e.getValue().value(this)))
-                    .filter(e -> e.getValue().isPresent())
-                    .collect(toMap(Map.Entry::getKey, e -> e.getValue().get()))
-            );
+            .injectedValues(context);
         CommandParseCache parseCache = commandCache.getUnchecked(command);
 
         boolean flagsEnabled = true;
@@ -307,7 +308,7 @@ public class CommandManagerImpl implements CommandManager {
                     throw new UsageException("Bad sub-command. Acceptable commands: "
                         + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
                 }
-                return executeSubCommand(next, sub, ImmutableList.copyOf(argIter));
+                return executeSubCommand(next, sub, context, ImmutableList.copyOf(argIter));
             }
             CommandArgument nextPart = partIter.next();
             addValueFull(parameters, command, nextPart, v -> v.value(next));
