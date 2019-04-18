@@ -26,6 +26,7 @@ import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.exception.UsageException;
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandPart;
 
@@ -50,6 +51,8 @@ abstract class CommandValueImpl implements CommandValue {
 
         Builder partContext(CommandPart ctx);
 
+        Builder injectedValues(InjectedValueAccess injectedValues);
+
         default Builder value(String value) {
             return values(ImmutableList.of(value));
         }
@@ -69,6 +72,8 @@ abstract class CommandValueImpl implements CommandValue {
 
     abstract CommandPart partContext();
 
+    abstract InjectedValueAccess injectedValues();
+
     abstract ImmutableList<String> values();
 
     @Override
@@ -82,7 +87,7 @@ abstract class CommandValueImpl implements CommandValue {
         for (String value : values()) {
             Optional<ArgumentConverter<T>> converter = manager().getConverter(key);
             checkState(converter.isPresent(), "No converter for %s", key);
-            Collection<T> convert = converter.get().convert(value);
+            Collection<T> convert = converter.get().convert(value, injectedValues());
             if (convert == null) {
                 throw new UsageException(String.format(
                     "Invalid value for %s, acceptable values are '%s'",

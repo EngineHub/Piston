@@ -22,15 +22,23 @@ package org.enginehub.piston.converter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.util.CaseHelper;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaConversionException;
+import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.invoke.MethodHandles.dropArguments;
+import static java.lang.invoke.MethodType.methodType;
 
 /**
  * A collection of default argument converters.
@@ -38,7 +46,7 @@ import java.util.function.Function;
 public class ArgumentConverters {
 
     private static final ArgumentConverter<String> STRING_ARGUMENT_CONVERTER =
-        SimpleArgumentConverter.fromSingle(Function.identity(), "any text");
+        SimpleArgumentConverter.fromSingle((s, c) -> s, "any text");
 
     public static ArgumentConverter<String> forString() {
         return STRING_ARGUMENT_CONVERTER;
@@ -53,11 +61,13 @@ public class ArgumentConverters {
         MethodHandle handle;
         try {
             handle = MethodHandles.publicLookup().findStatic(
-                c, "valueOf", MethodType.methodType(c, String.class)
+                c, "valueOf", methodType(c, String.class)
             );
         } catch (NoSuchMethodException | IllegalAccessException e) {
             return Optional.empty();
         }
+
+        handle = noContextConverter(handle);
 
         return Optional.of(converterForHandle(handle, c));
     }
@@ -71,29 +81,69 @@ public class ArgumentConverters {
         MethodHandle handle;
         try {
             handle = MethodHandles.publicLookup().findConstructor(
-                c, MethodType.methodType(void.class, String.class)
+                c, methodType(void.class, String.class)
             );
         } catch (NoSuchMethodException | IllegalAccessException e) {
             return Optional.empty();
         }
 
+        handle = noContextConverter(handle);
+
         return Optional.of(converterForHandle(handle, c));
     }
 
+    /**
+     * Convert a handle with signature {@code (String)T} to {@code (String,InjectedValueAccess)T}.
+     */
+    private static MethodHandle noContextConverter(MethodHandle noContextHandle) {
+        return dropArguments(noContextHandle, 1, InjectedValueAccess.class);
+    }
+
+    private static final String BI_FUNCTION_APPLY = "apply";
+    private static final MethodType HANDLE_TO_BI_FUNCTION = methodType(BiFunction.class, MethodHandle.class);
+    private static final MethodType BI_FUNCTION_RAW_SIG = methodType(Object.class, Object.class, Object.class);
+    private static final MethodType BI_FUNCTION_SIG = methodType(Object.class, String.class, InjectedValueAccess.class);
+
+    private static final CallSite HANDLE_TO_BI_FUNCTION_CONVERTER;
+
+    static {
+        MethodHandle handleInvoker = MethodHandles.invoker(BI_FUNCTION_SIG);
+        try {
+            HANDLE_TO_BI_FUNCTION_CONVERTER = LambdaMetafactory.metafactory(
+                MethodHandles.lookup(),
+                // Implementing BiFunction.apply
+                BI_FUNCTION_APPLY,
+                // Take a handle, to be converter to BiFunction
+                HANDLE_TO_BI_FUNCTION,
+                // Raw signature for SAM type
+                BI_FUNCTION_RAW_SIG,
+                // Handle to call the captured handle.
+                handleInvoker,
+                // Actual signature at invoke time
+                BI_FUNCTION_SIG
+            );
+        } catch (LambdaConversionException e) {
+            throw new IllegalStateException("Failed to load ArgumentConverter MetaFactory", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private static <T> SimpleArgumentConverter<T> converterForHandle(MethodHandle handle, Class<?> type) {
+        MethodType mType = handle.type();
+        checkArgument(mType.parameterType(0).isAssignableFrom(String.class)
+                && mType.parameterType(1).isAssignableFrom(InjectedValueAccess.class)
+                && type.isAssignableFrom(mType.returnType()),
+            "Incorrect signature: %s", handle);
+        BiFunction<String, InjectedValueAccess, T> biFunction;
+        try {
+            biFunction = (BiFunction<String, InjectedValueAccess, T>)
+                HANDLE_TO_BI_FUNCTION_CONVERTER.dynamicInvoker().invokeExact(handle);
+        } catch (Throwable throwable) {
+            Throwables.throwIfUnchecked(throwable);
+            throw new RuntimeException(throwable);
+        }
         return SimpleArgumentConverter.fromSingle(
-            arg -> {
-                try {
-                    // safe, the handle has a return type of `c`.
-                    // `c`'s type is T.
-                    @SuppressWarnings("unchecked")
-                    T result = (T) handle.invoke(arg);
-                    return result;
-                } catch (Throwable throwable) {
-                    Throwables.throwIfUnchecked(throwable);
-                    throw new RuntimeException(throwable);
-                }
-            },
+            biFunction,
             "any " + CaseHelper.titleToSpacedLower(type.getSimpleName())
         );
     }
@@ -108,7 +158,7 @@ public class ArgumentConverters {
         type -> {
             if (Objects.equals(type.wrap().getRawType(), Character.class)) {
                 return Optional.of(SimpleArgumentConverter.fromSingle(
-                    s -> s.charAt(0),
+                    (s, c) -> s.charAt(0),
                     "any character"
                 ));
             }

@@ -23,16 +23,13 @@ import org.enginehub.piston.inject.InjectedValueAccess;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
- * Converts user input into an actual type. It can provide multiple
- * results per argument.
+ * Argument converter that supports working without a context.
  *
  * @param <T> the type of the result
  */
-public interface ArgumentConverter<T> {
+public interface NoContextArgumentConverter<T> extends ArgumentConverter<T> {
 
     /**
      * Converts the argument input to a collection of argument values.
@@ -42,31 +39,15 @@ public interface ArgumentConverter<T> {
      * </p>
      *
      * @param argument the argument input to convert
-     * @param context the context to convert in
      * @return the argument values
      */
     @Nullable
-    Collection<T> convert(String argument, InjectedValueAccess context);
+    Collection<T> convert(String argument);
 
-    /**
-     * Describe the arguments that can be provided to this converter.
-     *
-     * <p>
-     * This information is displayed to the user.
-     * </p>
-     *
-     * @return a description of acceptable arguments
-     */
-    String describeAcceptableArguments();
-
-    /**
-     * Given {@code input} as the current input, provide some suggestions for the user.
-     *
-     * @param input the user's current input
-     * @return suggestions for the user
-     */
-    default List<String> getSuggestions(String input) {
-        return Collections.emptyList();
+    @Nullable
+    @Override
+    default Collection<T> convert(String argument, InjectedValueAccess context) {
+        return convert(argument);
     }
 
 }

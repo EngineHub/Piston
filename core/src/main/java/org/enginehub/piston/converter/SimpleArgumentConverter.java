@@ -19,9 +19,13 @@
 
 package org.enginehub.piston.converter;
 
+import org.enginehub.piston.inject.InjectedValueAccess;
+
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.Collections.singleton;
@@ -33,8 +37,8 @@ import static java.util.Collections.singleton;
 public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
 
     /**
-     * Implements {@link ArgumentConverter#convert(String)} using the provided function,
-     * and supplies the provided description for
+     * Implements {@link ArgumentConverter#convert(String, InjectedValueAccess)} using the provided
+     * function, and supplies the provided description for
      * {@link ArgumentConverter#describeAcceptableArguments()}.
      *
      * @param converter the converter function
@@ -43,14 +47,15 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
      * @return a converter using the given function and description
      */
     public static <T> SimpleArgumentConverter<T> from(
-        Function<String, Collection<T>> converter,
+        BiFunction<String, InjectedValueAccess, Collection<T>> converter,
         String description
     ) {
         return new SimpleArgumentConverter<>(converter, description);
     }
 
     /**
-     * Implements {@link ArgumentConverter#convert(String)} by wrapping the result of
+     * Implements {@link ArgumentConverter#convert(String, InjectedValueAccess)} by wrapping the
+     * result of
      * {@code converter} in a {@linkplain Collections#singleton(Object) singleton set},
      * and supplies the provided description for
      * {@link ArgumentConverter#describeAcceptableArguments()}.
@@ -61,23 +66,24 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
      * @return a converter using the given function and description
      */
     public static <T> SimpleArgumentConverter<T> fromSingle(
-        Function<String, T> converter,
+        BiFunction<String, InjectedValueAccess, T> converter,
         String description
     ) {
-        return from(x -> singleton(converter.apply(x)), description);
+        return from((x, c) -> singleton(converter.apply(x, c)), description);
     }
 
-    private final Function<String, Collection<T>> converter;
+    private final BiFunction<String, InjectedValueAccess, Collection<T>> converter;
     private final String description;
 
-    private SimpleArgumentConverter(Function<String, Collection<T>> converter, String description) {
+    private SimpleArgumentConverter(BiFunction<String, InjectedValueAccess, Collection<T>> converter, String description) {
         this.converter = converter;
         this.description = description;
     }
 
+    @Nullable
     @Override
-    public Collection<T> convert(String argument) {
-        return converter.apply(argument);
+    public Collection<T> convert(String argument, InjectedValueAccess context) {
+        return converter.apply(argument, context);
     }
 
     @Override

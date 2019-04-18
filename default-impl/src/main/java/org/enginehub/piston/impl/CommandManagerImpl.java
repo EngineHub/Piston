@@ -291,7 +291,7 @@ public class CommandManagerImpl implements CommandManager {
                     flagsEnabled = false;
                 } else {
                     // Pick out individual flags from the long-option form.
-                    consumeFlags(command, parameters, parseCache, defaultsNeeded, argIter, next);
+                    consumeFlags(command, context, parameters, parseCache, defaultsNeeded, argIter, next);
                 }
                 continue;
             }
@@ -311,7 +311,7 @@ public class CommandManagerImpl implements CommandManager {
                 return executeSubCommand(next, sub, context, ImmutableList.copyOf(argIter));
             }
             CommandArgument nextPart = partIter.next();
-            addValueFull(parameters, command, nextPart, v -> v.value(next));
+            addValueFull(parameters, command, nextPart, context, v -> v.value(next));
             defaultsNeeded.remove(nextPart);
         }
 
@@ -330,7 +330,7 @@ public class CommandManagerImpl implements CommandManager {
         }
 
         for (ArgAcceptingCommandPart part : defaultsNeeded) {
-            addValueFull(parameters, command, part, v -> v.values(part.getDefaults()));
+            addValueFull(parameters, command, part, context, v -> v.values(part.getDefaults()));
         }
 
         // Run the command action.
@@ -352,7 +352,12 @@ public class CommandManagerImpl implements CommandManager {
         }
     }
 
-    private void consumeFlags(Command command, CommandParametersImpl.Builder parameters, CommandParseCache parseCache, Set<ArgAcceptingCommandPart> defaultsNeeded, Iterator<String> argIter, String next) {
+    private void consumeFlags(Command command,
+                              InjectedValueAccess injectedValues,
+                              CommandParametersImpl.Builder parameters,
+                              CommandParseCache parseCache,
+                              Set<ArgAcceptingCommandPart> defaultsNeeded,
+                              Iterator<String> argIter, String next) {
         char[] flagArray = new char[next.length() - 1];
         next.getChars(1, next.length(), flagArray, 0);
         for (int i = 0; i < flagArray.length; i++) {
@@ -370,7 +375,7 @@ public class CommandManagerImpl implements CommandManager {
                 if (!argIter.hasNext()) {
                     break;
                 }
-                addValueFull(parameters, command, flag, v -> v.value(argIter.next()));
+                addValueFull(parameters, command, flag, injectedValues, v -> v.value(argIter.next()));
                 defaultsNeeded.remove(flag);
             } else {
                 // Sanity-check. Real check is in `cacheCommand`.
@@ -383,6 +388,7 @@ public class CommandManagerImpl implements CommandManager {
     private void addValueFull(CommandParametersImpl.Builder parameters,
                               Command command,
                               CommandPart part,
+                              InjectedValueAccess injectedValues,
                               Consumer<CommandValueImpl.Builder> valueAdder) {
         parameters.addPresentPart(part);
         CommandValueImpl.Builder builder = CommandValueImpl.builder();
@@ -390,6 +396,7 @@ public class CommandManagerImpl implements CommandManager {
         parameters.addValue(part, builder
             .commandContext(command)
             .partContext(part)
+            .injectedValues(injectedValues)
             .manager(this)
             .build());
     }

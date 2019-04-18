@@ -19,6 +19,9 @@
 
 package org.enginehub.piston.converter;
 
+import org.enginehub.piston.inject.InjectedValueAccess;
+
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,8 +34,9 @@ public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    public Collection<T> convert(String argument) {
-        return delegate.convert(argument);
+    @Nullable
+    public Collection<T> convert(String argument, InjectedValueAccess context) {
+        return delegate.convert(argument, context);
     }
 
     @Override
