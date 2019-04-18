@@ -81,7 +81,7 @@ abstract class CommandValueImpl implements CommandValue {
         ImmutableList.Builder<T> values = ImmutableList.builder();
         for (String value : values()) {
             Optional<ArgumentConverter<T>> converter = manager().getConverter(key);
-            checkState(converter.isPresent(), "No converter for {}", key);
+            checkState(converter.isPresent(), "No converter for %s", key);
             Collection<T> convert = converter.get().convert(value);
             if (convert == null) {
                 throw new UsageException(String.format(

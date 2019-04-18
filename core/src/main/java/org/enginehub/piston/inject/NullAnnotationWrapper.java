@@ -43,4 +43,9 @@ final class NullAnnotationWrapper implements AnnotationWrapper {
     public Class<? extends Annotation> getAnnotationType() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }

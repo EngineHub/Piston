@@ -20,6 +20,7 @@
 package org.enginehub.piston.inject;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 
 import javax.annotation.Nullable;
@@ -111,4 +112,11 @@ public abstract class Key<T> {
         return getAnnotationWrapper().getAnnotationType();
     }
 
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("type", getTypeToken())
+            .add("annotationWrapper", getAnnotationWrapper())
+            .toString();
+    }
 }
