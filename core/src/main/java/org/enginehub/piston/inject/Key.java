@@ -27,6 +27,9 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -86,6 +89,14 @@ public abstract class Key<T> {
         }
 
         validateAnnotationType(annotationType);
+        if (annotationType.getDeclaredMethods().length > 0
+            && Stream.of(annotationType.getDeclaredMethods())
+            .map(Method::getDefaultValue)
+            .allMatch(Objects::nonNull)) {
+            // all default values, match an instance made from them instead
+            return strategyFor(Annotations.allDefaultsAnnotation(annotationType));
+        }
+
         return TypeAnnotationWrapper.from(annotationType);
     }
 

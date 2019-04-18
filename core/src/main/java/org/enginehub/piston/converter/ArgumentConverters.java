@@ -104,7 +104,7 @@ public class ArgumentConverters {
     private static final MethodType BI_FUNCTION_RAW_SIG = methodType(Object.class, Object.class, Object.class);
     private static final MethodType BI_FUNCTION_SIG = methodType(Object.class, String.class, InjectedValueAccess.class);
 
-    private static final CallSite HANDLE_TO_BI_FUNCTION_CONVERTER;
+    private static final MethodHandle HANDLE_TO_BI_FUNCTION_CONVERTER;
 
     static {
         MethodHandle handleInvoker = MethodHandles.invoker(BI_FUNCTION_SIG);
@@ -121,7 +121,7 @@ public class ArgumentConverters {
                 handleInvoker,
                 // Actual signature at invoke time
                 BI_FUNCTION_SIG
-            );
+            ).dynamicInvoker();
         } catch (LambdaConversionException e) {
             throw new IllegalStateException("Failed to load ArgumentConverter MetaFactory", e);
         }
@@ -137,7 +137,7 @@ public class ArgumentConverters {
         BiFunction<String, InjectedValueAccess, T> biFunction;
         try {
             biFunction = (BiFunction<String, InjectedValueAccess, T>)
-                HANDLE_TO_BI_FUNCTION_CONVERTER.dynamicInvoker().invokeExact(handle);
+                HANDLE_TO_BI_FUNCTION_CONVERTER.invokeExact(handle);
         } catch (Throwable throwable) {
             Throwables.throwIfUnchecked(throwable);
             throw new RuntimeException(throwable);
