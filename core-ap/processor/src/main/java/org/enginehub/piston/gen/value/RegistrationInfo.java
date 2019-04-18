@@ -66,10 +66,10 @@ public abstract class RegistrationInfo {
             return this;
         }
 
-        ImmutableSet.Builder<TypeName> keyTypesBuilder();
+        ImmutableSet.Builder<KeyInfo> keyTypesBuilder();
 
-        default Builder addKeyType(TypeName typeName) {
-            keyTypesBuilder().add(typeName);
+        default Builder addKeyType(KeyInfo keyInfo) {
+            keyTypesBuilder().add(keyInfo);
             return this;
         }
 
@@ -100,7 +100,7 @@ public abstract class RegistrationInfo {
 
     public abstract ImmutableList<RequiredVariable> getDeclaredFields();
 
-    public abstract ImmutableSet<TypeName> getKeyTypes();
+    public abstract ImmutableSet<KeyInfo> getKeyTypes();
 
     public abstract ImmutableSet<TypeElement> getSuperTypes();
 

@@ -21,6 +21,7 @@ package org.enginehub.piston.gen;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Key;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -50,6 +51,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collection;
@@ -253,15 +255,42 @@ class CommandRegistrationGenerator {
 
     private Stream<FieldSpec> getKeyTypeFields() {
         return info.getKeyTypes().stream()
-            .map(keyType -> {
+            .map(keyInfo -> {
+                TypeName keyType = keyInfo.typeName();
                 ParameterizedTypeName keyPType = ParameterizedTypeName.get(
                     ClassName.get(Key.class),
                     keyType.box()
                 );
+                // _technically_ the spec can only be applied to parameters
+                // so we'll whip up a fake inner method with the annotation
+                // and at runtime, reflect out the instance
+                CodeBlock constrParams = CodeBlock.of("");
+                AnnotationSpec annotationSpec = keyInfo.annotationSpec();
+                if (annotationSpec != null) {
+                    TypeSpec annoExtractor = TypeSpec.anonymousClassBuilder("")
+                        // `a` = "annotation", extracts the annotation from its own parameter `ah`
+                        .addMethod(MethodSpec.methodBuilder("a")
+                            .returns(Annotation.class)
+                            // `ah` = "annotation holder", holds the annotation on this parameter
+                            .addParameter(ParameterSpec.builder(Object.class, "ah")
+                                .addAnnotation(annotationSpec)
+                                .build())
+                            .addStatement(
+                                // from this class
+                                "return getClass()\n" +
+                                // retrieve this method (there's only one)
+                                ".getDeclaredMethods()[0]\n" +
+                                // and get its first parameter's first annotation (again, only one)
+                                ".getParameterAnnotations()[0][0]")
+                            .build())
+                        .build();
+                    // call the method with a null parameter, since it doesn't really matter
+                    constrParams = CodeBlock.of("$L.a(null)", annoExtractor);
+                }
                 return FieldSpec.builder(
                     keyPType, SafeName.getNameAsIdentifier(keyType) + "Key",
                     PRIVATE, STATIC, FINAL
-                ).initializer("$L", TypeSpec.anonymousClassBuilder("")
+                ).initializer("$L", TypeSpec.anonymousClassBuilder(constrParams)
                     .superclass(keyPType)
                     .build()
                 ).build();

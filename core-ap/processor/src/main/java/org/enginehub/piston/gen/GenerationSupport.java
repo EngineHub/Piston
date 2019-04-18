@@ -20,6 +20,7 @@
 package org.enginehub.piston.gen;
 
 import com.google.inject.Key;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
@@ -75,8 +76,9 @@ public interface GenerationSupport {
      * Request a {@link Key} that provides the type at runtime.
      *
      * @param type the type to represent with a {@code Key}
+     * @param annotationSpec the annotation to include on the {@code Key}
      * @return code that represents an expression which will return the correct {@code Key}
      */
-    CodeBlock requestKey(TypeName type);
+    CodeBlock requestKey(TypeName type, @Nullable AnnotationSpec annotationSpec);
 
 }

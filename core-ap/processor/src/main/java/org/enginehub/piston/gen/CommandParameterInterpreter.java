@@ -22,6 +22,8 @@ package org.enginehub.piston.gen;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.BindingAnnotation;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -42,12 +44,14 @@ import org.enginehub.piston.util.CaseHelper;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.auto.common.MoreElements.asType;
+import static com.google.auto.common.MoreElements.getAnnotationMirror;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -109,7 +113,7 @@ class CommandParameterInterpreter {
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.value($L).asSingle($L)",
-                        var, ReservedNames.PARAMETERS, asKeyType(parameter.asType()))
+                        var, ReservedNames.PARAMETERS, asKeyType(parameter))
                     .build())
                 .build())
             .build();
@@ -143,7 +147,7 @@ class CommandParameterInterpreter {
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.value($L).asSingle($L)",
-                        var, ReservedNames.PARAMETERS, asKeyType(parameter.asType()))
+                        var, ReservedNames.PARAMETERS, asKeyType(parameter))
                     .build())
                 .build())
             .build();
@@ -182,15 +186,29 @@ class CommandParameterInterpreter {
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return requireOptional($L.injectedValue($L), $S)",
-                        ReservedNames.PARAMETERS, asKeyType(parameter.asType()),
+                        ReservedNames.PARAMETERS, asKeyType(parameter),
                         parameter.getSimpleName())
                     .build())
                 .build())
             .build();
     }
 
-    private CodeBlock asKeyType(TypeMirror mirror) {
-        return generationSupport.requestKey(TypeName.get(mirror));
+    private CodeBlock asKeyType(VariableElement mirror) {
+        ImmutableList<AnnotationMirror> firstAnnotation = mirror.getAnnotationMirrors().stream()
+            .filter(am -> {
+                TypeElement annoType = asType(am.getAnnotationType().asElement());
+                return getAnnotationMirror(annoType, BindingAnnotation.class).isPresent();
+            })
+            .collect(toImmutableList());
+        if (firstAnnotation.size() > 1) {
+            throw new ProcessingException("Too many binding annotations. Only one is allowed.")
+                .withElement(mirror)
+                .withAnnotation(firstAnnotation.get(1));
+        }
+        return generationSupport.requestKey(
+            TypeName.get(mirror.asType()),
+            firstAnnotation.stream().map(AnnotationSpec::get).findFirst().orElse(null)
+        );
     }
 
     List<CommandParamInfo> getParams() {
