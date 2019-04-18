@@ -19,8 +19,6 @@
 
 package org.enginehub.piston.inject;
 
-import com.google.inject.Key;
-
 import java.util.Optional;
 
 /**

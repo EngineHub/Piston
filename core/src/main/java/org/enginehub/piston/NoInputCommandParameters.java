@@ -21,7 +21,7 @@ package org.enginehub.piston;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Key;
+import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 

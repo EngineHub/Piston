@@ -22,7 +22,6 @@ package org.enginehub.piston.gen;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.BindingAnnotation;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -35,6 +34,7 @@ import org.enginehub.piston.gen.util.ProcessingException;
 import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.ExtractSpec;
 import org.enginehub.piston.gen.value.ReservedNames;
+import org.enginehub.piston.inject.InjectAnnotation;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandParts;
@@ -197,7 +197,7 @@ class CommandParameterInterpreter {
         ImmutableList<AnnotationMirror> firstAnnotation = mirror.getAnnotationMirrors().stream()
             .filter(am -> {
                 TypeElement annoType = asType(am.getAnnotationType().asElement());
-                return getAnnotationMirror(annoType, BindingAnnotation.class).isPresent();
+                return getAnnotationMirror(annoType, InjectAnnotation.class).isPresent();
             })
             .collect(toImmutableList());
         if (firstAnnotation.size() > 1) {

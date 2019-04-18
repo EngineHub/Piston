@@ -22,7 +22,7 @@ package org.enginehub.piston.part;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
+import org.enginehub.piston.inject.Key;
 
 import java.util.Collection;
 

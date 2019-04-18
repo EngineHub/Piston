@@ -19,10 +19,10 @@
 
 package org.enginehub.piston.gen;
 
-import com.google.inject.Key;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
+import org.enginehub.piston.inject.Key;
 
 import javax.annotation.Nullable;
 

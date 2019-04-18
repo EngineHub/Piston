@@ -19,10 +19,10 @@
 
 package org.enginehub.piston;
 
-import com.google.inject.Key;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.InjectedValueStore;
+import org.enginehub.piston.inject.Key;
 
 import java.util.List;
 import java.util.Optional;

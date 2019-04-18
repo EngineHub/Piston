@@ -19,8 +19,6 @@
 
 package org.enginehub.piston.inject;
 
-import com.google.inject.Key;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

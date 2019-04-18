@@ -17,21 +17,5 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@org.enginehub.piston.util.NonnullByDefault
 package org.enginehub.piston.inject;
-
-import org.enginehub.piston.util.ValueProvider;
-
-/**
- * Common storage declarations for injected values.
- */
-public interface InjectedValueStore extends InjectedValueAccess {
-    /**
-     * Inject a value into this store. It will be provided by
-     * {@link InjectedValueAccess#injectedValue(Key)}.
-     *
-     * @param key the key for the value
-     * @param provider the provider of the value
-     * @param <T> the type of the value
-     */
-    <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider);
-}

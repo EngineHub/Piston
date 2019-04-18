@@ -19,19 +19,27 @@
 
 package org.enginehub.piston.inject;
 
-import org.enginehub.piston.util.ValueProvider;
+import com.google.auto.value.AutoValue;
 
-/**
- * Common storage declarations for injected values.
- */
-public interface InjectedValueStore extends InjectedValueAccess {
-    /**
-     * Inject a value into this store. It will be provided by
-     * {@link InjectedValueAccess#injectedValue(Key)}.
-     *
-     * @param key the key for the value
-     * @param provider the provider of the value
-     * @param <T> the type of the value
-     */
-    <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider);
+import javax.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+
+@AutoValue
+abstract class InstanceAnnotationWrapper implements AnnotationWrapper {
+
+    static InstanceAnnotationWrapper from(Annotation annotationInstance) {
+        return new AutoValue_InstanceAnnotationWrapper(annotationInstance);
+    }
+
+    InstanceAnnotationWrapper() {
+    }
+
+    @Nonnull
+    @Override
+    public abstract Annotation getAnnotation();
+
+    @Override
+    public final Class<? extends Annotation> getAnnotationType() {
+        return getAnnotation().annotationType();
+    }
 }

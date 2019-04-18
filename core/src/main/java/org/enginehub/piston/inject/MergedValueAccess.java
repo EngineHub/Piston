@@ -20,7 +20,6 @@
 package org.enginehub.piston.inject;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Key;
 
 import java.util.Collection;
 import java.util.Optional;

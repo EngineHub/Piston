@@ -19,7 +19,6 @@
 
 package org.enginehub.piston.inject;
 
-import com.google.inject.Key;
 import org.enginehub.piston.util.ValueProvider;
 
 import java.util.Optional;

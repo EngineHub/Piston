@@ -20,7 +20,6 @@
 package org.enginehub.piston;
 
 import com.google.common.base.Splitter;
-import com.google.inject.Key;
 import org.enginehub.piston.commands.NoArgCommand;
 import org.enginehub.piston.commands.NoArgCommandRegistration;
 import org.enginehub.piston.commands.NoArgWithInjectedCommand;
@@ -30,6 +29,7 @@ import org.enginehub.piston.commands.SingleArgCommandRegistration;
 import org.enginehub.piston.commands.SingleOptionalArgCommand;
 import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration;
 import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.inject.Key;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -75,7 +75,7 @@ class BasicCommandTest {
                 cmd -> verify(cmd).noArg(injected))
                 .setCommandLine("no-arg-injected")
                 .setManagerSetup(commandManager -> commandManager.injectValue(
-                    Key.get(String.class), access -> Optional.of(injected)
+                    Key.of(String.class), access -> Optional.of(injected)
                 ))
         );
     }

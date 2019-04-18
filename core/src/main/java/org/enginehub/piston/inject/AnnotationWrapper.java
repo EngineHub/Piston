@@ -19,19 +19,18 @@
 
 package org.enginehub.piston.inject;
 
-import org.enginehub.piston.util.ValueProvider;
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
 
 /**
- * Common storage declarations for injected values.
+ * Defines comparision strategies for {@link Key}.
  */
-public interface InjectedValueStore extends InjectedValueAccess {
-    /**
-     * Inject a value into this store. It will be provided by
-     * {@link InjectedValueAccess#injectedValue(Key)}.
-     *
-     * @param key the key for the value
-     * @param provider the provider of the value
-     * @param <T> the type of the value
-     */
-    <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider);
+interface AnnotationWrapper {
+
+    @Nullable
+    Annotation getAnnotation();
+
+    @Nullable
+    Class<? extends Annotation> getAnnotationType();
+
 }

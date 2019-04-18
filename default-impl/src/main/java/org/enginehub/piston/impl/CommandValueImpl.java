@@ -21,12 +21,12 @@ package org.enginehub.piston.impl;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.exception.UsageException;
+import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandPart;
 
 import java.util.Collection;

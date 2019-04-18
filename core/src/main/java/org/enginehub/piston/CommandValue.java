@@ -20,7 +20,7 @@
 package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Key;
+import org.enginehub.piston.inject.Key;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -57,7 +57,7 @@ public interface CommandValue {
      * @see #asMultiple(Key)
      */
     default <T> ImmutableList<T> asMultiple(Class<T> key) {
-        return asMultiple(Key.get(key));
+        return asMultiple(Key.of(key));
     }
 
     /**
@@ -82,7 +82,7 @@ public interface CommandValue {
      * @see #asSingle(Key)
      */
     default <T> T asSingle(Class<T> key) {
-        return asSingle(Key.get(key));
+        return asSingle(Key.of(key));
     }
 
     /**

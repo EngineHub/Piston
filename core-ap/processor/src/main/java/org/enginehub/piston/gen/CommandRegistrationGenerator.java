@@ -21,7 +21,6 @@ package org.enginehub.piston.gen;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Key;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -42,6 +41,7 @@ import org.enginehub.piston.gen.value.ExtractSpec;
 import org.enginehub.piston.gen.value.RegistrationInfo;
 import org.enginehub.piston.gen.value.RequiredVariable;
 import org.enginehub.piston.gen.value.ReservedNames;
+import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandParts;
 
 import javax.annotation.processing.Filer;

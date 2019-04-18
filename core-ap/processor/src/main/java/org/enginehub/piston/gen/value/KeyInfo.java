@@ -20,8 +20,7 @@
 package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
+import com.google.common.reflect.TypeToken;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -31,6 +30,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.enginehub.piston.gen.util.CodeBlockUtil;
+import org.enginehub.piston.inject.Key;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
@@ -63,7 +63,7 @@ public abstract class KeyInfo {
         return Stream.of(typeArgument, annotationArgumentCode)
             .filter(Objects::nonNull)
             .collect(CodeBlockUtil.joining(
-                CodeBlock.of("$T.get(", Key.class),
+                CodeBlock.of("$T.of(", Key.class),
                 CodeBlock.of(","),
                 CodeBlock.of(")")
             ));
@@ -74,7 +74,7 @@ public abstract class KeyInfo {
             return CodeBlock.of("$T.class", typeName());
         }
         return CodeBlock.of("$L", TypeSpec.anonymousClassBuilder("")
-            .superclass(wrappedTypeName(TypeLiteral.class))
+            .superclass(wrappedTypeName(TypeToken.class))
             .build());
     }
 

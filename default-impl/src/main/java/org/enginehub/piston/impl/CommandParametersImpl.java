@@ -22,11 +22,11 @@ package org.enginehub.piston.impl;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 

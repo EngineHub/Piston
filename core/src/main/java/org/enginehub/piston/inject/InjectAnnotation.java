@@ -19,19 +19,22 @@
 
 package org.enginehub.piston.inject;
 
-import org.enginehub.piston.util.ValueProvider;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Common storage declarations for injected values.
+ * Meta-annotation that marks the annotation interface as an <em>inject annotation</em>.
+ *
+ * <p>
+ * There may only be one inject annotation per inject target. It is used to construct
+ * a matching {@link Key} for extraction.
+ * </p>
  */
-public interface InjectedValueStore extends InjectedValueAccess {
-    /**
-     * Inject a value into this store. It will be provided by
-     * {@link InjectedValueAccess#injectedValue(Key)}.
-     *
-     * @param key the key for the value
-     * @param provider the provider of the value
-     * @param <T> the type of the value
-     */
-    <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider);
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.ANNOTATION_TYPE)
+public @interface InjectAnnotation {
 }

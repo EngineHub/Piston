@@ -21,9 +21,9 @@ package org.enginehub.piston.part;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Key;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandValue;
+import org.enginehub.piston.inject.Key;
 
 public interface ArgAcceptingCommandPart extends CommandPart {
 

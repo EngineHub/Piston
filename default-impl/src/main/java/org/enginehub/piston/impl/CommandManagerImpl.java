@@ -26,7 +26,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
-import com.google.inject.Key;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandMetadata;
@@ -39,6 +38,7 @@ import org.enginehub.piston.exception.NoSuchCommandException;
 import org.enginehub.piston.exception.NoSuchFlagException;
 import org.enginehub.piston.exception.UsageException;
 import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.inject.MemoizingValueAccess;
 import org.enginehub.piston.inject.MergedValueAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
@@ -140,7 +140,7 @@ public class CommandManagerImpl implements CommandManager {
     private final Map<Key<?>, ArgumentConverter<?>> converters = new HashMap<>();
 
     public CommandManagerImpl() {
-        registerConverter(Key.get(String.class), ArgumentConverters.forString());
+        registerConverter(Key.of(String.class), ArgumentConverters.forString());
         for (Class<?> wrapperType : ImmutableList.of(
             Byte.class, Short.class, Integer.class, Long.class,
             Float.class, Double.class,
@@ -149,7 +149,7 @@ public class CommandManagerImpl implements CommandManager {
             // just forcing the generic to work
             @SuppressWarnings("unchecked")
             Class<Object> fake = (Class<Object>) wrapperType;
-            registerConverter(Key.get(fake), ArgumentConverters.get(TypeToken.of(fake)));
+            registerConverter(Key.of(fake), ArgumentConverters.get(TypeToken.of(fake)));
         }
     }
 
