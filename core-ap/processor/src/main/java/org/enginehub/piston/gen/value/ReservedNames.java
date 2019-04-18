@@ -29,6 +29,9 @@ public class ReservedNames {
     public static final String GET_COMMAND_METHOD = "getCommandMethod";
     public static final String REQUIRE_OPTIONAL = "requireOptional";
     public static final String BUILDER = "builder";
+    public static final String LISTENERS_BEFORE_CALL = "listenersBeforeCall";
+    public static final String LISTENERS_AFTER_CALL = "listenersAfterCall";
+    public static final String LISTENERS_AFTER_THROW = "listenersAfterThrow";
 
     /**
      * Field names that are pre-reserved, and must not be used.
@@ -50,7 +53,10 @@ public class ReservedNames {
             GET_COMMAND_METHOD,
             REQUIRE_OPTIONAL,
             LISTENERS,
-            BUILDER
+            BUILDER,
+            LISTENERS_BEFORE_CALL,
+            LISTENERS_AFTER_CALL,
+            LISTENERS_AFTER_THROW
         );
     }
 }

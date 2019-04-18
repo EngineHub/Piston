@@ -20,6 +20,7 @@
 package org.enginehub.piston.gen;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Key;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -166,6 +167,7 @@ class CommandRegistrationGenerator {
         spec.addMethod(generateNewBuilderMethod());
         spec.addMethod(generateRequireOptionalMethod());
         spec.addMethod(generateGetCommandMethod());
+        spec.addMethods(generateListenerMethods());
 
         // instance methods
         spec.addMethods(generateBuilderSetMethods());
@@ -179,6 +181,50 @@ class CommandRegistrationGenerator {
             .addStaticImport(CommandParts.class, "flag", "arg")
             .build()
             .writeTo(filer);
+    }
+
+    private CodeBlock listenerLoopAndCall(CodeBlock call) {
+        return CodeBlock.builder()
+            .beginControlFlow("for ($T l : $L)", CommandCallListener.class, ReservedNames.LISTENERS)
+            .addStatement(call)
+            .endControlFlow()
+            .build();
+    }
+
+    private MethodSpec listenerMethod(String name, String callName, ImmutableMap<Class<?>, String> parameters) {
+        MethodSpec.Builder b = MethodSpec.methodBuilder(name);
+        parameters.forEach(b::addParameter);
+        b.addCode(listenerLoopAndCall(
+            parameters.values().stream().map(CodeBlock::of).collect(
+                CodeBlockUtil.joining(
+                    CodeBlock.of("l.$L(", callName),
+                    CodeBlock.of(", "),
+                    CodeBlock.of(")")
+                )
+            )
+        ));
+        return b.build();
+    }
+
+    private ImmutableList<MethodSpec> generateListenerMethods() {
+        return ImmutableList.of(
+            listenerMethod(ReservedNames.LISTENERS_BEFORE_CALL, "beforeCall",
+                ImmutableMap.of(
+                    Method.class, "commandMethod",
+                    CommandParameters.class, "parameters"
+                )),
+            listenerMethod(ReservedNames.LISTENERS_AFTER_CALL, "afterCall",
+                ImmutableMap.of(
+                    Method.class, "commandMethod",
+                    CommandParameters.class, "parameters"
+                )),
+            listenerMethod(ReservedNames.LISTENERS_AFTER_THROW, "afterThrow",
+                ImmutableMap.of(
+                    Method.class, "commandMethod",
+                    CommandParameters.class, "parameters",
+                    Throwable.class, "error"
+                ))
+        );
     }
 
     private MethodSpec generateConstructor() {
@@ -336,8 +382,8 @@ class CommandRegistrationGenerator {
         body.add(CodeBlockUtil.scopeCommandMethod(commandInfo.getCommandMethod(), "cmdMethod"));
 
         // call beforeCall
-        body.addStatement("$L.forEach(l -> l.beforeCall($L, $L))",
-            ReservedNames.LISTENERS, "cmdMethod", ReservedNames.PARAMETERS);
+        body.addStatement("$L($L, $L)",
+            ReservedNames.LISTENERS_BEFORE_CALL, "cmdMethod", ReservedNames.PARAMETERS);
 
         // open up a `try` for calling after* listeners
         body.beginControlFlow("try");
@@ -355,15 +401,15 @@ class CommandRegistrationGenerator {
         }
 
         // call afterCall
-        body.addStatement("$L.forEach(l -> l.afterCall($L, $L))",
-            ReservedNames.LISTENERS, "cmdMethod", ReservedNames.PARAMETERS)
+        body.addStatement("$L($L, $L)",
+            ReservedNames.LISTENERS_AFTER_CALL, "cmdMethod", ReservedNames.PARAMETERS)
             .addStatement("return result");
 
         body.nextControlFlow("catch ($T t)", Throwable.class);
 
         // call afterThrow & re-throw
-        body.addStatement("$L.forEach(l -> l.afterThrow($L, $L, $L))",
-            ReservedNames.LISTENERS, "cmdMethod", ReservedNames.PARAMETERS, "t")
+        body.addStatement("$L($L, $L, $L)",
+            ReservedNames.LISTENERS_AFTER_THROW, "cmdMethod", ReservedNames.PARAMETERS, "t")
             .addStatement("throw t");
 
         body.endControlFlow();
