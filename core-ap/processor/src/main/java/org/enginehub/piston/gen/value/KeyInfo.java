@@ -20,10 +20,22 @@
 package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import org.enginehub.piston.gen.util.CodeBlockUtil;
 
 import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @AutoValue
 public abstract class KeyInfo {
@@ -37,7 +49,70 @@ public abstract class KeyInfo {
 
     public abstract TypeName typeName();
 
+    public final TypeName wrappedTypeName(Class<?> wrapper) {
+        return ParameterizedTypeName.get(ClassName.get(wrapper), typeName());
+    }
+
     @Nullable
     public abstract AnnotationSpec annotationSpec();
+
+    public final CodeBlock keyMaker() {
+        CodeBlock typeArgument = getTypeArgumentCode();
+        CodeBlock annotationArgumentCode = getAnnotationArgumentCode();
+
+        return Stream.of(typeArgument, annotationArgumentCode)
+            .filter(Objects::nonNull)
+            .collect(CodeBlockUtil.joining(
+                CodeBlock.of("$T.get(", Key.class),
+                CodeBlock.of(","),
+                CodeBlock.of(")")
+            ));
+    }
+
+    private CodeBlock getTypeArgumentCode() {
+        if (typeName() instanceof ClassName) {
+            return CodeBlock.of("$T.class", typeName());
+        }
+        return CodeBlock.of("$L", TypeSpec.anonymousClassBuilder("")
+            .superclass(wrappedTypeName(TypeLiteral.class))
+            .build());
+    }
+
+    @Nullable
+    private CodeBlock getAnnotationArgumentCode() {
+        AnnotationSpec spec = annotationSpec();
+        if (spec == null) {
+            return null;
+        }
+        if (spec.members.isEmpty()) {
+            return CodeBlock.of("$T.class", spec.type);
+        }
+        return runtimeAnnotationExtractor(spec);
+    }
+
+    private CodeBlock runtimeAnnotationExtractor(AnnotationSpec annotationSpec) {
+        // _technically_ the spec can only be applied to parameters
+        // so we'll whip up a fake inner method with the annotation
+        // and at runtime, reflect out the instance
+        TypeSpec annoExtractor = TypeSpec.anonymousClassBuilder("")
+            // `a` = "annotation", extracts the annotation from its own parameter `ah`
+            .addMethod(MethodSpec.methodBuilder("a")
+                .returns(Annotation.class)
+                // `ah` = "annotation holder", holds the annotation on this parameter
+                .addParameter(ParameterSpec.builder(Object.class, "ah")
+                    .addAnnotation(annotationSpec)
+                    .build())
+                .addStatement(
+                    // from this class
+                    "return getClass()" +
+                        // retrieve this method (there's only one)
+                        ".getDeclaredMethods()[0]" +
+                        // and get its first parameter's first annotation (again, only one)
+                        ".getParameterAnnotations()[0][0]")
+                .build())
+            .build();
+        // call the method with a null parameter, since it doesn't really matter
+        return CodeBlock.of("$L.a(null)", annoExtractor);
+    }
 
 }
