@@ -226,7 +226,13 @@ public class CommandManagerImpl implements CommandManager {
     // stored only by injectValue, with matching T, so this is safe
     @SuppressWarnings("unchecked")
     public <T> Optional<T> injectedValue(Key<T> key) {
-        return (Optional<T>) injectedValues.get(key).value(this);
+        lock.readLock().lock();
+        try {
+            return (Optional<T>) Optional.ofNullable(injectedValues.get(key))
+                .flatMap(v -> v.value(this));
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override

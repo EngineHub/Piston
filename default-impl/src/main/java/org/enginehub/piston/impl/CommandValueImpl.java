@@ -90,8 +90,8 @@ abstract class CommandValueImpl implements CommandValue {
             Collection<T> convert = converter.get().convert(value, injectedValues());
             if (convert == null) {
                 throw new UsageException(String.format(
-                    "Invalid value for %s, acceptable values are '%s'",
-                    partContext().getDescription(),
+                    "Invalid value for %s, acceptable values are %s",
+                    partContext().getTextRepresentation(),
                     converter.get().describeAcceptableArguments()),
                     commandContext());
             }
