@@ -40,7 +40,6 @@ import org.enginehub.piston.exception.UsageException;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.inject.MemoizingValueAccess;
-import org.enginehub.piston.inject.MergedValueAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandArgument;
@@ -48,7 +47,6 @@ import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
-import org.enginehub.piston.util.ValueProvider;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -63,7 +61,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 public class CommandManagerImpl implements CommandManager {
@@ -136,7 +133,6 @@ public class CommandManagerImpl implements CommandManager {
     private final LoadingCache<Command, CommandParseCache> commandCache = CacheBuilder.newBuilder()
         .softValues()
         .build(CacheLoader.from(CommandManagerImpl::cacheCommand));
-    private final Map<Key<?>, ValueProvider<InjectedValueAccess, ?>> injectedValues = new HashMap<>();
     private final Map<Key<?>, ArgumentConverter<?>> converters = new HashMap<>();
 
     public CommandManagerImpl() {
@@ -211,31 +207,6 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
-    public <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> supplier) {
-        checkNotNull(key, "key cannot be null");
-        checkNotNull(supplier, "supplier cannot be null");
-        lock.writeLock().lock();
-        try {
-            injectedValues.put(key, supplier);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    @Override
-    // stored only by injectValue, with matching T, so this is safe
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
-        lock.readLock().lock();
-        try {
-            return (Optional<T>) Optional.ofNullable(injectedValues.get(key))
-                .flatMap(v -> v.value(context));
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    @Override
     public Stream<Command> getAllCommands() {
         ImmutableList<Command> allCommands;
         lock.readLock().lock();
@@ -266,12 +237,9 @@ public class CommandManagerImpl implements CommandManager {
             if (command == null) {
                 throw new NoSuchCommandException(name);
             }
-            // order given context first, then resolve manager values
-            // cache all values
-            InjectedValueAccess fullContext = MemoizingValueAccess.wrap(
-                MergedValueAccess.of(context, this)
-            );
-            return executeSubCommand(name, command, fullContext, args.subList(1, args.size()));
+            // cache if needed
+            InjectedValueAccess cachedContext = MemoizingValueAccess.wrap(context);
+            return executeSubCommand(name, command, cachedContext, args.subList(1, args.size()));
         } finally {
             lock.readLock().unlock();
         }

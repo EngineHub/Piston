@@ -21,7 +21,6 @@ package org.enginehub.piston;
 
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.inject.InjectedValueAccess;
-import org.enginehub.piston.inject.InjectedValueStore;
 import org.enginehub.piston.inject.Key;
 
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * Responsible for holding all commands, as well as parsing and dispatching from user input.
  */
-public interface CommandManager extends InjectedValueStore {
+public interface CommandManager {
 
     /**
      * Create a new command builder, using the default implementation of this manager.

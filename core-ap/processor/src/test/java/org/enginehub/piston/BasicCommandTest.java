@@ -20,6 +20,7 @@
 package org.enginehub.piston;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
 import org.enginehub.piston.commands.NoArgCommand;
 import org.enginehub.piston.commands.NoArgCommandRegistration;
 import org.enginehub.piston.commands.NoArgWithInjectedCommand;
@@ -30,6 +31,7 @@ import org.enginehub.piston.commands.SingleOptionalArgCommand;
 import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
+import org.enginehub.piston.inject.MapBackedValueStore;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -40,14 +42,14 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 class BasicCommandTest {
 
-    private <CMD> void testCommand(TestCommandConfig<CMD> config) {
+    private <CMD> void testCommand(TestCommandConfig<CMD> config, InjectedValueAccess context) {
         CMD mock = mock(config.getCmdClass());
         CommandManager manager = DefaultCommandManagerService.getInstance().newCommandManager();
         Optional.ofNullable(config.getManagerSetup())
             .ifPresent(setup -> setup.accept(manager));
         config.getRegistration().accept(manager, mock);
         manager.execute(
-            InjectedValueAccess.EMPTY,
+            context,
             Splitter.on(' ').splitToList(config.getCommandLine())
         );
         config.getVerification().accept(mock);
@@ -61,7 +63,8 @@ class BasicCommandTest {
                 NoArgCommand.class,
                 TestCommandConfig.ezRegister(NoArgCommandRegistration.builder()),
                 cmd -> verify(cmd).noArg())
-                .setCommandLine("no-arg")
+                .setCommandLine("no-arg"),
+            InjectedValueAccess.EMPTY
         );
     }
 
@@ -73,10 +76,10 @@ class BasicCommandTest {
                 NoArgWithInjectedCommand.class,
                 TestCommandConfig.ezRegister(NoArgWithInjectedCommandRegistration.builder()),
                 cmd -> verify(cmd).noArg(injected))
-                .setCommandLine("no-arg-injected")
-                .setManagerSetup(commandManager -> commandManager.injectValue(
-                    Key.of(String.class), access -> Optional.of(injected)
-                ))
+                .setCommandLine("no-arg-injected"),
+            MapBackedValueStore.create(ImmutableMap.of(
+                Key.of(String.class), access -> Optional.of(injected)
+            ))
         );
     }
 
@@ -88,7 +91,8 @@ class BasicCommandTest {
                 SingleArgCommand.class,
                 TestCommandConfig.ezRegister(SingleArgCommandRegistration.builder()),
                 cmd -> verify(cmd).singleArg(testString))
-                .setCommandLine("single-arg " + testString)
+                .setCommandLine("single-arg " + testString),
+            InjectedValueAccess.EMPTY
         );
     }
 
@@ -100,14 +104,16 @@ class BasicCommandTest {
                 SingleOptionalArgCommand.class,
                 TestCommandConfig.ezRegister(SingleOptionalArgCommandRegistration.builder()),
                 cmd -> verify(cmd).singleArg(null))
-                .setCommandLine("single-arg-opt")
+                .setCommandLine("single-arg-opt"),
+            InjectedValueAccess.EMPTY
         );
         testCommand(
             new TestCommandConfig<>(
                 SingleOptionalArgCommand.class,
                 TestCommandConfig.ezRegister(SingleOptionalArgCommandRegistration.builder()),
                 cmd -> verify(cmd).singleArg(testString))
-                .setCommandLine("single-arg-opt " + testString)
+                .setCommandLine("single-arg-opt " + testString),
+            InjectedValueAccess.EMPTY
         );
     }
 }

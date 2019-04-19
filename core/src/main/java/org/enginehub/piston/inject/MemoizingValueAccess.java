@@ -19,7 +19,9 @@
 
 package org.enginehub.piston.inject;
 
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import org.enginehub.piston.util.ValueProvider;
+
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,10 +31,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class MemoizingValueAccess implements InjectedValueAccess {
 
     public static MemoizingValueAccess wrap(InjectedValueAccess delegate) {
+        if (delegate instanceof MemoizingValueAccess) {
+            return (MemoizingValueAccess) delegate;
+        }
         return new MemoizingValueAccess(delegate);
     }
 
-    private final Map<Key<?>, Optional<?>> memory = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Key<?>, Optional<?>> memory = new ConcurrentHashMap<>();
     private final InjectedValueAccess delegate;
 
     private MemoizingValueAccess(InjectedValueAccess delegate) {
@@ -40,13 +45,13 @@ public final class MemoizingValueAccess implements InjectedValueAccess {
     }
 
     /**
-     * Get an injected value, but only if it is currently memoized.
-     *
-     * @return the value, or {@link Optional#empty()} if not provided and memoized
+     * Snapshot the current memory for reading.
      */
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> injectedValueIfMemoized(Key<T> key) {
-        return (Optional<T>) memory.getOrDefault(key, Optional.empty());
+    public InjectedValueAccess snapshotMemory() {
+        ImmutableMap.Builder<Key<?>, ValueProvider<InjectedValueAccess, ?>> snapshot
+            = ImmutableMap.builder();
+        memory.forEach((k, v) -> snapshot.put(k, ValueProvider.constant(v.orElse(null))));
+        return MapBackedValueStore.create(snapshot.build());
     }
 
     @Override
