@@ -19,10 +19,6 @@
 
 package org.enginehub.piston.converter;
 
-import org.enginehub.piston.inject.InjectedValueAccess;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,21 +28,7 @@ import java.util.List;
  *
  * @param <T> the type of the result
  */
-public interface ArgumentConverter<T> {
-
-    /**
-     * Converts the argument input to a collection of argument values.
-     *
-     * <p>
-     * If it can't be converted, return {@code null}.
-     * </p>
-     *
-     * @param argument the argument input to convert
-     * @param context the context to convert in
-     * @return the argument values
-     */
-    @Nullable
-    Collection<T> convert(String argument, InjectedValueAccess context);
+public interface ArgumentConverter<T> extends Converter<T> {
 
     /**
      * Describe the arguments that can be provided to this converter.

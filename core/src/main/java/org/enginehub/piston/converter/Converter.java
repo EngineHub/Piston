@@ -17,29 +17,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.inject;
+package org.enginehub.piston.converter;
 
-import org.enginehub.piston.util.ValueProvider;
-
-import java.util.Optional;
+import org.enginehub.piston.inject.InjectedValueAccess;
 
 /**
- * Forwards all calls to the delegate.
+ * Simplified interface to {@link ArgumentConverter}. Only contains the conversion.
  */
-public class ForwardingValueStore implements InjectedValueStore {
-    protected final InjectedValueStore delegate;
+@FunctionalInterface
+public interface Converter<T> {
 
-    public ForwardingValueStore(InjectedValueStore delegate) {
-        this.delegate = delegate;
-    }
+    /**
+     * Converts the argument input to a collection of argument values.
+     *
+     * @param argument the argument input to convert
+     * @param context the context to convert in
+     * @return the result of attempting to convert the argument
+     */
+    ConversionResult<T> convert(String argument, InjectedValueAccess context);
 
-    @Override
-    public <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider) {
-        delegate.injectValue(key, provider);
-    }
-
-    @Override
-    public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
-        return delegate.injectedValue(key, context);
-    }
 }

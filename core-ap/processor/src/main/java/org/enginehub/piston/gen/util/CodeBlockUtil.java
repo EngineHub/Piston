@@ -22,6 +22,7 @@ package org.enginehub.piston.gen.util;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
+import org.enginehub.piston.internal.RegistrationUtil;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.ExecutableElement;
@@ -31,16 +32,17 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.enginehub.piston.gen.value.ReservedNames.GET_COMMAND_METHOD;
 
 public class CodeBlockUtil {
 
     public static CodeBlock scopeCommandMethod(ExecutableElement method, String varName) {
         return CodeBlock.builder()
             .addStatement(
-                "$T $L = $L($S$L)",
+                "$T $L = $T.getCommandMethod($T.class, $S$L)",
                 Method.class, varName,
-                GET_COMMAND_METHOD, method.getSimpleName().toString(),
+                RegistrationUtil.class,
+                TypeName.get(method.getEnclosingElement().asType()),
+                method.getSimpleName().toString(),
                 method.getParameters().stream()
                     .map(param -> TypeName.get(param.asType()))
                     .map(type -> CodeBlock.of("$T.class", type))

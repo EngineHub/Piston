@@ -22,6 +22,8 @@ package org.enginehub.piston;
 import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.inject.Key;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -81,6 +83,7 @@ public interface CommandValue {
      * @see #asString()
      * @see #asSingle(Key)
      */
+    @Nullable
     default <T> T asSingle(Class<T> key) {
         return asSingle(Key.of(key));
     }
@@ -95,8 +98,13 @@ public interface CommandValue {
      * @throws IllegalStateException if not exactly one value is present
      * @see #asString()
      */
+    @Nullable
     default <T> T asSingle(Key<T> key) {
         ImmutableList<T> values = asMultiple(key);
+        if (values.size() == 0 && asStrings().size() > 0) {
+            // special case -- this means that all values were "null", so use null here
+            return null;
+        }
         checkState(values.size() > 0, "No value present");
         checkState(values.size() == 1, "Too many values present");
         return values.get(0);

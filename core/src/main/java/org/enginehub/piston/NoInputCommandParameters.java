@@ -20,13 +20,12 @@
 package org.enginehub.piston;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableMap;
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -44,7 +43,7 @@ public abstract class NoInputCommandParameters implements CommandParameters {
     @AutoValue.Builder
     public interface Builder {
 
-        Builder injectedValues(Map<Key<?>, Object> values);
+        Builder injectedValues(InjectedValueAccess values);
 
         Builder metadata(@Nullable CommandMetadata metadata);
 
@@ -54,7 +53,7 @@ public abstract class NoInputCommandParameters implements CommandParameters {
     NoInputCommandParameters() {
     }
 
-    abstract ImmutableMap<Key<?>, Object> injectedValues();
+    abstract InjectedValueAccess injectedValues();
 
     @Nullable
     abstract CommandMetadata metadata();
@@ -76,9 +75,7 @@ public abstract class NoInputCommandParameters implements CommandParameters {
     }
 
     @Override
-    public <T> Optional<T> injectedValue(Key<T> key) {
-        @SuppressWarnings("unchecked")
-        T value = (T) injectedValues().get(key);
-        return Optional.ofNullable(value);
+    public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
+        return injectedValues().injectedValue(key, context);
     }
 }

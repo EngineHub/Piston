@@ -40,5 +40,24 @@ public interface InjectedValueAccess {
      * @return the value, or {@link Optional#empty()} if not provided
      * @see InjectedValueStore#injectValue(Key, ValueProvider)
      */
-    <T> Optional<T> injectedValue(Key<T> key);
+    default <T> Optional<T> injectedValue(Key<T> key) {
+        return injectedValue(key, this);
+    }
+
+    /**
+     * Get an injected value, resolving other injected values under the given context.
+     *
+     * <p>
+     * Provide value injectors to a {@linkplain InjectedValueStore store}.
+     * </p>
+     *
+     * <p>
+     * This alternative to {@link #injectedValue(Key)} is provided mostly for
+     * wrapping classes to function properly.
+     * </p>
+     *
+     * @return the value, or {@link Optional#empty()} if not provided
+     * @see InjectedValueStore#injectValue(Key, ValueProvider)
+     */
+    <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess access);
 }

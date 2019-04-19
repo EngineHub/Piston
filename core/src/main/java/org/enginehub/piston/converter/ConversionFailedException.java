@@ -17,29 +17,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.inject;
+package org.enginehub.piston.converter;
 
-import org.enginehub.piston.util.ValueProvider;
+import java.util.Collection;
 
-import java.util.Optional;
-
-/**
- * Forwards all calls to the delegate.
- */
-public class ForwardingValueStore implements InjectedValueStore {
-    protected final InjectedValueStore delegate;
-
-    public ForwardingValueStore(InjectedValueStore delegate) {
-        this.delegate = delegate;
-    }
-
-    @Override
-    public <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider) {
-        delegate.injectValue(key, provider);
-    }
-
-    @Override
-    public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
-        return delegate.injectedValue(key, context);
+public class ConversionFailedException extends RuntimeException {
+    public ConversionFailedException(Throwable primaryCause, Collection<? extends Throwable> otherCauses) {
+        super("Conversion failed, reasons added in cause + suppressed exceptions", primaryCause);
+        otherCauses.forEach(this::addSuppressed);
     }
 }

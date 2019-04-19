@@ -31,10 +31,8 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import java.lang.reflect.Method;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
-import static org.enginehub.piston.gen.value.ReservedNames.GET_COMMAND_METHOD;
 
 class ConditionGenerator {
     private final AnnotationMirror conditionMirror;

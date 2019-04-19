@@ -25,7 +25,6 @@ import com.google.common.reflect.TypeToken;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.util.CaseHelper;
 
-import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaConversionException;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
@@ -34,10 +33,11 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.invoke.MethodHandles.catchException;
 import static java.lang.invoke.MethodHandles.dropArguments;
+import static java.lang.invoke.MethodHandles.filterReturnValue;
 import static java.lang.invoke.MethodType.methodType;
 
 /**
@@ -46,7 +46,7 @@ import static java.lang.invoke.MethodType.methodType;
 public class ArgumentConverters {
 
     private static final ArgumentConverter<String> STRING_ARGUMENT_CONVERTER =
-        SimpleArgumentConverter.fromSingle((s, c) -> s, "any text");
+        SimpleArgumentConverter.from((s, c) -> SuccessfulConversion.fromSingle(s), "any text");
 
     public static ArgumentConverter<String> forString() {
         return STRING_ARGUMENT_CONVERTER;
@@ -99,28 +99,27 @@ public class ArgumentConverters {
         return dropArguments(noContextHandle, 1, InjectedValueAccess.class);
     }
 
-    private static final String BI_FUNCTION_APPLY = "apply";
-    private static final MethodType HANDLE_TO_BI_FUNCTION = methodType(BiFunction.class, MethodHandle.class);
-    private static final MethodType BI_FUNCTION_RAW_SIG = methodType(Object.class, Object.class, Object.class);
-    private static final MethodType BI_FUNCTION_SIG = methodType(Object.class, String.class, InjectedValueAccess.class);
+    private static final String CONVERTER_CONVERT = "convert";
+    private static final MethodType HANDLE_TO_CONVERTER = methodType(Converter.class, MethodHandle.class);
+    private static final MethodType CONVERTER_SIG = methodType(ConversionResult.class, String.class, InjectedValueAccess.class);
 
-    private static final MethodHandle HANDLE_TO_BI_FUNCTION_CONVERTER;
+    private static final MethodHandle HANDLE_TO_CONVERTER_CONVERTER;
 
     static {
-        MethodHandle handleInvoker = MethodHandles.invoker(BI_FUNCTION_SIG);
+        MethodHandle handleInvoker = MethodHandles.invoker(CONVERTER_SIG);
         try {
-            HANDLE_TO_BI_FUNCTION_CONVERTER = LambdaMetafactory.metafactory(
+            HANDLE_TO_CONVERTER_CONVERTER = LambdaMetafactory.metafactory(
                 MethodHandles.lookup(),
-                // Implementing BiFunction.apply
-                BI_FUNCTION_APPLY,
-                // Take a handle, to be converter to BiFunction
-                HANDLE_TO_BI_FUNCTION,
+                // Implementing Converter.convert
+                CONVERTER_CONVERT,
+                // Take a handle, to be converter to Converter
+                HANDLE_TO_CONVERTER,
                 // Raw signature for SAM type
-                BI_FUNCTION_RAW_SIG,
+                CONVERTER_SIG,
                 // Handle to call the captured handle.
                 handleInvoker,
                 // Actual signature at invoke time
-                BI_FUNCTION_SIG
+                CONVERTER_SIG
             ).dynamicInvoker();
         } catch (LambdaConversionException e) {
             throw new IllegalStateException("Failed to load ArgumentConverter MetaFactory", e);
@@ -134,18 +133,49 @@ public class ArgumentConverters {
                 && mType.parameterType(1).isAssignableFrom(InjectedValueAccess.class)
                 && type.isAssignableFrom(mType.returnType()),
             "Incorrect signature: %s", handle);
-        BiFunction<String, InjectedValueAccess, T> biFunction;
+
+        handle = augmentHandleForConversionResult(handle);
+
+        Converter<T> converter;
         try {
-            biFunction = (BiFunction<String, InjectedValueAccess, T>)
-                HANDLE_TO_BI_FUNCTION_CONVERTER.invokeExact(handle);
+            converter = (Converter<T>) HANDLE_TO_CONVERTER_CONVERTER.invokeExact(handle);
         } catch (Throwable throwable) {
             Throwables.throwIfUnchecked(throwable);
             throw new RuntimeException(throwable);
         }
-        return SimpleArgumentConverter.fromSingle(
-            biFunction,
+        return SimpleArgumentConverter.from(
+            converter,
             "any " + CaseHelper.titleToSpacedLower(type.getSimpleName())
         );
+    }
+
+    private static final MethodHandle SUCCESSFUL_CONVERSION_FROM;
+    private static final MethodHandle FAILED_CONVERSION_FROM;
+
+    static {
+        try {
+            SUCCESSFUL_CONVERSION_FROM = MethodHandles.lookup()
+                .findStatic(SuccessfulConversion.class, "fromSingle",
+                    methodType(SuccessfulConversion.class, Object.class));
+            FAILED_CONVERSION_FROM = MethodHandles.lookup()
+                .findStatic(FailedConversion.class, "from",
+                    methodType(FailedConversion.class, Throwable.class));
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Wrap the handle to return the result using {@link ConversionResult}.
+     */
+    private static MethodHandle augmentHandleForConversionResult(MethodHandle delegate) {
+        // wrap the return value using `fromSingle(T)`
+        MethodHandle result = filterReturnValue(delegate,
+            SUCCESSFUL_CONVERSION_FROM.asType(methodType(ConversionResult.class, delegate.type().returnType())));
+        // wrap the exceptions using `from(Throwable)`
+        result = catchException(result, Throwable.class,
+            FAILED_CONVERSION_FROM.asType(methodType(ConversionResult.class, Throwable.class)));
+        return result;
     }
 
     private interface ACProvider<T> {
@@ -157,8 +187,8 @@ public class ArgumentConverters {
         ArgumentConverters::constructorConverters,
         type -> {
             if (Objects.equals(type.wrap().getRawType(), Character.class)) {
-                return Optional.of(SimpleArgumentConverter.fromSingle(
-                    (s, c) -> s.charAt(0),
+                return Optional.of(SimpleArgumentConverter.from(
+                    (s, c) -> SuccessfulConversion.fromSingle(s.charAt(0)),
                     "any character"
                 ));
             }

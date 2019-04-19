@@ -95,8 +95,7 @@ abstract class CommandParametersImpl implements CommandParameters {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public final <T> Optional<T> injectedValue(Key<T> key) {
-        return injectedValues().injectedValue(key);
+    public final <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
+        return injectedValues().injectedValue(key, context);
     }
 }

@@ -49,9 +49,9 @@ public final class MergedValueAccess implements InjectedValueAccess {
     }
 
     @Override
-    public <T> Optional<T> injectedValue(Key<T> key) {
+    public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
         return delegates.stream()
-            .map(access -> access.injectedValue(key))
+            .map(access -> access.injectedValue(key, context))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst();

@@ -21,8 +21,6 @@ package org.enginehub.piston.converter;
 
 import org.enginehub.piston.inject.InjectedValueAccess;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.List;
 
 public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
@@ -34,8 +32,7 @@ public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    @Nullable
-    public Collection<T> convert(String argument, InjectedValueAccess context) {
+    public ConversionResult<T> convert(String argument, InjectedValueAccess context) {
         return delegate.convert(argument, context);
     }
 

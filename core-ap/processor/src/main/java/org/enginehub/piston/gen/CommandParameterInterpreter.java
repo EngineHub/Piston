@@ -35,6 +35,7 @@ import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.ExtractSpec;
 import org.enginehub.piston.gen.value.ReservedNames;
 import org.enginehub.piston.inject.InjectAnnotation;
+import org.enginehub.piston.internal.RegistrationUtil;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandParts;
@@ -184,11 +185,16 @@ class CommandParameterInterpreter {
             .extractSpec(ExtractSpec.builder()
                 .name(parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(var -> CodeBlock.builder()
-                    .addStatement("return requireOptional($L.injectedValue($L), $S)",
-                        ReservedNames.PARAMETERS, asKeyType(parameter),
-                        parameter.getSimpleName())
-                    .build())
+                .extractMethodBody(var -> {
+                    CodeBlock paramKey = asKeyType(parameter);
+                    return CodeBlock.builder()
+                        .addStatement("return $T.requireOptional($L, $S, $L.injectedValue($L))",
+                            RegistrationUtil.class,
+                            paramKey,
+                            parameter.getSimpleName(),
+                            ReservedNames.PARAMETERS, paramKey)
+                        .build();
+                })
                 .build())
             .build();
     }

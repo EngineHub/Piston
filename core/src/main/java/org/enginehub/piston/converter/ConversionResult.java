@@ -21,33 +21,37 @@ package org.enginehub.piston.converter;
 
 import org.enginehub.piston.inject.InjectedValueAccess;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**
- * Argument converter that supports working without a context.
+ * Represents the result of {@link ArgumentConverter#convert(String, InjectedValueAccess)}.
  *
- * @param <T> the type of the result
+ * <p>
+ * This either wraps the result, or contains errors explaining why it didn't match.
+ * </p>
  */
-public interface NoContextArgumentConverter<T> extends ArgumentConverter<T> {
+public abstract class ConversionResult<T> {
+
+    ConversionResult() {
+    }
+
+    public abstract boolean isSuccessful();
 
     /**
-     * Converts the argument input to a collection of argument values.
-     *
-     * <p>
-     * If it can't be converted, return {@code null}.
-     * </p>
-     *
-     * @param argument the argument input to convert
-     * @return the argument values
+     * Pick the successful result, or merge the errors of the two unsuccessful results.
      */
-    @Nullable
-    Collection<T> convert(String argument);
+    public abstract ConversionResult<T> orElse(ConversionResult<T> result);
 
-    @Nullable
-    @Override
-    default Collection<T> convert(String argument, InjectedValueAccess context) {
-        return convert(argument);
+    public final Collection<T> orElse(Collection<T> other) {
+        if (isSuccessful()) {
+            return get();
+        }
+        return other;
     }
+
+    /**
+     * Get the result, or throw an exception with all collected errors.
+     */
+    public abstract Collection<T> get();
 
 }

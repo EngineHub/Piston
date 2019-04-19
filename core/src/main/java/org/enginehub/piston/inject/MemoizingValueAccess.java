@@ -51,7 +51,7 @@ public final class MemoizingValueAccess implements InjectedValueAccess {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> injectedValue(Key<T> key) {
-        return (Optional<T>) memory.computeIfAbsent(key, delegate::injectedValue);
+    public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
+        return (Optional<T>) memory.computeIfAbsent(key, k -> delegate.injectedValue(k, context));
     }
 }

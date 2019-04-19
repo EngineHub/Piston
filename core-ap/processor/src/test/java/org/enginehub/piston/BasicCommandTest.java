@@ -99,7 +99,7 @@ class BasicCommandTest {
             new TestCommandConfig<>(
                 SingleOptionalArgCommand.class,
                 TestCommandConfig.ezRegister(SingleOptionalArgCommandRegistration.builder()),
-                cmd -> verify(cmd).singleArg(""))
+                cmd -> verify(cmd).singleArg(null))
                 .setCommandLine("single-arg-opt")
         );
         testCommand(

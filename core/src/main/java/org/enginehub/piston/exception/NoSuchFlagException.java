@@ -33,9 +33,15 @@ public class NoSuchFlagException extends UsageException {
             .collect(joining());
     }
 
+    private final char requestedFlag;
+
     public NoSuchFlagException(Command command, char requestedFlag) {
         super("Flag '" + requestedFlag + "' is not a valid flag for "
             + command.getName() + ". Options: " + getAllFlags(command), command);
+        this.requestedFlag = requestedFlag;
     }
 
+    public char getRequestedFlag() {
+        return requestedFlag;
+    }
 }

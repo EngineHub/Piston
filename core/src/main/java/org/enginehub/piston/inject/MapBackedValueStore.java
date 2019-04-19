@@ -51,8 +51,8 @@ public final class MapBackedValueStore implements InjectedValueStore {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> injectedValue(Key<T> key) {
+    public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
         ValueProvider<InjectedValueAccess, T> provider = (ValueProvider<InjectedValueAccess, T>) providers.get(key);
-        return Optional.ofNullable(provider).flatMap(p -> p.value(this));
+        return Optional.ofNullable(provider).flatMap(p -> p.value(context));
     }
 }

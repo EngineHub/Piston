@@ -125,7 +125,7 @@ public abstract class Key<T> {
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this)
+        return MoreObjects.toStringHelper(Key.class)
             .add("type", getTypeToken())
             .add("annotationWrapper", getAnnotationWrapper())
             .toString();
