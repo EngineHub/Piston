@@ -46,6 +46,11 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
     }
 
     @Override
+    public <U> ConversionResult<U> failureAsAny() {
+        throw new IllegalStateException("This is not a failed conversion result.");
+    }
+
+    @Override
     public ConversionResult<T> orElse(ConversionResult<T> result) {
         return this;
     }

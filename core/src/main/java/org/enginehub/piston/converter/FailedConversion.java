@@ -52,6 +52,13 @@ public final class FailedConversion<T> extends ConversionResult<T> {
     }
 
     @Override
+    // we contain no T, so this is safe
+    @SuppressWarnings("unchecked")
+    public <U> ConversionResult<U> failureAsAny() {
+        return (FailedConversion<U>) this;
+    }
+
+    @Override
     public ConversionResult<T> orElse(ConversionResult<T> result) {
         return result.isSuccessful()
             ? result

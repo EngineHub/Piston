@@ -38,6 +38,16 @@ public abstract class ConversionResult<T> {
     public abstract boolean isSuccessful();
 
     /**
+     * If this result is a failure, recast as a different result type.
+     *
+     * <p>
+     * This is useful for result collectors, where the result is a different
+     * type than the inputs.
+     * </p>
+     */
+    public abstract <U> ConversionResult<U> failureAsAny();
+
+    /**
      * Pick the successful result, or merge the errors of the two unsuccessful results.
      */
     public abstract ConversionResult<T> orElse(ConversionResult<T> result);
