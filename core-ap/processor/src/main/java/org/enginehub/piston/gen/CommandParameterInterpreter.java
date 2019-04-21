@@ -27,6 +27,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import org.enginehub.piston.CommandParameters;
+import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.annotation.param.Arg;
 import org.enginehub.piston.annotation.param.ArgFlag;
 import org.enginehub.piston.annotation.param.Switch;
@@ -42,11 +43,13 @@ import org.enginehub.piston.part.CommandParts;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.util.CaseHelper;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +71,11 @@ class CommandParameterInterpreter {
 
     }
 
+    private static boolean isUnconverted(ProcessingEnvironment env, VariableElement parameter) {
+        TypeMirror commandValue = env.getElementUtils().getTypeElement(CommandValue.class.getCanonicalName()).asType();
+        return env.getTypeUtils().isAssignable(parameter.asType(), commandValue);
+    }
+
     private final Map<Class<? extends Annotation>, ParamTransform> ANNOTATION_TRANSFORMS = ImmutableMap.of(
         Arg.class, this::argTransform,
         ArgFlag.class, this::argFlagTransform,
@@ -75,10 +83,14 @@ class CommandParameterInterpreter {
     );
     private final ExecutableElement method;
     private final GenerationSupport generationSupport;
+    private final ProcessingEnvironment env;
 
-    CommandParameterInterpreter(ExecutableElement method, GenerationSupport generationSupport) {
+    CommandParameterInterpreter(ExecutableElement method,
+                                GenerationSupport generationSupport,
+                                ProcessingEnvironment env) {
         this.method = method;
         this.generationSupport = generationSupport;
+        this.env = env;
     }
 
     private MethodSpec.Builder extractSpec(VariableElement param, String name) {
@@ -109,14 +121,7 @@ class CommandParameterInterpreter {
                         ".build()",
                     CommandParts.class, name, desc,
                     stringListForGen(defaults.stream())))
-            .extractSpec(ExtractSpec.builder()
-                .name(parameter.getSimpleName().toString())
-                .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(var -> CodeBlock.builder()
-                    .addStatement("return $L.value($L).asSingle($L)",
-                        var, ReservedNames.PARAMETERS, asKeyType(parameter))
-                    .build())
-                .build())
+            .extractSpec(getArgExtractSpec(parameter))
             .build();
     }
 
@@ -143,14 +148,25 @@ class CommandParameterInterpreter {
                 CommandParts.class, name, desc,
                 argName,
                 stringListForGen(defaults.stream())))
-            .extractSpec(ExtractSpec.builder()
-                .name(parameter.getSimpleName().toString())
-                .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(var -> CodeBlock.builder()
-                    .addStatement("return $L.value($L).asSingle($L)",
-                        var, ReservedNames.PARAMETERS, asKeyType(parameter))
-                    .build())
-                .build())
+            .extractSpec(getArgExtractSpec(parameter))
+            .build();
+    }
+
+    private ExtractSpec getArgExtractSpec(VariableElement parameter) {
+        return ExtractSpec.builder()
+            .name(parameter.getSimpleName().toString())
+            .type(TypeName.get(parameter.asType()))
+            .extractMethodBody(var -> {
+                CodeBlock.Builder builder = CodeBlock.builder();
+                if (isUnconverted(env, parameter)) {
+                    builder.addStatement("return $L.value($L)",
+                        var, ReservedNames.PARAMETERS);
+                } else {
+                    builder.addStatement("return $L.value($L).asSingle($L)",
+                        var, ReservedNames.PARAMETERS, asKeyType(parameter));
+                }
+                return builder.build();
+            })
             .build();
     }
 

@@ -194,7 +194,7 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         if (descFooter.equals("")) {
             descFooter = null;
         }
-        List<CommandParamInfo> params = new CommandParameterInterpreter(method, generationSupport)
+        List<CommandParamInfo> params = new CommandParameterInterpreter(method, generationSupport, processingEnv)
             .getParams();
         return builder
             .commandMethod(method)
