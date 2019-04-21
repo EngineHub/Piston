@@ -53,6 +53,7 @@ import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
@@ -61,6 +62,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getValue;
+import static org.enginehub.piston.gen.util.CodeBlockUtil.listForGen;
 import static org.enginehub.piston.gen.util.CodeBlockUtil.stringListForGen;
 
 class CommandParameterInterpreter {
@@ -111,16 +113,19 @@ class CommandParameterInterpreter {
         }
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
+        CodeBlock.Builder construction = CodeBlock.builder()
+            .add("$T.arg($S, $S)\n" +
+                    ".defaultsTo($L)\n",
+                CommandParts.class, name, desc,
+                stringListForGen(defaults.stream()));
+        if (!isUnconverted(env, parameter)) {
+            construction.add(".ofTypes($L)\n", listForGen(Stream.of(asKeyType(parameter))));
+        }
+        construction.add(".build()");
         return CommandParamInfo.builder()
             .name(parameter.getSimpleName() + "Part")
             .type(TypeName.get(CommandArgument.class))
-            .construction(
-                CodeBlock.of(
-                    "$T.arg($S, $S)\n" +
-                        ".defaultsTo($L)\n" +
-                        ".build()",
-                    CommandParts.class, name, desc,
-                    stringListForGen(defaults.stream())))
+            .construction(construction.build())
             .extractSpec(getArgExtractSpec(parameter))
             .build();
     }
@@ -136,18 +141,22 @@ class CommandParameterInterpreter {
         }
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
+        CodeBlock.Builder construction = CodeBlock.builder()
+            .add("$T.flag('$L', $S)\n" +
+                    ".withRequiredArg()\n" +
+                    ".argNamed($S)\n" +
+                    ".defaultsTo($L)\n",
+                CommandParts.class, name, desc,
+                argName,
+                stringListForGen(defaults.stream()));
+        if (!isUnconverted(env, parameter)) {
+            construction.add(".ofTypes($L)\n", listForGen(Stream.of(asKeyType(parameter))));
+        }
+        construction.add(".build()");
         return CommandParamInfo.builder()
             .name(parameter.getSimpleName() + "Part")
             .type(TypeName.get(ArgAcceptingCommandFlag.class))
-            .construction(CodeBlock.of(
-                "$T.flag('$L', $S)\n" +
-                    ".withRequiredArg()\n" +
-                    ".argNamed($S)\n" +
-                    ".defaultsTo($L)\n" +
-                    ".build()",
-                CommandParts.class, name, desc,
-                argName,
-                stringListForGen(defaults.stream())))
+            .construction(construction.build())
             .extractSpec(getArgExtractSpec(parameter))
             .build();
     }
