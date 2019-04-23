@@ -30,10 +30,15 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.enginehub.piston.gen.util.CodeBlockUtil;
+import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.inject.Key;
+import org.enginehub.piston.util.CaseHelper;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -56,6 +61,39 @@ public abstract class KeyInfo {
     @Nullable
     public abstract AnnotationSpec annotationSpec();
 
+    public final String getVariableName() {
+        AnnotationSpec spec = annotationSpec();
+        return SafeName.getNameAsIdentifier(typeName()) +
+            "_" +
+            (spec == null
+                ? ""
+                : getSpecName(spec) + "_") +
+            "Key";
+    }
+
+    private String getSpecName(AnnotationSpec spec) {
+        StringBuilder name = new StringBuilder();
+        name.append(SafeName.getNameAsIdentifier(spec.type));
+        for (Iterator<Map.Entry<String, List<CodeBlock>>> iterator
+             = spec.members.entrySet().iterator();
+             iterator.hasNext(); ) {
+            Map.Entry<String, List<CodeBlock>> entry = iterator.next();
+            if (!entry.getKey().equals("value")) {
+                name.append(CaseHelper.camelToTitle(entry.getKey()));
+            }
+            int size = entry.getValue().size();
+            if (size == 1) {
+                name.append(entry.getValue().get(0));
+            } else {
+                entry.getValue().forEach(name::append);
+            }
+            if (iterator.hasNext()) {
+                name.append('$');
+            }
+        }
+        return SafeName.from(name.toString());
+    }
+
     public final CodeBlock keyMaker() {
         CodeBlock typeArgument = getTypeArgumentCode();
         CodeBlock annotationArgumentCode = getAnnotationArgumentCode();
@@ -64,7 +102,7 @@ public abstract class KeyInfo {
             .filter(Objects::nonNull)
             .collect(CodeBlockUtil.joining(
                 CodeBlock.of("$T.of(", Key.class),
-                CodeBlock.of(","),
+                CodeBlock.of(", "),
                 CodeBlock.of(")")
             ));
     }

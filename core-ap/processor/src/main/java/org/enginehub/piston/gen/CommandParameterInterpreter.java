@@ -32,6 +32,7 @@ import org.enginehub.piston.annotation.param.Arg;
 import org.enginehub.piston.annotation.param.ArgFlag;
 import org.enginehub.piston.annotation.param.Switch;
 import org.enginehub.piston.gen.util.ProcessingException;
+import org.enginehub.piston.gen.util.TypeNameUtil;
 import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.ExtractSpec;
 import org.enginehub.piston.gen.value.ReservedNames;
@@ -45,6 +46,7 @@ import org.enginehub.piston.util.CaseHelper;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -162,17 +164,34 @@ class CommandParameterInterpreter {
     }
 
     private ExtractSpec getArgExtractSpec(VariableElement parameter) {
+        TypeMirror immutableList = env.getElementUtils().getTypeElement(ImmutableList.class.getCanonicalName())
+            .asType();
+        TypeMirror parameterType = parameter.asType();
         return ExtractSpec.builder()
             .name(parameter.getSimpleName().toString())
-            .type(TypeName.get(parameter.asType()))
+            .type(TypeName.get(parameterType))
             .extractMethodBody(var -> {
                 CodeBlock.Builder builder = CodeBlock.builder();
                 if (isUnconverted(env, parameter)) {
                     builder.addStatement("return $L.value($L)",
                         var, ReservedNames.PARAMETERS);
                 } else {
-                    builder.addStatement("return $L.value($L).asSingle($L)",
-                        var, ReservedNames.PARAMETERS, asKeyType(parameter));
+                    Element paramAsElement = env.getTypeUtils().asElement(parameterType);
+                    boolean isObject = paramAsElement != null && Object.class.getName().contentEquals(
+                        asType(paramAsElement).getQualifiedName()
+                    );
+                    TypeMirror erasedType = env.getTypeUtils().erasure(parameterType);
+                    if (!isObject && env.getTypeUtils().isAssignable(immutableList, erasedType)) {
+                        // Parameter is a collection type
+                        builder.addStatement("return $L.value($L).asMultiple($L)",
+                            var, ReservedNames.PARAMETERS, asKeyType(
+                                parameter,
+                                TypeNameUtil.firstTypeArg(TypeName.get(parameterType))
+                            ));
+                    } else {
+                        builder.addStatement("return $L.value($L).asSingle($L)",
+                            var, ReservedNames.PARAMETERS, asKeyType(parameter));
+                    }
                 }
                 return builder.build();
             })
@@ -225,6 +244,10 @@ class CommandParameterInterpreter {
     }
 
     private CodeBlock asKeyType(VariableElement mirror) {
+        return asKeyType(mirror, TypeName.get(mirror.asType()));
+    }
+
+    private CodeBlock asKeyType(VariableElement mirror, TypeName typeName) {
         ImmutableList<AnnotationMirror> firstAnnotation = mirror.getAnnotationMirrors().stream()
             .filter(am -> {
                 TypeElement annoType = asType(am.getAnnotationType().asElement());
@@ -237,7 +260,7 @@ class CommandParameterInterpreter {
                 .withAnnotation(firstAnnotation.get(1));
         }
         return generationSupport.requestKey(
-            TypeName.get(mirror.asType()),
+            typeName,
             firstAnnotation.stream().map(AnnotationSpec::get).findFirst().orElse(null)
         );
     }

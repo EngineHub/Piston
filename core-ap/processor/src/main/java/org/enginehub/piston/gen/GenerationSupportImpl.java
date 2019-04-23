@@ -120,7 +120,8 @@ class GenerationSupportImpl implements GenerationSupport {
     @Override
     public CodeBlock requestKey(TypeName type, @Nullable AnnotationSpec annotationSpec) {
         type = type.box();
-        builder.addKeyType(KeyInfo.of(type, annotationSpec));
-        return CodeBlock.of("$L", SafeName.getNameAsIdentifier(type) + "Key");
+        KeyInfo keyInfo = KeyInfo.of(type, annotationSpec);
+        builder.addKeyType(keyInfo);
+        return CodeBlock.of("$L", keyInfo.getVariableName());
     }
 }

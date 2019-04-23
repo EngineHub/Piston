@@ -264,7 +264,8 @@ class CommandRegistrationGenerator {
         return info.getKeyTypes().stream()
             .map(keyInfo ->
                 FieldSpec.builder(
-                    keyInfo.wrappedTypeName(Key.class), SafeName.getNameAsIdentifier(keyInfo.typeName()) + "Key",
+                    keyInfo.wrappedTypeName(Key.class),
+                    keyInfo.getVariableName(),
                     PRIVATE, STATIC, FINAL
                 ).initializer(keyInfo.keyMaker()).build()
             );

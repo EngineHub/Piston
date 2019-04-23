@@ -29,7 +29,7 @@ import org.enginehub.piston.util.CaseHelper;
  * Utility for making Java-safe names from free-form Unicode.
  *
  * <p>
- *     Safe names are made by replacing non-safe characters with underscores.
+ * Safe names are made by replacing non-safe characters with underscores.
  * </p>
  */
 public class SafeName {
@@ -64,13 +64,13 @@ public class SafeName {
                 getNameAsIdentifierRaw(raw)
             );
             for (TypeName typeArgument : pt.typeArguments) {
-                result.append(getNameAsIdentifierRaw(typeArgument));
+                result.append('$').append(getNameAsIdentifierRaw(typeArgument));
             }
             return result;
         } else if (typeName instanceof ArrayTypeName) {
             // append Array to the name
             CharSequence base = getNameAsIdentifierRaw(((ArrayTypeName) typeName).componentType);
-            return new StringBuilder(base).append("Array");
+            return new StringBuilder(base).append("$Array");
         }
         // just use toString() as a last resort
         return typeName.toString();

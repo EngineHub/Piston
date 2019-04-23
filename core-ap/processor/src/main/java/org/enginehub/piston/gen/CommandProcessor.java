@@ -108,44 +108,51 @@ public class CommandProcessor extends BasicAnnotationProcessor {
 
     private Set<Element> doProcess(Set<Element> elements) {
         for (Element element : elements) {
-            TypeElement type = asType(element);
-
-            RegistrationInfo.Builder registration = RegistrationInfo.builder();
-            IdentifierTracker identifierTracker = new IdentifierTracker();
-            GenerationSupport generationSupport = new GenerationSupportImpl(
-                identifierTracker, registration
-            );
-
-            ImmutableList<CommandInfo> info = type.getEnclosedElements().stream()
-                .filter(enclosedElement -> enclosedElement.getKind() == ElementKind.METHOD)
-                .filter(m -> isAnnotationPresent(m, org.enginehub.piston.annotation.Command.class))
-                .map(MoreElements::asExecutable)
-                .map(m -> getCommandInfo(m, generationSupport))
-                .collect(toImmutableList());
-            CommandInfoOptimization rootOptimization = buildOptimizer(identifierTracker);
-            info = ImmutableList.copyOf(rootOptimization.optimize(info));
-
-            AnnotationMirror container = getAnnotationMirror(element, CommandContainer.class)
-                .toJavaUtil().orElseThrow(() ->
-                    new ProcessingException("Missing CommandContainer annotation")
-                        .withElement(element));
-            getList(
-                element, container, "superTypes", TypeMirror.class
-            ).forEach(t -> registration.addSuperType(asTypeElement(t)));
-
             try {
-                new CommandRegistrationGenerator(
-                    registration
-                        .name(type.getSimpleName() + "Registration")
-                        .targetClassName(ClassName.get(type))
-                        .classVisibility(visibility(type.getModifiers()))
-                        .commands(info)
-                        .build())
-                    .generate(element,
-                        getPackage(element).getQualifiedName().toString(),
-                        processingEnv.getFiler());
-            } catch (IOException e) {
-                throw new ProcessingException("Error writing generated file", e)
+                TypeElement type = asType(element);
+
+                RegistrationInfo.Builder registration = RegistrationInfo.builder();
+                IdentifierTracker identifierTracker = new IdentifierTracker();
+                GenerationSupport generationSupport = new GenerationSupportImpl(
+                    identifierTracker, registration
+                );
+
+                ImmutableList<CommandInfo> info = type.getEnclosedElements().stream()
+                    .filter(enclosedElement -> enclosedElement.getKind() == ElementKind.METHOD)
+                    .filter(m -> isAnnotationPresent(m, org.enginehub.piston.annotation.Command.class))
+                    .map(MoreElements::asExecutable)
+                    .map(m -> getCommandInfo(m, generationSupport))
+                    .collect(toImmutableList());
+                CommandInfoOptimization rootOptimization = buildOptimizer(identifierTracker);
+                info = ImmutableList.copyOf(rootOptimization.optimize(info));
+
+                AnnotationMirror container = getAnnotationMirror(element, CommandContainer.class)
+                    .toJavaUtil().orElseThrow(() ->
+                        new ProcessingException("Missing CommandContainer annotation")
+                            .withElement(element));
+                getList(
+                    element, container, "superTypes", TypeMirror.class
+                ).forEach(t -> registration.addSuperType(asTypeElement(t)));
+
+                try {
+                    new CommandRegistrationGenerator(
+                        registration
+                            .name(type.getSimpleName() + "Registration")
+                            .targetClassName(ClassName.get(type))
+                            .classVisibility(visibility(type.getModifiers()))
+                            .commands(info)
+                            .build())
+                        .generate(element,
+                            getPackage(element).getQualifiedName().toString(),
+                            processingEnv.getFiler());
+                } catch (IOException e) {
+                    throw new ProcessingException("Error writing generated file", e)
+                        .withElement(element);
+                }
+            } catch (ProcessingException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ProcessingException("Error generating code", e)
                     .withElement(element);
             }
         }

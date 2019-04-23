@@ -32,6 +32,7 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.enginehub.piston.gen.util.TypeNameUtil.rawType;
 
 public class CodeBlockUtil {
 
@@ -44,7 +45,7 @@ public class CodeBlockUtil {
                 TypeName.get(method.getEnclosingElement().asType()),
                 method.getSimpleName().toString(),
                 method.getParameters().stream()
-                    .map(param -> TypeName.get(param.asType()))
+                    .map(param -> rawType(TypeName.get(param.asType())))
                     .map(type -> CodeBlock.of("$T.class", type))
                     .collect(joining(() ->
                         new CodeBlockJoiner(
