@@ -273,11 +273,15 @@ public class CommandManagerImpl implements CommandManager {
                 if (next.equals("--")) {
                     // Special option to stop flag handling.
                     flagsEnabled = false;
-                } else {
+                    continue;
+                }
+                // verify not a negative number
+                char firstFlag = next.charAt(1);
+                if (!Character.isDigit(firstFlag) || parseCache.flags.containsKey(firstFlag)) {
                     // Pick out individual flags from the long-option form.
                     consumeFlags(command, context, parameters, parseCache, defaultsNeeded, argIter, next);
+                    continue;
                 }
-                continue;
             }
 
             // Otherwise, eat it as the current argument.
