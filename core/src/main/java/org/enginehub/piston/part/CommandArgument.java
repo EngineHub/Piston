@@ -34,7 +34,8 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
             .named(name)
             .describedBy(description)
             .defaultsTo(ImmutableList.of())
-            .ofTypes(ImmutableSet.of());
+            .ofTypes(ImmutableSet.of())
+            .variable(false);
     }
 
     @AutoValue.Builder
@@ -64,10 +65,19 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
 
         abstract Builder types(Collection<Key<?>> types);
 
+        public abstract Builder variable(boolean variable);
+
         public abstract CommandArgument build();
     }
 
     public abstract String getName();
+
+    /**
+     * Check if this argument a <em>variable argument</em>.
+     *
+     * That is, does it accept a variable amount of inputs, rather than one?F
+     */
+    public abstract boolean isVariable();
 
     /**
      * {@inheritDoc}
@@ -84,7 +94,8 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
 
     @Override
     public String getTextRepresentation() {
-        return isRequired() ? "<" + getName() + ">" : "[" + getName() + "]";
+        String namePlus = getName() + (isVariable() ? "..." : "");
+        return isRequired() ? "<" + namePlus + ">" : "[" + namePlus + "]";
     }
 
 }

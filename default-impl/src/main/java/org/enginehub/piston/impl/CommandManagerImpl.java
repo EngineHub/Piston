@@ -61,8 +61,10 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 public class CommandManagerImpl implements CommandManager {
@@ -105,8 +107,18 @@ public class CommandManagerImpl implements CommandManager {
                 }
             }
         }
+        ImmutableList<CommandArgument> commandArguments = arguments.build();
+        int[] indexes = IntStream.range(0, commandArguments.size())
+            .filter(idx -> commandArguments.get(idx).isVariable())
+            .toArray();
+        checkArgument(indexes.length <= 1, "Too many variable arguments");
+        if (indexes.length > 0) {
+            int varargIndex = indexes[0];
+            checkArgument(varargIndex == commandArguments.size() - 1,
+                "Variable argument must be the last argument");
+        }
         return new CommandParseCache(
-            arguments.build(),
+            commandArguments,
             defaultProvided.build(),
             flags.build(),
             subCommands.build(),
@@ -260,35 +272,10 @@ public class CommandManagerImpl implements CommandManager {
             .injectedValues(context);
         CommandParseCache parseCache = commandCache.getUnchecked(command);
 
-        boolean flagsEnabled = true;
         Set<ArgAcceptingCommandPart> defaultsNeeded = new HashSet<>(parseCache.defaultProvided);
+        List<String> nonFlagArgs = removeFlagArguments(command, context, args, parameters, parseCache, defaultsNeeded);
+
         Iterator<CommandArgument> partIter = parseCache.arguments.iterator();
-        Iterator<String> argIter = args.iterator();
-        ImmutableList.Builder<String> nonFlagArgsBuilder = ImmutableList.builder();
-        while (argIter.hasNext()) {
-            String next = argIter.next();
-
-            // Handle flags:
-            if (next.startsWith("-") && flagsEnabled) {
-                if (next.equals("--")) {
-                    // Special option to stop flag handling.
-                    flagsEnabled = false;
-                    continue;
-                }
-                // verify not a negative number
-                char firstFlag = next.charAt(1);
-                if (!Character.isDigit(firstFlag) || parseCache.flags.containsKey(firstFlag)) {
-                    // Pick out individual flags from the long-option form.
-                    consumeFlags(command, context, parameters, parseCache, defaultsNeeded, argIter, next);
-                    continue;
-                }
-            }
-
-            // Otherwise, eat it as the current argument.
-            nonFlagArgsBuilder.add(next);
-        }
-
-        List<String> nonFlagArgs = nonFlagArgsBuilder.build();
         ListIterator<String> nonFlagArgsIter = nonFlagArgs.listIterator();
         int requiredPartsRemaining = parseCache.requiredParts + (parseCache.subCommandRequired ? 1 : 0);
         while (nonFlagArgsIter.hasNext()) {
@@ -305,7 +292,7 @@ public class CommandManagerImpl implements CommandManager {
                         throw new UsageException("Bad sub-command. Acceptable commands: "
                             + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
                     }
-                    return executeSubCommand(next, sub, context, ImmutableList.copyOf(argIter));
+                    return executeSubCommand(next, sub, context, ImmutableList.copyOf(nonFlagArgsIter));
                 }
                 CommandArgument nextPart = partIter.next();
                 int remainingArguments = nonFlagArgs.size() - nonFlagArgsIter.previousIndex();
@@ -317,7 +304,12 @@ public class CommandManagerImpl implements CommandManager {
                     continue;
                 }
                 if (isAcceptedByTypeParsers(nextPart, next, context)) {
-                    addValueFull(parameters, command, nextPart, context, v -> v.value(next));
+                    ImmutableList<String> values = nextPart.isVariable()
+                        ? ImmutableList.<String>builder()
+                        .add(next)
+                        .addAll(nonFlagArgsIter).build()
+                        : ImmutableList.of(next);
+                    addValueFull(parameters, command, nextPart, context, v -> v.values(values));
                     defaultsNeeded.remove(nextPart);
                     if (nextPart.isRequired()) {
                         requiredPartsRemaining--;
@@ -329,16 +321,17 @@ public class CommandManagerImpl implements CommandManager {
                 }
             }
         }
+
         // Handle error conditions.
         boolean moreParts = partIter.hasNext() && partIter.next().isRequired();
         // The sub-command is only handled on empty-parts.
         // If we made it here, we ran out of arguments before calling into it.
         if (moreParts || parseCache.subCommandRequired) {
-            checkState(!argIter.hasNext(), "Should not have more arguments to analyze.");
+            checkState(!nonFlagArgsIter.hasNext(), "Should not have more arguments to analyze.");
             throw new UsageException("Not enough arguments", command);
         }
 
-        if (argIter.hasNext()) {
+        if (nonFlagArgsIter.hasNext()) {
             checkState(!partIter.hasNext(), "Should not have more parts to analyze.");
             throw new UsageException("Too many arguments", command);
         }
@@ -364,6 +357,38 @@ public class CommandManagerImpl implements CommandManager {
         } catch (Exception e) {
             throw new CommandExecutionException(e, command);
         }
+    }
+
+    private List<String> removeFlagArguments(Command command, InjectedValueAccess context,
+                                             List<String> args, CommandParametersImpl.Builder parameters,
+                                             CommandParseCache parseCache, Set<ArgAcceptingCommandPart> defaultsNeeded) {
+        boolean flagsEnabled = true;
+        Iterator<String> argIter = args.iterator();
+        ImmutableList.Builder<String> nonFlagArgsBuilder = ImmutableList.builder();
+        while (argIter.hasNext()) {
+            String next = argIter.next();
+
+            // Handle flags:
+            if (next.startsWith("-") && flagsEnabled) {
+                if (next.equals("--")) {
+                    // Special option to stop flag handling.
+                    flagsEnabled = false;
+                    continue;
+                }
+                // verify not a negative number
+                char firstFlag = next.charAt(1);
+                if (!Character.isDigit(firstFlag) || parseCache.flags.containsKey(firstFlag)) {
+                    // Pick out individual flags from the long-option form.
+                    consumeFlags(command, context, parameters, parseCache, defaultsNeeded, argIter, next);
+                    continue;
+                }
+            }
+
+            // Otherwise, eat it as the current argument.
+            nonFlagArgsBuilder.add(next);
+        }
+
+        return nonFlagArgsBuilder.build();
     }
 
     /**
