@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
 
 public final class SuccessfulConversion<T> extends ConversionResult<T> {
 
@@ -53,6 +54,20 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
     @Override
     public ConversionResult<T> orElse(ConversionResult<T> result) {
         return this;
+    }
+
+    @Override
+    public <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper) {
+        Collection<U> mapped;
+        try {
+            mapped = mapper.apply(get());
+        } catch (Throwable t) {
+            return FailedConversion.from(t);
+        }
+        if (mapped == null) {
+            return FailedConversion.from(new NullPointerException());
+        }
+        return from(mapped);
     }
 
     @Override

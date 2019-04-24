@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static java.util.stream.Collectors.toList;
 
@@ -66,6 +67,11 @@ public final class FailedConversion<T> extends ConversionResult<T> {
             .addAll(otherFailures)
             .add((FailedConversion<T>) result)
             .build());
+    }
+
+    @Override
+    public <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper) {
+        return failureAsAny();
     }
 
     public Throwable getError() {
