@@ -30,6 +30,12 @@ public interface Converter<T> {
     /**
      * Converts the argument input to a collection of argument values.
      *
+     * <p>
+     * This method should be <em>pure</em>, i.e. it should not send any
+     * error messages to anything in the {@code context}. This could
+     * result in spurious error messages during parsing.
+     * </p>
+     *
      * @param argument the argument input to convert
      * @param context the context to convert in
      * @return the result of attempting to convert the argument

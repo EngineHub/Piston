@@ -25,6 +25,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
@@ -53,6 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -72,6 +74,7 @@ public class CommandManagerImpl implements CommandManager {
         ImmutableMap.Builder<String, Command> subCommands = ImmutableMap.builder();
         boolean subCommandRequired = false;
         ImmutableList<CommandPart> parts = command.getParts();
+        int requiredParts = 0;
         for (int i = 0; i < parts.size(); i++) {
             CommandPart part = parts.get(i);
             if (part instanceof ArgAcceptingCommandFlag || part instanceof NoArgCommandFlag) {
@@ -92,6 +95,9 @@ public class CommandManagerImpl implements CommandManager {
             } else {
                 throw new IllegalStateException("Unknown part implementation " + part);
             }
+            if (part.isRequired()) {
+                requiredParts++;
+            }
             if (part instanceof ArgAcceptingCommandPart) {
                 ArgAcceptingCommandPart argPart = (ArgAcceptingCommandPart) part;
                 if (argPart.getDefaults().size() > 0) {
@@ -104,7 +110,8 @@ public class CommandManagerImpl implements CommandManager {
             defaultProvided.build(),
             flags.build(),
             subCommands.build(),
-            subCommandRequired);
+            subCommandRequired,
+            requiredParts);
     }
 
     private static class CommandParseCache {
@@ -113,17 +120,19 @@ public class CommandManagerImpl implements CommandManager {
         final ImmutableMap<Character, CommandFlag> flags;
         final ImmutableMap<String, Command> subCommands;
         final boolean subCommandRequired;
+        final int requiredParts;
 
         CommandParseCache(ImmutableList<CommandArgument> arguments,
                           ImmutableList<ArgAcceptingCommandPart> defaultProvided,
                           ImmutableMap<Character, CommandFlag> flags,
                           ImmutableMap<String, Command> subCommands,
-                          boolean subCommandRequired) {
+                          boolean subCommandRequired, int requiredParts) {
             this.arguments = arguments;
             this.defaultProvided = defaultProvided;
             this.flags = flags;
             this.subCommands = subCommands;
             this.subCommandRequired = subCommandRequired;
+            this.requiredParts = requiredParts;
         }
     }
 
@@ -255,6 +264,7 @@ public class CommandManagerImpl implements CommandManager {
         Set<ArgAcceptingCommandPart> defaultsNeeded = new HashSet<>(parseCache.defaultProvided);
         Iterator<CommandArgument> partIter = parseCache.arguments.iterator();
         Iterator<String> argIter = args.iterator();
+        ImmutableList.Builder<String> nonFlagArgsBuilder = ImmutableList.builder();
         while (argIter.hasNext()) {
             String next = argIter.next();
 
@@ -271,24 +281,50 @@ public class CommandManagerImpl implements CommandManager {
             }
 
             // Otherwise, eat it as the current argument.
-            if (!partIter.hasNext()) {
-                // we may still consume as a sub-command
-                if (parseCache.subCommands.isEmpty()) {
-                    // but not in this case
-                    break;
-                }
-                Command sub = parseCache.subCommands.get(next);
-                if (sub == null) {
-                    throw new UsageException("Bad sub-command. Acceptable commands: "
-                        + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
-                }
-                return executeSubCommand(next, sub, context, ImmutableList.copyOf(argIter));
-            }
-            CommandArgument nextPart = partIter.next();
-            addValueFull(parameters, command, nextPart, context, v -> v.value(next));
-            defaultsNeeded.remove(nextPart);
+            nonFlagArgsBuilder.add(next);
         }
 
+        List<String> nonFlagArgs = nonFlagArgsBuilder.build();
+        ListIterator<String> nonFlagArgsIter = nonFlagArgs.listIterator();
+        int requiredPartsRemaining = parseCache.requiredParts + (parseCache.subCommandRequired ? 1 : 0);
+        while (nonFlagArgsIter.hasNext()) {
+            String next = nonFlagArgsIter.next();
+            while (true) {
+                if (!partIter.hasNext()) {
+                    // we may still consume as a sub-command
+                    if (parseCache.subCommands.isEmpty()) {
+                        // but not in this case
+                        break;
+                    }
+                    Command sub = parseCache.subCommands.get(next);
+                    if (sub == null) {
+                        throw new UsageException("Bad sub-command. Acceptable commands: "
+                            + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
+                    }
+                    return executeSubCommand(next, sub, context, ImmutableList.copyOf(argIter));
+                }
+                CommandArgument nextPart = partIter.next();
+                int remainingArguments = nonFlagArgs.size() - nonFlagArgsIter.previousIndex();
+                if (remainingArguments < requiredPartsRemaining) {
+                    throw new UsageException("Not enough arguments", command);
+                }
+                if (!nextPart.isRequired() && remainingArguments == requiredPartsRemaining) {
+                    // skip optional parts when we need this for required parts
+                    continue;
+                }
+                if (isAcceptedByTypeParsers(nextPart, next, context)) {
+                    addValueFull(parameters, command, nextPart, context, v -> v.value(next));
+                    defaultsNeeded.remove(nextPart);
+                    if (nextPart.isRequired()) {
+                        requiredPartsRemaining--;
+                    }
+                    break;
+                } else if (nextPart.isRequired()) {
+                    throw new UsageException("Missing argument for "
+                        + nextPart.getTextRepresentation(), command);
+                }
+            }
+        }
         // Handle error conditions.
         boolean moreParts = partIter.hasNext() && partIter.next().isRequired();
         // The sub-command is only handled on empty-parts.
@@ -324,6 +360,28 @@ public class CommandManagerImpl implements CommandManager {
         } catch (Exception e) {
             throw new CommandExecutionException(e, command);
         }
+    }
+
+    /**
+     * Check if {@code part} has type converters attached, and if so, return
+     * {@code true} iff any of them will convert {@code next}. If there are no
+     * type converters, also return {@code true}.
+     */
+    private boolean isAcceptedByTypeParsers(ArgAcceptingCommandPart part,
+                                            String next,
+                                            InjectedValueAccess context) {
+        ImmutableSet<Key<?>> types = part.getTypes();
+        if (types.isEmpty()) {
+            return true;
+        }
+
+        return types.stream().anyMatch(type -> {
+            ArgumentConverter<?> argumentConverter = getArgumentConverter(type);
+            if (argumentConverter == null) {
+                throw new IllegalStateException("No argument converter for " + type);
+            }
+            return argumentConverter.convert(next, context).isSuccessful();
+        });
     }
 
     private void consumeFlags(Command command,
