@@ -120,8 +120,9 @@ class CommandParameterInterpreter {
                     ".defaultsTo($L)\n",
                 CommandParts.class, name, desc,
                 stringListForGen(defaults.stream()));
-        if (!isUnconverted(env, parameter)) {
-            construction.add(".ofTypes($L)\n", listForGen(Stream.of(asKeyType(parameter))));
+        addArgTypes(parameter, construction);
+        if (getValue(parameter, arg, "variable", boolean.class)) {
+            construction.add(".variable(true)\n");
         }
         construction.add(".build()");
         return CommandParamInfo.builder()
@@ -151,9 +152,7 @@ class CommandParameterInterpreter {
                 CommandParts.class, name, desc,
                 argName,
                 stringListForGen(defaults.stream()));
-        if (!isUnconverted(env, parameter)) {
-            construction.add(".ofTypes($L)\n", listForGen(Stream.of(asKeyType(parameter))));
-        }
+        addArgTypes(parameter, construction);
         construction.add(".build()");
         return CommandParamInfo.builder()
             .name(parameter.getSimpleName() + "Part")
@@ -163,9 +162,21 @@ class CommandParameterInterpreter {
             .build();
     }
 
+    private void addArgTypes(VariableElement parameter, CodeBlock.Builder construction) {
+        if (!isUnconverted(env, parameter)) {
+            CodeBlock keyRef;
+            TypeMirror parameterType = parameter.asType();
+            if (isMultiCompatibleType(parameterType)) {
+                keyRef = asKeyType(parameter,
+                    TypeNameUtil.firstTypeArg(TypeName.get(parameterType)));
+            } else {
+                keyRef = asKeyType(parameter);
+            }
+            construction.add(".ofTypes($L)\n", listForGen(Stream.of(keyRef)));
+        }
+    }
+
     private ExtractSpec getArgExtractSpec(VariableElement parameter) {
-        TypeMirror immutableList = env.getElementUtils().getTypeElement(ImmutableList.class.getCanonicalName())
-            .asType();
         TypeMirror parameterType = parameter.asType();
         return ExtractSpec.builder()
             .name(parameter.getSimpleName().toString())
@@ -175,27 +186,31 @@ class CommandParameterInterpreter {
                 if (isUnconverted(env, parameter)) {
                     builder.addStatement("return $L.value($L)",
                         var, ReservedNames.PARAMETERS);
+                } else if (isMultiCompatibleType(parameterType)) {
+                    // Parameter is a collection type
+                    builder.addStatement("return $L.value($L).asMultiple($L)",
+                        var, ReservedNames.PARAMETERS, asKeyType(
+                            parameter,
+                            TypeNameUtil.firstTypeArg(TypeName.get(parameterType))
+                        ));
                 } else {
-                    Element paramAsElement = env.getTypeUtils().asElement(parameterType);
-                    boolean isObject = paramAsElement != null && Object.class.getName().contentEquals(
-                        asType(paramAsElement).getQualifiedName()
-                    );
-                    TypeMirror erasedType = env.getTypeUtils().erasure(parameterType);
-                    if (!isObject && env.getTypeUtils().isAssignable(immutableList, erasedType)) {
-                        // Parameter is a collection type
-                        builder.addStatement("return $L.value($L).asMultiple($L)",
-                            var, ReservedNames.PARAMETERS, asKeyType(
-                                parameter,
-                                TypeNameUtil.firstTypeArg(TypeName.get(parameterType))
-                            ));
-                    } else {
-                        builder.addStatement("return $L.value($L).asSingle($L)",
-                            var, ReservedNames.PARAMETERS, asKeyType(parameter));
-                    }
+                    builder.addStatement("return $L.value($L).asSingle($L)",
+                        var, ReservedNames.PARAMETERS, asKeyType(parameter));
                 }
                 return builder.build();
             })
             .build();
+    }
+
+    private boolean isMultiCompatibleType(TypeMirror mirror) {
+        TypeMirror immutableList = env.getElementUtils().getTypeElement(ImmutableList.class.getCanonicalName())
+            .asType();
+        Element paramAsElement = env.getTypeUtils().asElement(mirror);
+        boolean isObject = paramAsElement != null && Object.class.getName().contentEquals(
+            asType(paramAsElement).getQualifiedName()
+        );
+        TypeMirror erasedType = env.getTypeUtils().erasure(mirror);
+        return !isObject && env.getTypeUtils().isAssignable(immutableList, erasedType);
     }
 
     private CommandParamInfo switchTransform(VariableElement parameter) {

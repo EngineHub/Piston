@@ -42,4 +42,6 @@ public @interface Arg {
 
     String[] def() default {};
 
+    boolean variable() default false;
+
 }
