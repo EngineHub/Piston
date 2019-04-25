@@ -44,6 +44,8 @@ public abstract class CommandInfo {
 
         Builder name(String name);
 
+        Builder generatedName(String name);
+
         Builder aliases(Collection<String> aliases);
 
         Builder description(String description);
@@ -63,6 +65,8 @@ public abstract class CommandInfo {
     public abstract ExecutableElement getCommandMethod();
 
     public abstract String getName();
+
+    public abstract String getGeneratedName();
 
     public abstract ImmutableList<String> getAliases();
 

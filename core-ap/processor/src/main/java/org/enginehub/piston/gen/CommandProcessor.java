@@ -163,8 +163,8 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         return new CommandInfoOptimization(
             new CommandParamInfoOptimization(
                 new ExtractSpecOptimization(identifierTracker),
-                identifierTracker)
-        );
+                identifierTracker),
+            identifierTracker);
     }
 
     private static final ImmutableSet<Modifier> VISIBILITY_MODIFIERS = Sets.immutableEnumSet(
@@ -206,6 +206,7 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         return builder
             .commandMethod(method)
             .name(name)
+            .generatedName(name)
             .aliases(aliases)
             .description(desc)
             .footer(descFooter)

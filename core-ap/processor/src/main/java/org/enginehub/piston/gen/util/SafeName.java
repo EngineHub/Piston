@@ -45,6 +45,10 @@ public class SafeName {
             .skip(1)
             .map(cp -> Character.isJavaIdentifierPart(cp) ? cp : '_')
             .forEachOrdered(result::appendCodePoint);
+        if (result.length() == 1 && result.charAt(0) == '_') {
+            // unsafe name, removed in Java 9, just need one more
+            result.append('_');
+        }
         return result.toString();
     }
 

@@ -19,19 +19,27 @@
 
 package org.enginehub.piston.gen.optimize;
 
+import org.enginehub.piston.gen.IdentifierTracker;
+import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.gen.value.CommandInfo;
 
 public class CommandInfoOptimization implements CollectionOptimization<CommandInfo> {
 
     private final CommandParamInfoOptimization commandParamInfoOptimization;
+    private final IdentifierTracker identifierTracker;
 
-    public CommandInfoOptimization(CommandParamInfoOptimization commandParamInfoOptimization) {
+    public CommandInfoOptimization(CommandParamInfoOptimization commandParamInfoOptimization,
+                                   IdentifierTracker identifierTracker) {
         this.commandParamInfoOptimization = commandParamInfoOptimization;
+        this.identifierTracker = identifierTracker;
     }
 
     @Override
     public CommandInfo optimizeSingle(CommandInfo input) {
         return input.toBuilder()
+            .generatedName(identifierTracker.methodName(
+                SafeName.from(input.getGeneratedName())
+            ))
             .params(commandParamInfoOptimization.optimize(input.getParams()))
             .build();
     }

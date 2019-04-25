@@ -316,7 +316,7 @@ class CommandRegistrationGenerator {
                 .map(CommandParamInfo::getName)
                 .filter(Objects::nonNull)
                 .map(name -> CodeBlock.of("$L", name))));
-        lambda.addStatement("b.action(this::$L)", SafeName.from(cmd.getName()));
+        lambda.addStatement("b.action(this::$L)", cmd.getGeneratedName());
         cmd.getCondition().ifPresent(cond -> {
             lambda.add(cond.getConstruction());
             lambda.addStatement("b.condition($L)", cond.getCondVariable());
@@ -331,8 +331,7 @@ class CommandRegistrationGenerator {
     }
 
     private MethodSpec generateCommandBinding(CommandInfo commandInfo) {
-        String safeCmdName = SafeName.from(commandInfo.getName());
-        MethodSpec.Builder spec = MethodSpec.methodBuilder(safeCmdName)
+        MethodSpec.Builder spec = MethodSpec.methodBuilder(commandInfo.getGeneratedName())
             .addModifiers(PRIVATE)
             .returns(int.class)
             .addParameter(COMMAND_PARAMETERS_SPEC);
