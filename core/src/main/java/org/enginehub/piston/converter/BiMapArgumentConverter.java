@@ -21,6 +21,8 @@ package org.enginehub.piston.converter;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.List;
@@ -61,8 +63,8 @@ public final class BiMapArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    public String describeAcceptableArguments() {
-        return String.join("|", map.keySet());
+    public Component describeAcceptableArguments() {
+        return TextComponent.of(String.join("|", map.keySet()));
     }
 
     @Override

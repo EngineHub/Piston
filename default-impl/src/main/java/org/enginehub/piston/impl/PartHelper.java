@@ -19,6 +19,8 @@
 
 package org.enginehub.piston.impl;
 
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 
@@ -30,8 +32,8 @@ import java.util.stream.Stream;
 
 public class PartHelper {
 
-    public static Stream<String> getUsage(List<CommandPart> parts) {
-        Stream.Builder<String> other = Stream.builder();
+    public static Stream<Component> getUsage(List<CommandPart> parts) {
+        Stream.Builder<Component> other = Stream.builder();
         SortedSet<Character> flags = new TreeSet<>();
         for (CommandPart part : parts) {
             if (part instanceof NoArgCommandFlag) {
@@ -40,11 +42,12 @@ public class PartHelper {
                 other.add(part.getTextRepresentation());
             }
         }
-        Stream<String> flagsString = Stream.of(flags)
+        Stream<Component> flagsString = Stream.of(flags)
             .filter(x -> !x.isEmpty())
             .map(f -> f.stream()
                 .map(String::valueOf)
-                .collect(Collectors.joining("", "[-", "]")));
+                .collect(Collectors.joining("", "[-", "]")))
+            .map(TextComponent::of);
         return Stream.concat(flagsString, other.build());
     }
 

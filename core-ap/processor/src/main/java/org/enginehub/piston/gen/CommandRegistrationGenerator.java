@@ -68,6 +68,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static org.enginehub.piston.gen.util.CodeBlockUtil.listForGen;
 import static org.enginehub.piston.gen.util.CodeBlockUtil.stringListForGen;
+import static org.enginehub.piston.gen.util.CodeBlockUtil.textCompOf;
 
 /**
  * Class that handles the generation of command registration classes.
@@ -307,7 +308,7 @@ class CommandRegistrationGenerator {
         CodeBlock.Builder lambda = CodeBlock.builder()
             .add("b -> {\n").indent();
         lambda.addStatement("b.aliases($L)", stringListForGen(cmd.getAliases().stream()));
-        lambda.addStatement("b.description($S)", cmd.getDescription());
+        lambda.addStatement("b.description($L)", textCompOf(cmd.getDescription()));
         cmd.getFooter().ifPresent(footer ->
             lambda.addStatement("b.footer($S)", footer)
         );

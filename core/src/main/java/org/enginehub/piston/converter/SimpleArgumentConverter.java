@@ -19,6 +19,8 @@
 
 package org.enginehub.piston.converter;
 
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.List;
@@ -30,6 +32,10 @@ import java.util.function.Function;
  */
 public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
 
+    public static <T> SimpleArgumentConverter<T> from(Converter<T> converter, String description) {
+        return from(converter, TextComponent.of(description));
+    }
+
     /**
      * Implements {@link ArgumentConverter#convert(String, InjectedValueAccess)} using the provided
      * function, and supplies the provided description for
@@ -40,14 +46,14 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
      * @param <T> the type of the argument
      * @return a converter using the given function and description
      */
-    public static <T> SimpleArgumentConverter<T> from(Converter<T> converter, String description) {
+    public static <T> SimpleArgumentConverter<T> from(Converter<T> converter, Component description) {
         return new SimpleArgumentConverter<>(converter, description);
     }
 
     private final Converter<T> converter;
-    private final String description;
+    private final Component description;
 
-    private SimpleArgumentConverter(Converter<T> converter, String description) {
+    private SimpleArgumentConverter(Converter<T> converter, Component description) {
         this.converter = converter;
         this.description = description;
     }
@@ -58,7 +64,7 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    public String describeAcceptableArguments() {
+    public Component describeAcceptableArguments() {
         return description;
     }
 

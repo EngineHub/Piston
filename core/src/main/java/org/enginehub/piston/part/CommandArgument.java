@@ -22,6 +22,9 @@ package org.enginehub.piston.part;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.inject.Key;
 
 import java.util.Collection;
@@ -29,7 +32,7 @@ import java.util.Collection;
 @AutoValue
 public abstract class CommandArgument implements ArgAcceptingCommandPart {
 
-    public static Builder builder(String name, String description) {
+    public static Builder builder(TranslatableComponent name, Component description) {
         return new AutoValue_CommandArgument.Builder()
             .named(name)
             .describedBy(description)
@@ -42,16 +45,24 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
     public abstract static class Builder {
 
         public final Builder named(String name) {
+            return named(TranslatableComponent.of(name));
+        }
+
+        public final Builder named(TranslatableComponent name) {
             return name(name);
         }
 
-        abstract Builder name(String name);
+        abstract Builder name(TranslatableComponent name);
 
         public final Builder describedBy(String description) {
+            return describedBy(TextComponent.of(description));
+        }
+
+        public final Builder describedBy(Component description) {
             return description(description);
         }
 
-        abstract Builder description(String description);
+        abstract Builder description(Component description);
 
         public final Builder defaultsTo(Iterable<String> defaults) {
             return defaults(defaults);
@@ -70,7 +81,7 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
         public abstract CommandArgument build();
     }
 
-    public abstract String getName();
+    public abstract TranslatableComponent getName();
 
     /**
      * Check if this argument a <em>variable argument</em>.
@@ -93,9 +104,15 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
     }
 
     @Override
-    public String getTextRepresentation() {
-        String namePlus = getName() + (isVariable() ? "..." : "");
-        return isRequired() ? "<" + namePlus + ">" : "[" + namePlus + "]";
+    public Component getTextRepresentation() {
+        TextComponent.Builder builder = TextComponent.builder("");
+        builder.append(TextComponent.of(isRequired() ? "<" : "["));
+        builder.append(getName());
+        if (isVariable()) {
+            builder.append(TextComponent.of("..."));
+        }
+        builder.append(TextComponent.of(isRequired() ? ">" : "]"));
+        return builder.build();
     }
 
 }

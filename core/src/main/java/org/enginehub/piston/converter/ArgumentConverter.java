@@ -19,6 +19,8 @@
 
 package org.enginehub.piston.converter;
 
+import net.kyori.text.Component;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public interface ArgumentConverter<T> extends Converter<T> {
      *
      * @return a description of acceptable arguments
      */
-    String describeAcceptableArguments();
+    Component describeAcceptableArguments();
 
     /**
      * Given {@code input} as the current input, provide some suggestions for the user.

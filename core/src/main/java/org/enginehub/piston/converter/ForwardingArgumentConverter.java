@@ -19,6 +19,7 @@
 
 package org.enginehub.piston.converter;
 
+import net.kyori.text.Component;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    public String describeAcceptableArguments() {
+    public Component describeAcceptableArguments() {
         return delegate.describeAcceptableArguments();
     }
 

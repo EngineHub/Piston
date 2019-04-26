@@ -66,6 +66,9 @@ import static org.enginehub.piston.gen.util.AnnoValueExtraction.getList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getValue;
 import static org.enginehub.piston.gen.util.CodeBlockUtil.listForGen;
 import static org.enginehub.piston.gen.util.CodeBlockUtil.stringListForGen;
+import static org.enginehub.piston.gen.util.CodeBlockUtil.textCompOf;
+import static org.enginehub.piston.gen.util.CodeBlockUtil.transCompOf;
+import static org.enginehub.piston.gen.util.ProcessingEnvValues.prefixArgName;
 
 class CommandParameterInterpreter {
 
@@ -116,9 +119,9 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.arg($S, $S)\n" +
+            .add("$T.arg($L, $L)\n" +
                     ".defaultsTo($L)\n",
-                CommandParts.class, name, desc,
+                CommandParts.class, transCompOf(prefixArgName(env, name)), textCompOf(desc),
                 stringListForGen(defaults.stream()));
         addArgTypes(parameter, construction);
         if (getValue(parameter, arg, "variable", boolean.class)) {
@@ -145,12 +148,12 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.flag('$L', $S)\n" +
+            .add("$T.flag('$L', $L)\n" +
                     ".withRequiredArg()\n" +
-                    ".argNamed($S)\n" +
+                    ".argNamed($L)\n" +
                     ".defaultsTo($L)\n",
-                CommandParts.class, name, desc,
-                argName,
+                CommandParts.class, name, textCompOf(desc),
+                transCompOf(prefixArgName(env, argName)),
                 stringListForGen(defaults.stream()));
         addArgTypes(parameter, construction);
         construction.add(".build()");
@@ -225,8 +228,8 @@ class CommandParameterInterpreter {
             .name(parameter.getSimpleName() + "Part")
             .type(TypeName.get(NoArgCommandFlag.class))
             .construction(CodeBlock.of(
-                "$T.flag('$L', $S).build()",
-                CommandParts.class, name, desc))
+                "$T.flag('$L', $L).build()",
+                CommandParts.class, name, textCompOf(desc)))
             .extractSpec(ExtractSpec.builder()
                 .name(parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))

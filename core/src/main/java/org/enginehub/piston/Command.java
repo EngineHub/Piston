@@ -20,6 +20,7 @@
 package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.text.Component;
 import org.enginehub.piston.part.CommandPart;
 
 import javax.annotation.Nullable;
@@ -121,9 +122,9 @@ public interface Command {
 
         Builder aliases(Collection<String> aliases);
 
-        Builder description(String description);
+        Builder description(Component description);
 
-        Builder footer(@Nullable String footer);
+        Builder footer(@Nullable Component footer);
 
         Builder parts(Collection<CommandPart> parts);
 
@@ -145,9 +146,9 @@ public interface Command {
 
     ImmutableList<String> getAliases();
 
-    String getDescription();
+    Component getDescription();
 
-    Optional<String> getFooter();
+    Optional<Component> getFooter();
 
     ImmutableList<CommandPart> getParts();
 
@@ -160,8 +161,8 @@ public interface Command {
     /**
      * Get the usage text for this command.
      */
-    String getUsage();
+    Component getUsage();
 
-    String getFullHelp();
+    Component getFullHelp();
 
 }

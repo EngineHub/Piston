@@ -20,12 +20,19 @@
 package org.enginehub.piston.part;
 
 import com.google.auto.value.AutoValue;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 
 @AutoValue
 public abstract class NoArgCommandFlag implements CommandFlag {
 
     public static NoArgCommandFlag.Builder builder(char name,
                                                    String description) {
+        return builder(name, TextComponent.of(description));
+    }
+
+    public static NoArgCommandFlag.Builder builder(char name,
+                                                   Component description) {
         return new AutoValue_NoArgCommandFlag.Builder()
             .named(name)
             .describedBy(description);
@@ -41,10 +48,14 @@ public abstract class NoArgCommandFlag implements CommandFlag {
         abstract Builder name(char name);
 
         public final Builder describedBy(String description) {
+            return describedBy(TextComponent.of(description));
+        }
+
+        public final Builder describedBy(Component description) {
             return description(description);
         }
 
-        abstract Builder description(String description);
+        abstract Builder description(Component description);
 
         public final ArgAcceptingCommandFlag.Builder withRequiredArg() {
             NoArgCommandFlag flag = build();
@@ -62,7 +73,7 @@ public abstract class NoArgCommandFlag implements CommandFlag {
     }
 
     @Override
-    public String getTextRepresentation() {
-        return "[-" + getName() + "]";
+    public Component getTextRepresentation() {
+        return TextComponent.of("[-" + getName() + "]");
     }
 }

@@ -21,16 +21,18 @@ package org.enginehub.piston.part;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.Command;
 
 import java.util.Collection;
-
-import static java.util.stream.Collectors.joining;
+import java.util.Iterator;
 
 @AutoValue
 public abstract class SubCommandPart implements CommandPart {
 
-    public static Builder builder(String name, String description) {
+    public static Builder builder(TranslatableComponent name, Component description) {
         return new AutoValue_SubCommandPart.Builder()
             .named(name)
             .describedBy(description);
@@ -39,17 +41,21 @@ public abstract class SubCommandPart implements CommandPart {
     @AutoValue.Builder
     public abstract static class Builder {
 
-        public final Builder named(String name) {
+        public final Builder named(TranslatableComponent name) {
             return name(name);
         }
 
-        abstract Builder name(String name);
+        abstract Builder name(TranslatableComponent name);
 
         public final Builder describedBy(String description) {
+            return describedBy(TextComponent.of(description));
+        }
+
+        public final Builder describedBy(Component description) {
             return description(description);
         }
 
-        abstract Builder description(String description);
+        abstract Builder description(Component description);
 
         public final Builder withCommands(Collection<Command> commands) {
             return commands(commands);
@@ -70,16 +76,24 @@ public abstract class SubCommandPart implements CommandPart {
         public abstract SubCommandPart build();
     }
 
-    public abstract String getName();
+    public abstract TranslatableComponent getName();
 
     public abstract ImmutableList<Command> getCommands();
 
     @Override
-    public String getTextRepresentation() {
-        String cmdsJoined = getCommands().stream()
-            .map(Command::getName)
-            .collect(joining("|"));
-        return isRequired() ? "<" + cmdsJoined + ">" : "[" + cmdsJoined + "]";
+    public Component getTextRepresentation() {
+        TextComponent.Builder builder = TextComponent.builder("");
+        builder.append(TextComponent.of(isRequired() ? "<" : "["));
+        for (Iterator<Command> iterator = getCommands().iterator(); iterator.hasNext(); ) {
+            Command command = iterator.next();
+
+            builder.append(TextComponent.of(command.getName()));
+            if (iterator.hasNext()) {
+                builder.append(TextComponent.of("|"));
+            }
+        }
+        builder.append(TextComponent.of(isRequired() ? ">" : "]"));
+        return builder.build();
     }
 
 }

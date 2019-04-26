@@ -19,6 +19,7 @@
 
 package org.enginehub.piston.part;
 
+import net.kyori.text.Component;
 import org.enginehub.piston.CommandParameters;
 
 /**
@@ -36,17 +37,17 @@ public interface CommandPart {
      * the user where the part belongs, and what it should look like.
      *
      * <p>
-     * For flags, this could be something like `--flag`.
+     * For flags, this could be something like `-flag`.
      * For arguments and commands, this could be their name.
      * </p>
      */
-    String getTextRepresentation();
+    Component getTextRepresentation();
 
     /**
      * Returns the description of this part. This should describe what
      * the part controls in the command's execution.
      */
-    String getDescription();
+    Component getDescription();
 
     /**
      * Returns {@code true} if this part is required, and may not be

@@ -21,6 +21,9 @@ package org.enginehub.piston.part;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.inject.Key;
 
 import java.util.Collection;
@@ -28,7 +31,7 @@ import java.util.Collection;
 @AutoValue
 public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAcceptingCommandPart {
 
-    public static Builder builder(char name, String description) {
+    public static Builder builder(char name, Component description) {
         return new AutoValue_ArgAcceptingCommandFlag.Builder()
             .named(name)
             .describedBy(description)
@@ -46,10 +49,14 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
         abstract Builder name(char name);
 
         public final Builder describedBy(String description) {
+            return describedBy(TextComponent.of(description));
+        }
+
+        public final Builder describedBy(Component description) {
             return description(description);
         }
 
-        abstract Builder description(String description);
+        abstract Builder description(Component description);
 
         public final Builder defaultsTo(Iterable<String> defaults) {
             return defaults(defaults);
@@ -64,10 +71,14 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
         abstract Builder types(Collection<Key<?>> types);
 
         public final Builder argNamed(String name) {
+            return argNamed(TranslatableComponent.of(name));
+        }
+
+        public final Builder argNamed(TranslatableComponent name) {
             return argumentName(name);
         }
 
-        abstract Builder argumentName(String name);
+        abstract Builder argumentName(TranslatableComponent name);
 
         public abstract ArgAcceptingCommandFlag build();
     }
@@ -75,10 +86,14 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
     ArgAcceptingCommandFlag() {
     }
 
-    public abstract String getArgumentName();
+    public abstract TranslatableComponent getArgumentName();
 
     @Override
-    public String getTextRepresentation() {
-        return "[-" + getName() + " <" + getArgumentName() + ">]";
+    public Component getTextRepresentation() {
+        return TextComponent.builder("")
+            .append(TextComponent.of("[-" + getName() + " <"))
+            .append(getArgumentName())
+            .append(TextComponent.of(">]"))
+            .build();
     }
 }

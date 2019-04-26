@@ -17,21 +17,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.part;
+package org.enginehub.piston.gen.util;
 
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import javax.annotation.processing.ProcessingEnvironment;
 
-public class CommandParts {
+/**
+ * Value extraction from {@link ProcessingEnvironment}.
+ */
+public class ProcessingEnvValues {
 
-    public static NoArgCommandFlag.Builder flag(char flag, Component description) {
-        return NoArgCommandFlag.builder(flag, description);
+    public static final String ARG_NAME_KEY_PREFIX = "arg.name.key.prefix";
+
+    public static String prefixArgName(ProcessingEnvironment env, String name) {
+        return env.getOptions().getOrDefault(ARG_NAME_KEY_PREFIX, "piston.argument")
+            + "." + name;
     }
 
-    public static CommandArgument.Builder arg(TranslatableComponent name, Component description) {
-        return CommandArgument.builder(name, description);
-    }
-
-    private CommandParts() {
+    private ProcessingEnvValues() {
     }
 }

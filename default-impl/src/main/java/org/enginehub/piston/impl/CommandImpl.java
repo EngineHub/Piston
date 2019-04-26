@@ -21,6 +21,8 @@ package org.enginehub.piston.impl;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static net.kyori.text.Component.newline;
 import static org.enginehub.piston.Command.Action.NULL_ACTION;
 
 @AutoValue
@@ -57,10 +60,10 @@ abstract class CommandImpl implements Command {
         Builder aliases(Collection<String> aliases);
 
         @Override
-        Builder description(String description);
+        Builder description(Component description);
 
         @Override
-        Builder footer(@Nullable String footer);
+        Builder footer(@Nullable Component footer);
 
         @Override
         Builder parts(Collection<CommandPart> parts);
@@ -106,72 +109,75 @@ abstract class CommandImpl implements Command {
     public abstract Builder toBuilder();
 
     @Override
-    public String getUsage() {
-        StringBuilder builder = new StringBuilder();
-        appendUsage(builder);
-        return builder.toString();
+    public Component getUsage() {
+        return TextComponent.make("", this::appendUsage);
     }
 
-    private void appendUsage(StringBuilder builder) {
-        builder.append('/').append(getName());
-        Iterator<String> usages = PartHelper.getUsage(getParts()).iterator();
+    private void appendUsage(TextComponent.Builder builder) {
+        builder.append(TextComponent.of("/" + getName()));
+        Iterator<Component> usages = PartHelper.getUsage(getParts()).iterator();
         while (usages.hasNext()) {
-            builder.append(' ').append(usages.next());
+            builder.append(TextComponent.of(" ")).append(usages.next());
         }
     }
 
     @Override
-    public String getFullHelp() {
-        StringBuilder builder = new StringBuilder(getDescription());
+    public Component getFullHelp() {
+        TextComponent.Builder builder = TextComponent.builder("");
 
-        builder.append("\nUsage: ");
+        builder.append(TextComponent.of("\nUsage: "));
 
         appendUsage(builder);
-        builder.append('\n');
+        builder.append(newline());
 
         appendArguments(builder);
 
         appendFlags(builder);
 
-        getFooter().ifPresent(footer -> builder.append(footer).append('\n'));
+        getFooter().ifPresent(footer -> builder.append(footer).append(newline()));
 
-        return builder.toString();
+        return builder.build();
     }
 
-    private void appendArguments(StringBuilder builder) {
+    private void appendArguments(TextComponent.Builder builder) {
         List<CommandArgument> args = getParts().stream()
             .filter(x -> x instanceof CommandArgument)
             .map(x -> (CommandArgument) x)
             .collect(Collectors.toList());
         if (args.size() > 0) {
-            builder.append("Arguments:\n");
+            builder.append(TextComponent.of("Arguments:\n"));
             for (CommandArgument arg : args) {
-                builder.append("  ").append(arg.getTextRepresentation());
+                builder.append(TextComponent.of("  ")).append(arg.getTextRepresentation());
                 if (arg.getDefaults().size() > 0) {
-                    builder.append(" (defaults to ");
+                    builder.append(TextComponent.of(" (defaults to "));
                     if (arg.getDefaults().size() == 1) {
-                        builder.append(arg.getDefaults().get(0));
+                        builder.append(TextComponent.of(arg.getDefaults().get(0)));
                     } else {
-                        builder.append(arg.getDefaults());
+                        builder.append(TextComponent.of(arg.getDefaults().toString()));
                     }
-                    builder.append(')');
+                    builder.append(TextComponent.of(")"));
                 }
-                builder.append(": ").append(arg.getDescription()).append('\n');
+                builder.append(TextComponent.of(": "))
+                    .append(arg.getDescription())
+                    .append(newline());
             }
         }
     }
 
-    private void appendFlags(StringBuilder builder) {
+    private void appendFlags(TextComponent.Builder builder) {
         List<CommandFlag> flags = getParts().stream()
             .filter(x -> x instanceof CommandFlag)
             .map(x -> (CommandFlag) x)
             .collect(Collectors.toList());
         if (flags.size() > 0) {
-            builder.append("Flags:\n");
+            builder.append(TextComponent.of("Flags:\n"));
             for (CommandFlag flag : flags) {
                 // produces text like "-f: Some description"
-                builder.append("  -").append(flag.getName())
-                    .append(": ").append(flag.getDescription()).append('\n');
+                builder.append(TextComponent.of("  -"))
+                    .append(Component.of(flag.getName()))
+                    .append(TextComponent.of(": "))
+                    .append(flag.getDescription())
+                    .append(newline());
             }
         }
     }

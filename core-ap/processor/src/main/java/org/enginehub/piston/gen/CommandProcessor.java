@@ -44,6 +44,7 @@ import org.enginehub.piston.gen.value.RegistrationInfo;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
+import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -67,8 +68,10 @@ import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getValue;
+import static org.enginehub.piston.gen.util.ProcessingEnvValues.ARG_NAME_KEY_PREFIX;
 
 @AutoService(Processor.class)
+@SupportedOptions(ARG_NAME_KEY_PREFIX)
 public class CommandProcessor extends BasicAnnotationProcessor {
 
     @Override
