@@ -30,7 +30,7 @@ public class ProcessingEnvValues {
 
     public static String prefixArgName(ProcessingEnvironment env, String name) {
         String prefix = env.getOptions().getOrDefault(ARG_NAME_KEY_PREFIX, "piston.argument");
-        return prefix.isEmpty() ? name : prefix + "." + name;
+        return prefix == null || prefix.isEmpty() ? name : prefix + "." + name;
     }
 
     private ProcessingEnvValues() {
