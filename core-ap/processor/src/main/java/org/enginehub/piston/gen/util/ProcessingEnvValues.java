@@ -29,8 +29,8 @@ public class ProcessingEnvValues {
     public static final String ARG_NAME_KEY_PREFIX = "arg.name.key.prefix";
 
     public static String prefixArgName(ProcessingEnvironment env, String name) {
-        return env.getOptions().getOrDefault(ARG_NAME_KEY_PREFIX, "piston.argument")
-            + "." + name;
+        String prefix = env.getOptions().getOrDefault(ARG_NAME_KEY_PREFIX, "piston.argument");
+        return prefix.isEmpty() ? name : prefix + "." + name;
     }
 
     private ProcessingEnvValues() {
