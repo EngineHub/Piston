@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
-import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverters;
 import org.enginehub.piston.exception.CommandException;
@@ -269,7 +268,11 @@ public class CommandManagerImpl implements CommandManager {
     private int executeSubCommand(String calledName, Command command,
                                   InjectedValueAccess context, List<String> args) {
         CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
-            .injectedValues(context);
+            .injectedValues(context)
+            .metadata(CommandMetadataImpl.builder()
+                .calledName(calledName)
+                .arguments(args)
+                .build());
         CommandParseCache parseCache = commandCache.getUnchecked(command);
 
         Set<ArgAcceptingCommandPart> defaultsNeeded = new HashSet<>(parseCache.defaultProvided);
@@ -291,6 +294,12 @@ public class CommandManagerImpl implements CommandManager {
                     if (sub == null) {
                         throw new UsageException("Bad sub-command. Acceptable commands: "
                             + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
+                    }
+                    // validate this condition first
+                    addDefaults(command, context, parameters, defaultsNeeded);
+                    CommandParametersImpl builtParams = parameters.build();
+                    if (!command.getCondition().satisfied(builtParams)) {
+                        throw new ConditionFailedException(command);
                     }
                     return executeSubCommand(next, sub, context, ImmutableList.copyOf(nonFlagArgsIter));
                 }
@@ -336,17 +345,11 @@ public class CommandManagerImpl implements CommandManager {
             throw new UsageException("Too many arguments", command);
         }
 
-        for (ArgAcceptingCommandPart part : defaultsNeeded) {
-            addValueFull(parameters, command, part, context, v -> v.values(part.getDefaults()));
-        }
+        addDefaults(command, context, parameters, defaultsNeeded);
 
         // Run the command action.
         try {
-            CommandMetadata metadata = CommandMetadataImpl.builder()
-                .calledName(calledName)
-                .arguments(args)
-                .build();
-            CommandParametersImpl builtParams = parameters.metadata(metadata).build();
+            CommandParametersImpl builtParams = parameters.build();
             if (!command.getCondition().satisfied(builtParams)) {
                 throw new ConditionFailedException(command);
             }
@@ -356,6 +359,12 @@ public class CommandManagerImpl implements CommandManager {
             throw e;
         } catch (Exception e) {
             throw new CommandExecutionException(e, command);
+        }
+    }
+
+    private void addDefaults(Command command, InjectedValueAccess context, CommandParametersImpl.Builder parameters, Set<ArgAcceptingCommandPart> defaultsNeeded) {
+        for (ArgAcceptingCommandPart part : defaultsNeeded) {
+            addValueFull(parameters, command, part, context, v -> v.values(part.getDefaults()));
         }
     }
 
