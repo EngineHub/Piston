@@ -125,6 +125,8 @@ abstract class CommandImpl implements Command {
     public Component getFullHelp() {
         TextComponent.Builder builder = TextComponent.builder("");
 
+        builder.append(getDescription());
+
         builder.append(TextComponent.of("\nUsage: "));
 
         appendUsage(builder);
@@ -150,11 +152,18 @@ abstract class CommandImpl implements Command {
                 builder.append(TextComponent.of("  ")).append(arg.getTextRepresentation());
                 if (arg.getDefaults().size() > 0) {
                     builder.append(TextComponent.of(" (defaults to "));
+                    String value;
                     if (arg.getDefaults().size() == 1) {
-                        builder.append(TextComponent.of(arg.getDefaults().get(0)));
+                        value = arg.getDefaults().get(0);
+                        if (value.trim().isEmpty()) {
+                            value = "none";
+                        }
                     } else {
-                        builder.append(TextComponent.of(arg.getDefaults().toString()));
+                        value = arg.getDefaults().stream()
+                            .filter(s -> s.trim().length() > 0)
+                            .collect(Collectors.joining(", ", "[", "]"));
                     }
+                    builder.append(TextComponent.of(value));
                     builder.append(TextComponent.of(")"));
                 }
                 builder.append(TextComponent.of(": "))
