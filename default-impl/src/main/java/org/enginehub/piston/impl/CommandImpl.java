@@ -170,7 +170,7 @@ abstract class CommandImpl implements Command {
             builder.append("Flags:\n");
             for (CommandFlag flag : flags) {
                 // produces text like "-f: Some description"
-                builder.append("  ").append(flag.getTextRepresentation())
+                builder.append("  -").append(flag.getName())
                     .append(": ").append(flag.getDescription()).append('\n');
             }
         }
