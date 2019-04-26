@@ -23,6 +23,7 @@ import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -241,8 +242,25 @@ class CommandParameterInterpreter {
             .build();
     }
 
+    private CommandParamInfo untypedParameter(VariableElement parameter) {
+        if (TypeName.get(parameter.asType()).equals(ClassName.get(CommandParameters.class))) {
+            return commandParameterValue(parameter);
+        }
+        return injectableValue(parameter);
+    }
+
+    private CommandParamInfo commandParameterValue(VariableElement parameter) {
+        return CommandParamInfo.builder()
+            .extractSpec(ExtractSpec.builder()
+                .name(parameter.getSimpleName().toString())
+                .type(TypeName.get(parameter.asType()))
+                .extractMethodBody(var ->
+                    CodeBlock.of("$[return $L;\n$]", ReservedNames.PARAMETERS))
+                .build())
+            .build();
+    }
+
     private CommandParamInfo injectableValue(VariableElement parameter) {
-        String name = parameter.getSimpleName().toString();
         return CommandParamInfo.builder()
             .extractSpec(ExtractSpec.builder()
                 .name(parameter.getSimpleName().toString())
@@ -300,7 +318,7 @@ class CommandParameterInterpreter {
                 "Too many transforms applicable. Did you add conflicting annotations?")
                 .withElement(parameter);
         }
-        ParamTransform transform = transforms.isEmpty() ? this::injectableValue : transforms.get(0);
+        ParamTransform transform = transforms.isEmpty() ? this::untypedParameter : transforms.get(0);
         return transform.createPartInfo(parameter);
     }
 }
