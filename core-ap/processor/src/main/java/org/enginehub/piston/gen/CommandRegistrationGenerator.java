@@ -310,7 +310,7 @@ class CommandRegistrationGenerator {
         lambda.addStatement("b.aliases($L)", stringListForGen(cmd.getAliases().stream()));
         lambda.addStatement("b.description($L)", textCompOf(cmd.getDescription()));
         cmd.getFooter().ifPresent(footer ->
-            lambda.addStatement("b.footer($S)", footer)
+            lambda.addStatement("b.footer($L)", textCompOf(footer))
         );
         lambda.addStatement("b.parts($L)",
             listForGen(cmd.getParams().stream()
