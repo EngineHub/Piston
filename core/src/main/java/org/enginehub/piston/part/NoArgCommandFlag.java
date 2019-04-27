@@ -22,6 +22,7 @@ package org.enginehub.piston.part;
 import com.google.auto.value.AutoValue;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.enginehub.piston.ColorConfig;
 
 @AutoValue
 public abstract class NoArgCommandFlag implements CommandFlag {
@@ -74,6 +75,11 @@ public abstract class NoArgCommandFlag implements CommandFlag {
 
     @Override
     public Component getTextRepresentation() {
-        return TextComponent.of("[-" + getName() + "]");
+        return TextComponent.builder("")
+            .color(ColorConfig.getPartWrapping())
+            .append(TextComponent.of("["))
+            .append(TextComponent.of("-" + getName(), ColorConfig.getMainText()))
+            .append(TextComponent.of("]"))
+            .build();
     }
 }

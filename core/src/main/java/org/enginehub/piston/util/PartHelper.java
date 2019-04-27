@@ -21,10 +21,12 @@ package org.enginehub.piston.util;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -47,12 +49,18 @@ public class PartHelper {
                 other.add(part.getTextRepresentation());
             }
         }
-        Stream<Component> flagsString = Stream.of(flags)
+        Stream<TextComponent> flagsString = Optional.of(flags)
             .filter(x -> !x.isEmpty())
             .map(f -> f.stream()
                 .map(String::valueOf)
-                .collect(Collectors.joining("", "[-", "]")))
-            .map(TextComponent::of);
+                .collect(Collectors.joining("")))
+            .map(text -> TextComponent.builder("")
+                .color(ColorConfig.getPartWrapping())
+                .append(TextComponent.of("["))
+                .append(TextComponent.of("-" + text, ColorConfig.getMainText()))
+                .append(TextComponent.of("]"))
+                .build())
+            .map(Stream::of).orElse(Stream.empty());
 
         Iterator<Component> usages = Stream.concat(flagsString, other.build()).iterator();
         while (usages.hasNext()) {

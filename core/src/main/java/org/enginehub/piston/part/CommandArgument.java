@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
+import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.inject.Key;
 
 import java.util.Collection;
@@ -105,11 +106,15 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
 
     @Override
     public Component getTextRepresentation() {
-        TextComponent.Builder builder = TextComponent.builder("");
+        TextComponent.Builder builder = TextComponent.builder("")
+            .color(ColorConfig.getPartWrapping());
         builder.append(TextComponent.of(isRequired() ? "<" : "["));
-        builder.append(getName());
+        builder.append(TextComponent.builder("")
+            .color(ColorConfig.getMainText())
+            .append(getName())
+            .build());
         if (isVariable()) {
-            builder.append(TextComponent.of("..."));
+            builder.append(TextComponent.of("...", ColorConfig.getTextModifier()));
         }
         builder.append(TextComponent.of(isRequired() ? ">" : "]"));
         return builder.build();

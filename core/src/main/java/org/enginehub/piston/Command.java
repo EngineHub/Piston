@@ -22,7 +22,7 @@ package org.enginehub.piston;
 import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import org.enginehub.piston.part.CommandPart;
-import org.enginehub.piston.util.UsageGenerator;
+import org.enginehub.piston.util.HelpGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -160,9 +160,11 @@ public interface Command {
     Builder toBuilder();
 
     default Component getUsage() {
-        return UsageGenerator.create(ImmutableList.of(this)).getUsage();
+        return HelpGenerator.create(ImmutableList.of(this)).getUsage();
     }
 
-    Component getFullHelp();
+    default Component getFullHelp() {
+        return HelpGenerator.create(ImmutableList.of(this)).getFullHelp();
+    }
 
 }

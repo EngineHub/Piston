@@ -25,7 +25,7 @@ import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.part.CommandFlag;
-import org.enginehub.piston.util.UsageGenerator;
+import org.enginehub.piston.util.HelpGenerator;
 
 import static java.util.stream.Collectors.joining;
 
@@ -41,7 +41,7 @@ public class NoSuchFlagException extends UsageException {
     private static Component getMessage(ImmutableList<Command> commands, char requestedFlag) {
         TextComponent.Builder message = TextComponent.builder("");
         message.append(TextComponent.of("Flag '" + requestedFlag + "' is not a valid flag for "));
-        message.append(UsageGenerator.create(commands).getFullName());
+        message.append(HelpGenerator.create(commands).getFullName());
         String allFlags = getAllFlags(commands);
         message.append(TextComponent.of(
             allFlags.isEmpty()

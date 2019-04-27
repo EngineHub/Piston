@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
+import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
 
 import java.util.Collection;
@@ -82,14 +83,15 @@ public abstract class SubCommandPart implements CommandPart {
 
     @Override
     public Component getTextRepresentation() {
-        TextComponent.Builder builder = TextComponent.builder("");
+        TextComponent.Builder builder = TextComponent.builder("")
+            .color(ColorConfig.getPartWrapping());
         builder.append(TextComponent.of(isRequired() ? "<" : "["));
         for (Iterator<Command> iterator = getCommands().iterator(); iterator.hasNext(); ) {
             Command command = iterator.next();
 
-            builder.append(TextComponent.of(command.getName()));
+            builder.append(TextComponent.of(command.getName(), ColorConfig.getMainText()));
             if (iterator.hasNext()) {
-                builder.append(TextComponent.of("|"));
+                builder.append(TextComponent.of("|", ColorConfig.getTextModifier()));
             }
         }
         builder.append(TextComponent.of(isRequired() ? ">" : "]"));
