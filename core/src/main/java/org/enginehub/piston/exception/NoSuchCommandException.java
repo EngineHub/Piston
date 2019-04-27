@@ -19,12 +19,15 @@
 
 package org.enginehub.piston.exception;
 
+import com.google.common.collect.ImmutableList;
+import net.kyori.text.TextComponent;
+
 public class NoSuchCommandException extends CommandException {
 
     private final String requestedCommand;
 
     public NoSuchCommandException(String requestedCommand) {
-        super("No such command: " + requestedCommand, null);
+        super(TextComponent.of("No such command: " + requestedCommand), ImmutableList.of());
         this.requestedCommand = requestedCommand;
     }
 

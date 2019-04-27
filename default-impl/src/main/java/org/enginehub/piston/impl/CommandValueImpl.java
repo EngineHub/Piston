@@ -21,6 +21,7 @@ package org.enginehub.piston.impl;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandValue;
@@ -48,7 +49,7 @@ abstract class CommandValueImpl implements CommandValue {
 
         Builder manager(CommandManager manager);
 
-        Builder commandContext(Command ctx);
+        Builder commandContext(Collection<Command> ctx);
 
         Builder partContext(CommandPart ctx);
 
@@ -69,7 +70,7 @@ abstract class CommandValueImpl implements CommandValue {
 
     abstract CommandManager manager();
 
-    abstract Command commandContext();
+    abstract ImmutableList<Command> commandContext();
 
     abstract CommandPart partContext();
 
@@ -93,11 +94,12 @@ abstract class CommandValueImpl implements CommandValue {
             checkState(converter.isPresent(), "No converter for %s", key);
             ConversionResult<T> convert = converter.get().convert(value, injectedValues());
             if (!convert.isSuccessful()) {
-                throw new UsageException(String.format(
-                    "Invalid value for %s, acceptable values are %s",
-                    partContext().getTextRepresentation(),
-                    converter.get().describeAcceptableArguments()),
-                    commandContext());
+                TextComponent.Builder message = TextComponent.builder("")
+                    .append(TextComponent.of("Invalid value for "))
+                    .append(partContext().getTextRepresentation())
+                    .append(TextComponent.of(", acceptable values are "))
+                    .append(converter.get().describeAcceptableArguments());
+                throw new UsageException(message.build(), commandContext());
             }
             values.addAll(convert.get());
         }

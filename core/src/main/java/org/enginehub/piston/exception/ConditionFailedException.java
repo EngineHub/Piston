@@ -19,15 +19,19 @@
 
 package org.enginehub.piston.exception;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
 
 public class ConditionFailedException extends CommandException {
 
-    public ConditionFailedException(Command command) {
-        super("Condition failed: " + command.getCondition(), command);
+    public ConditionFailedException(ImmutableList<Command> commands) {
+        super(TextComponent.of("Condition failed: " + Iterables.getLast(commands).getCondition()),
+            commands);
     }
 
     public Command.Condition getCondition() {
-        return command.getCondition();
+        return Iterables.getLast(commands).getCondition();
     }
 }

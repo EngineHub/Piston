@@ -30,7 +30,6 @@ import org.enginehub.piston.part.CommandPart;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -109,19 +108,6 @@ abstract class CommandImpl implements Command {
     public abstract Builder toBuilder();
 
     @Override
-    public Component getUsage() {
-        return TextComponent.make("", this::appendUsage);
-    }
-
-    private void appendUsage(TextComponent.Builder builder) {
-        builder.append(TextComponent.of("/" + getName()));
-        Iterator<Component> usages = PartHelper.getUsage(getParts()).iterator();
-        while (usages.hasNext()) {
-            builder.append(TextComponent.of(" ")).append(usages.next());
-        }
-    }
-
-    @Override
     public Component getFullHelp() {
         TextComponent.Builder builder = TextComponent.builder("");
 
@@ -129,7 +115,7 @@ abstract class CommandImpl implements Command {
 
         builder.append(TextComponent.of("\nUsage: "));
 
-        appendUsage(builder);
+        builder.append(getUsage());
         builder.append(newline());
 
         appendArguments(builder);

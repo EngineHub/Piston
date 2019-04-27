@@ -19,6 +19,7 @@
 
 package org.enginehub.piston.exception;
 
+import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.Command;
 
 import javax.annotation.Nullable;
@@ -30,8 +31,8 @@ import javax.annotation.Nullable;
  */
 public class CommandExecutionException extends CommandException {
 
-    public CommandExecutionException(Throwable cause, @Nullable Command command) {
-        super(cause, command);
+    public CommandExecutionException(Throwable cause, ImmutableList<Command> commands) {
+        super(cause, commands);
     }
 
 }

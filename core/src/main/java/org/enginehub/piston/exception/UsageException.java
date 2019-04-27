@@ -19,25 +19,27 @@
 
 package org.enginehub.piston.exception;
 
+import com.google.common.collect.ImmutableList;
+import net.kyori.text.Component;
 import org.enginehub.piston.Command;
 
 /**
  * Parent class for all usage-related exceptions.
  */
 public class UsageException extends CommandException {
-    public UsageException(Command command) {
-        super(command);
+    public UsageException(ImmutableList<Command> commands) {
+        super(commands);
     }
 
-    public UsageException(String message, Command command) {
-        super(message, command);
+    public UsageException(Component message, ImmutableList<Command> commands) {
+        super(message, commands);
     }
 
-    public UsageException(String message, Throwable cause, Command command) {
-        super(message, cause, command);
+    public UsageException(Component message, Throwable cause, ImmutableList<Command> commands) {
+        super(message, cause, commands);
     }
 
-    public UsageException(Throwable cause, Command command) {
-        super(cause, command);
+    public UsageException(Throwable cause, ImmutableList<Command> commands) {
+        super(cause, commands);
     }
 }

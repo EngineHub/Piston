@@ -19,25 +19,42 @@
 
 package org.enginehub.piston.exception;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.part.CommandFlag;
+import org.enginehub.piston.util.UsageGenerator;
 
 import static java.util.stream.Collectors.joining;
 
 public class NoSuchFlagException extends UsageException {
 
-    private static String getAllFlags(Command command) {
-        return command.getParts().stream()
+    private static String getAllFlags(ImmutableList<Command> commands) {
+        return Iterables.getLast(commands).getParts().stream()
             .filter(CommandFlag.class::isInstance)
             .map(f -> String.valueOf(((CommandFlag) f).getName()))
             .collect(joining());
     }
 
+    private static Component getMessage(ImmutableList<Command> commands, char requestedFlag) {
+        TextComponent.Builder message = TextComponent.builder("");
+        message.append(TextComponent.of("Flag '" + requestedFlag + "' is not a valid flag for "));
+        message.append(UsageGenerator.create(commands).getFullName());
+        String allFlags = getAllFlags(commands);
+        message.append(TextComponent.of(
+            allFlags.isEmpty()
+                ? ", as it does not have any flags"
+                : ". Options: " + allFlags
+        ));
+        return message.build();
+    }
+
     private final char requestedFlag;
 
-    public NoSuchFlagException(Command command, char requestedFlag) {
-        super("Flag '" + requestedFlag + "' is not a valid flag for "
-            + command.getName() + ". Options: " + getAllFlags(command), command);
+    public NoSuchFlagException(ImmutableList<Command> command, char requestedFlag) {
+        super(getMessage(command, requestedFlag), command);
         this.requestedFlag = requestedFlag;
     }
 

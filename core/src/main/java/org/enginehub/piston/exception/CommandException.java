@@ -19,38 +19,55 @@
 
 package org.enginehub.piston.exception;
 
+import com.google.common.collect.ImmutableList;
+import net.kyori.text.Component;
 import org.enginehub.piston.Command;
-
-import javax.annotation.Nullable;
 
 /**
  * Parent class for all command-related exceptions.
  */
 public class CommandException extends RuntimeException {
-    @Nullable
-    protected final Command command;
+    private final Component message;
+    protected final ImmutableList<Command> commands;
 
-    public CommandException(@Nullable Command command) {
-        this.command = command;
+    public CommandException(ImmutableList<Command> commands) {
+        this.message = Component.empty();
+        this.commands = commands;
     }
 
-    public CommandException(String message, @Nullable Command command) {
-        super(message);
-        this.command = command;
+    public CommandException(Component message, ImmutableList<Command> commands) {
+        super(message.toString());
+        this.message = message;
+        this.commands = commands;
     }
 
-    public CommandException(String message, Throwable cause, @Nullable Command command) {
-        super(message, cause);
-        this.command = command;
+    public CommandException(Component message, Throwable cause, ImmutableList<Command> commands) {
+        super(message.toString(), cause);
+        this.message = message;
+        this.commands = commands;
     }
 
-    public CommandException(Throwable cause, @Nullable Command command) {
+    public CommandException(Throwable cause, ImmutableList<Command> commands) {
         super(cause);
-        this.command = command;
+        this.message = Component.empty();
+        this.commands = commands;
     }
 
-    @Nullable
-    public Command getCommand() {
-        return command;
+    /**
+     * Get the rich message, with extra formatting.
+     */
+    public Component getRichMessage() {
+        return message;
+    }
+
+    /**
+     * Retrieves all commands associated with this exception.
+     *
+     * <p>
+     * This is intended to capture the parent command context upon exceptional state.
+     * </p>
+     */
+    public ImmutableList<Command> getCommands() {
+        return commands;
     }
 }

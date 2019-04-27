@@ -19,14 +19,15 @@
 
 package org.enginehub.piston.impl;
 
-import com.google.common.base.Joiner;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
+import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.converter.ArgumentConverter;
@@ -60,6 +61,7 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -259,13 +261,20 @@ public class CommandManagerImpl implements CommandManager {
             }
             // cache if needed
             InjectedValueAccess cachedContext = MemoizingValueAccess.wrap(context);
-            return executeSubCommand(name, command, cachedContext, args.subList(1, args.size()));
+            return executeSubCommand(name, ImmutableList.of(command), cachedContext,
+                args.subList(1, args.size()));
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    private int executeSubCommand(String calledName, Command command,
+    private ImmutableList<Command> append(ImmutableList<Command> list, Command command) {
+        return ImmutableList.<Command>builder()
+            .addAll(list).add(command)
+            .build();
+    }
+
+    private int executeSubCommand(String calledName, ImmutableList<Command> executionPath,
                                   InjectedValueAccess context, List<String> args) {
         CommandParametersImpl.Builder parameters = CommandParametersImpl.builder()
             .injectedValues(context)
@@ -273,10 +282,12 @@ public class CommandManagerImpl implements CommandManager {
                 .calledName(calledName)
                 .arguments(args)
                 .build());
+        Command command = Iterables.getLast(executionPath);
         CommandParseCache parseCache = commandCache.getUnchecked(command);
 
         Set<ArgAcceptingCommandPart> defaultsNeeded = new HashSet<>(parseCache.defaultProvided);
-        List<String> nonFlagArgs = removeFlagArguments(command, context, args, parameters, parseCache, defaultsNeeded);
+        List<String> nonFlagArgs = removeFlagArguments(executionPath, context, args, parameters,
+            parseCache, defaultsNeeded);
 
         Iterator<CommandArgument> partIter = parseCache.arguments.iterator();
         ListIterator<String> nonFlagArgsIter = nonFlagArgs.listIterator();
@@ -292,21 +303,27 @@ public class CommandManagerImpl implements CommandManager {
                     }
                     Command sub = parseCache.subCommands.get(next);
                     if (sub == null) {
-                        throw new UsageException("Bad sub-command. Acceptable commands: "
-                            + Joiner.on(", ").join(parseCache.subCommands.keySet()), command);
+                        throw new UsageException(TextComponent.of("Invalid sub-command. Options: "
+                            + parseCache.subCommands.values().stream()
+                            .distinct()
+                            .map(Command::getName)
+                            .collect(Collectors.joining(", "))),
+                            executionPath);
                     }
+                    executionPath = append(executionPath, sub);
                     // validate this condition first
-                    addDefaults(command, context, parameters, defaultsNeeded);
+                    addDefaults(executionPath, context, parameters, defaultsNeeded);
                     CommandParametersImpl builtParams = parameters.build();
                     if (!command.getCondition().satisfied(builtParams)) {
-                        throw new ConditionFailedException(command);
+                        throw new ConditionFailedException(executionPath);
                     }
-                    return executeSubCommand(next, sub, context, ImmutableList.copyOf(nonFlagArgsIter));
+                    return executeSubCommand(next, executionPath, context, ImmutableList.copyOf(nonFlagArgsIter));
                 }
                 CommandArgument nextPart = partIter.next();
                 int remainingArguments = nonFlagArgs.size() - nonFlagArgsIter.previousIndex();
                 if (remainingArguments < requiredPartsRemaining) {
-                    throw new UsageException("Not enough arguments", command);
+                    throw new UsageException(TextComponent.of("Not enough arguments"),
+                        executionPath);
                 }
                 if (!nextPart.isRequired() && remainingArguments == requiredPartsRemaining) {
                     // skip optional parts when we need this for required parts
@@ -318,15 +335,16 @@ public class CommandManagerImpl implements CommandManager {
                         .add(next)
                         .addAll(nonFlagArgsIter).build()
                         : ImmutableList.of(next);
-                    addValueFull(parameters, command, nextPart, context, v -> v.values(values));
+                    addValueFull(parameters, executionPath, nextPart, context, v -> v.values(values));
                     defaultsNeeded.remove(nextPart);
                     if (nextPart.isRequired()) {
                         requiredPartsRemaining--;
                     }
                     break;
                 } else if (nextPart.isRequired()) {
-                    throw new UsageException("Missing argument for "
-                        + nextPart.getTextRepresentation(), command);
+                    throw new UsageException(TextComponent.builder("Missing argument for ")
+                        .append(nextPart.getTextRepresentation())
+                        .build(), executionPath);
                 }
             }
         }
@@ -337,38 +355,41 @@ public class CommandManagerImpl implements CommandManager {
         // If we made it here, we ran out of arguments before calling into it.
         if (moreParts || parseCache.subCommandRequired) {
             checkState(!nonFlagArgsIter.hasNext(), "Should not have more arguments to analyze.");
-            throw new UsageException("Not enough arguments", command);
+            throw new UsageException(TextComponent.of("Not enough arguments"),
+                executionPath);
         }
 
         if (nonFlagArgsIter.hasNext()) {
             checkState(!partIter.hasNext(), "Should not have more parts to analyze.");
-            throw new UsageException("Too many arguments", command);
+            throw new UsageException(TextComponent.of("Too many arguments"),
+                executionPath);
         }
 
-        addDefaults(command, context, parameters, defaultsNeeded);
+        addDefaults(executionPath, context, parameters, defaultsNeeded);
 
         // Run the command action.
         try {
             CommandParametersImpl builtParams = parameters.build();
             if (!command.getCondition().satisfied(builtParams)) {
-                throw new ConditionFailedException(command);
+                throw new ConditionFailedException(executionPath);
             }
 
             return command.getAction().run(builtParams);
         } catch (CommandException e) {
             throw e;
         } catch (Exception e) {
-            throw new CommandExecutionException(e, command);
+            throw new CommandExecutionException(e, executionPath);
         }
     }
 
-    private void addDefaults(Command command, InjectedValueAccess context, CommandParametersImpl.Builder parameters, Set<ArgAcceptingCommandPart> defaultsNeeded) {
+    private void addDefaults(ImmutableList<Command> executionPath, InjectedValueAccess context,
+                             CommandParametersImpl.Builder parameters, Set<ArgAcceptingCommandPart> defaultsNeeded) {
         for (ArgAcceptingCommandPart part : defaultsNeeded) {
-            addValueFull(parameters, command, part, context, v -> v.values(part.getDefaults()));
+            addValueFull(parameters, executionPath, part, context, v -> v.values(part.getDefaults()));
         }
     }
 
-    private List<String> removeFlagArguments(Command command, InjectedValueAccess context,
+    private List<String> removeFlagArguments(ImmutableList<Command> executionPath, InjectedValueAccess context,
                                              List<String> args, CommandParametersImpl.Builder parameters,
                                              CommandParseCache parseCache, Set<ArgAcceptingCommandPart> defaultsNeeded) {
         boolean flagsEnabled = true;
@@ -388,7 +409,7 @@ public class CommandManagerImpl implements CommandManager {
                 char firstFlag = next.charAt(1);
                 if (!Character.isDigit(firstFlag) || parseCache.flags.containsKey(firstFlag)) {
                     // Pick out individual flags from the long-option form.
-                    consumeFlags(command, context, parameters, parseCache, defaultsNeeded, argIter, next);
+                    consumeFlags(executionPath, context, parameters, parseCache, defaultsNeeded, argIter, next);
                     continue;
                 }
             }
@@ -422,7 +443,7 @@ public class CommandManagerImpl implements CommandManager {
         });
     }
 
-    private void consumeFlags(Command command,
+    private void consumeFlags(ImmutableList<Command> executionPath,
                               InjectedValueAccess injectedValues,
                               CommandParametersImpl.Builder parameters,
                               CommandParseCache parseCache,
@@ -434,18 +455,18 @@ public class CommandManagerImpl implements CommandManager {
             char c = flagArray[i];
             CommandFlag flag = parseCache.flags.get(c);
             if (flag == null) {
-                throw new NoSuchFlagException(command, c);
+                throw new NoSuchFlagException(executionPath, c);
             }
             if (flag instanceof ArgAcceptingCommandFlag) {
                 if (i + 1 < flagArray.length) {
                     // Only allow argument-flags at the end of flag-combos.
-                    throw new UsageException("Argument-accepting flags must be " +
-                        "at the end of combined flag groups.", command);
+                    throw new UsageException(TextComponent.of("Argument-accepting flags must be " +
+                        "at the end of combined flag groups."), executionPath);
                 }
                 if (!argIter.hasNext()) {
                     break;
                 }
-                addValueFull(parameters, command, flag, injectedValues, v -> v.value(argIter.next()));
+                addValueFull(parameters, executionPath, flag, injectedValues, v -> v.value(argIter.next()));
                 defaultsNeeded.remove(flag);
             } else {
                 // Sanity-check. Real check is in `cacheCommand`.
@@ -456,7 +477,7 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     private void addValueFull(CommandParametersImpl.Builder parameters,
-                              Command command,
+                              ImmutableList<Command> executionPath,
                               CommandPart part,
                               InjectedValueAccess injectedValues,
                               Consumer<CommandValueImpl.Builder> valueAdder) {
@@ -464,7 +485,7 @@ public class CommandManagerImpl implements CommandManager {
         CommandValueImpl.Builder builder = CommandValueImpl.builder();
         valueAdder.accept(builder);
         parameters.addValue(part, builder
-            .commandContext(command)
+            .commandContext(executionPath)
             .partContext(part)
             .injectedValues(injectedValues)
             .manager(this)

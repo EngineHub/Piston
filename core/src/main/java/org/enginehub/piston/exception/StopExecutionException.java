@@ -19,6 +19,8 @@
 
 package org.enginehub.piston.exception;
 
+import com.google.common.collect.ImmutableList;
+import net.kyori.text.Component;
 import org.enginehub.piston.Command;
 
 import javax.annotation.Nullable;
@@ -27,11 +29,11 @@ import javax.annotation.Nullable;
  * Signal to stop executing a command. Command reference not required.
  */
 public class StopExecutionException extends CommandException {
-    public StopExecutionException(String message) {
-        this(message, null);
+    public StopExecutionException(Component message) {
+        this(message, ImmutableList.of());
     }
 
-    public StopExecutionException(String message, @Nullable Command command) {
-        super(message, command);
+    public StopExecutionException(Component message, ImmutableList<Command> commands) {
+        super(message, commands);
     }
 }

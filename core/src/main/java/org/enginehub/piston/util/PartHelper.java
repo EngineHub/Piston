@@ -17,14 +17,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.impl;
+package org.enginehub.piston.util;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 
-import java.util.List;
+import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -32,10 +32,15 @@ import java.util.stream.Stream;
 
 public class PartHelper {
 
-    public static Stream<Component> getUsage(List<CommandPart> parts) {
+    /**
+     * Generate component representing the usage text for the given parts.
+     */
+    public static void appendUsage(Stream<CommandPart> parts, TextComponent.Builder output) {
         Stream.Builder<Component> other = Stream.builder();
         SortedSet<Character> flags = new TreeSet<>();
-        for (CommandPart part : parts) {
+        Iterator<CommandPart> iterator = parts.iterator();
+        while (iterator.hasNext()) {
+            CommandPart part = iterator.next();
             if (part instanceof NoArgCommandFlag) {
                 flags.add(((NoArgCommandFlag) part).getName());
             } else {
@@ -48,7 +53,14 @@ public class PartHelper {
                 .map(String::valueOf)
                 .collect(Collectors.joining("", "[-", "]")))
             .map(TextComponent::of);
-        return Stream.concat(flagsString, other.build());
+
+        Iterator<Component> usages = Stream.concat(flagsString, other.build()).iterator();
+        while (usages.hasNext()) {
+            output.append(usages.next());
+            if (usages.hasNext()) {
+                output.append(TextComponent.of(" "));
+            }
+        }
     }
 
 }
