@@ -45,7 +45,10 @@ public class DefaultCommandManagerService implements CommandManagerService {
     }
 
     private static CommandManagerService getDefaultService() {
-        ServiceLoader<CommandManagerService> loader = ServiceLoader.load(CommandManagerService.class);
+        ServiceLoader<CommandManagerService> loader = ServiceLoader.load(
+            CommandManagerService.class,
+            CommandManagerService.class.getClassLoader()
+        );
         return stream(loader.iterator())
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No default service available."));
