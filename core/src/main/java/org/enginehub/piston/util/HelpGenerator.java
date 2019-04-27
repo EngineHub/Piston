@@ -59,8 +59,9 @@ public class HelpGenerator {
 
         for (Iterator<Command> iterator = executionPath.iterator(); iterator.hasNext(); ) {
             Command command = iterator.next();
-            usage.append(TextComponent.of(command.getName(), ColorConfig.getMainText())).append(space());
+            usage.append(TextComponent.of(command.getName(), ColorConfig.getMainText()));
             if (iterator.hasNext()) {
+                usage.append(space());
                 // drop the sub-command part
                 Stream<CommandPart> parts = command.getParts().stream();
                 parts = parts.filter(x -> !(x instanceof SubCommandPart));
