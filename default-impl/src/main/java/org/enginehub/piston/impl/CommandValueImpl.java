@@ -27,6 +27,8 @@ import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ConversionResult;
+import org.enginehub.piston.converter.FailedConversion;
+import org.enginehub.piston.exception.ConversionFailedException;
 import org.enginehub.piston.exception.UsageException;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
@@ -94,12 +96,10 @@ abstract class CommandValueImpl implements CommandValue {
             checkState(converter.isPresent(), "No converter for %s", key);
             ConversionResult<T> convert = converter.get().convert(value, injectedValues());
             if (!convert.isSuccessful()) {
-                TextComponent.Builder message = TextComponent.builder("")
-                    .append(TextComponent.of("Invalid value for "))
-                    .append(partContext().getTextRepresentation())
-                    .append(TextComponent.of(", acceptable values are "))
-                    .append(converter.get().describeAcceptableArguments());
-                throw new UsageException(message.build(), commandContext());
+                throw new ConversionFailedException(commandContext(),
+                    partContext().getTextRepresentation(),
+                    converter.get(),
+                    (FailedConversion<?>) convert);
             }
             values.addAll(convert.get());
         }

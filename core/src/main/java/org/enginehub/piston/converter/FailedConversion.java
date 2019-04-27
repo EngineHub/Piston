@@ -22,6 +22,7 @@ package org.enginehub.piston.converter;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -84,8 +85,7 @@ public final class FailedConversion<T> extends ConversionResult<T> {
 
     @Override
     public Collection<T> get() {
-        throw new ConversionFailedException(error,
-            otherFailures.stream().map(FailedConversion::getError).collect(toList()));
+        throw FailedConversionMapper.mapOnto(NoSuchElementException::new, this);
     }
 
     @Override

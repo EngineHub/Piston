@@ -19,11 +19,18 @@
 
 package org.enginehub.piston.converter;
 
-import java.util.Collection;
+import java.util.function.Supplier;
 
-public class ConversionFailedException extends RuntimeException {
-    public ConversionFailedException(Throwable primaryCause, Collection<? extends Throwable> otherCauses) {
-        super("Conversion failed, reasons added in cause + suppressed exceptions", primaryCause);
-        otherCauses.forEach(this::addSuppressed);
+public class FailedConversionMapper {
+    public static <X extends Throwable> X mapOnto(Supplier<X> newThrowable, FailedConversion<?> conversion) {
+        X error = newThrowable.get();
+        error.initCause(conversion.getError());
+        conversion.getOtherFailures().forEach(f ->
+            error.addSuppressed(f.getError())
+        );
+        return error;
+    }
+
+    private FailedConversionMapper() {
     }
 }
