@@ -46,7 +46,8 @@ import static java.lang.invoke.MethodType.methodType;
 public class ArgumentConverters {
 
     private static final ArgumentConverter<String> STRING_ARGUMENT_CONVERTER =
-        SimpleArgumentConverter.from((s, c) -> SuccessfulConversion.fromSingle(s), "any text");
+        BaseArgumentConverter.fromSingle((s, c) -> s, "any text",
+            TypeToken.of(String.class));
 
     public static ArgumentConverter<String> forString() {
         return STRING_ARGUMENT_CONVERTER;
@@ -127,7 +128,7 @@ public class ArgumentConverters {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> SimpleArgumentConverter<T> converterForHandle(MethodHandle handle, Class<?> type) {
+    private static <T> BaseArgumentConverter<T> converterForHandle(MethodHandle handle, Class<?> type) {
         MethodType mType = handle.type();
         checkArgument(mType.parameterType(0).isAssignableFrom(String.class)
                 && mType.parameterType(1).isAssignableFrom(InjectedValueAccess.class)
@@ -143,9 +144,10 @@ public class ArgumentConverters {
             Throwables.throwIfUnchecked(throwable);
             throw new RuntimeException(throwable);
         }
-        return SimpleArgumentConverter.from(
+        return BaseArgumentConverter.from(
             converter,
-            "any " + CaseHelper.titleToSpacedLower(type.getSimpleName())
+            "any " + CaseHelper.titleToSpacedLower(type.getSimpleName()),
+            TypeToken.of((Class<T>) type)
         );
     }
 
@@ -187,9 +189,10 @@ public class ArgumentConverters {
         ArgumentConverters::constructorConverters,
         type -> {
             if (Objects.equals(type.wrap().getRawType(), Character.class)) {
-                return Optional.of(SimpleArgumentConverter.from(
-                    (s, c) -> SuccessfulConversion.fromSingle(s.charAt(0)),
-                    "any character"
+                return Optional.of(BaseArgumentConverter.fromSingle(
+                    (s, c) -> s.charAt(0),
+                    "any character",
+                    TypeToken.of(Character.class)
                 ));
             }
             return Optional.empty();

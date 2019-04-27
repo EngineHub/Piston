@@ -19,10 +19,14 @@
 
 package org.enginehub.piston.converter;
 
+import com.google.common.reflect.TypeToken;
 import net.kyori.text.Component;
 import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.inject.Key;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
 
@@ -33,8 +37,8 @@ public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    public ConversionResult<T> convert(String argument, InjectedValueAccess context) {
-        return delegate.convert(argument, context);
+    public ConversionResult<T> convert(Iterator<String> arguments, InjectedValueAccess context) {
+        return delegate.convert(arguments, context);
     }
 
     @Override
@@ -43,7 +47,12 @@ public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    public List<String> getSuggestions(String input) {
+    public TypeToken<? extends T> getType() {
+        return delegate.getType();
+    }
+
+    @Override
+    public Stream<String> getSuggestions(String input) {
         return delegate.getSuggestions(input);
     }
 }

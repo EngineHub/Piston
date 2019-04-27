@@ -87,7 +87,7 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
     /**
      * Check if this argument a <em>variable argument</em>.
      *
-     * That is, does it accept a variable amount of inputs, rather than one?F
+     * That is, does it accept a variable amount of inputs, rather than one?
      */
     public abstract boolean isVariable();
 

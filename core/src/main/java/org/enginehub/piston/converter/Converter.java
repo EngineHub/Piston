@@ -21,6 +21,8 @@ package org.enginehub.piston.converter;
 
 import org.enginehub.piston.inject.InjectedValueAccess;
 
+import java.util.Iterator;
+
 /**
  * Simplified interface to {@link ArgumentConverter}. Only contains the conversion.
  */
@@ -28,7 +30,7 @@ import org.enginehub.piston.inject.InjectedValueAccess;
 public interface Converter<T> {
 
     /**
-     * Converts the argument input to a collection of argument values.
+     * Converts the argument inputs to a collection of argument values.
      *
      * <p>
      * This method should be <em>pure</em>, i.e. it should not send any
@@ -36,10 +38,16 @@ public interface Converter<T> {
      * result in spurious error messages during parsing.
      * </p>
      *
-     * @param argument the argument input to convert
+     * <p>
+     * The converter must not be over-eager in accepting arguments. Any arguments
+     * consumed from the provided iterator will be considered taken by the converter if
+     * a successful result is returned, and will not be passed to another converter.
+     * </p>
+     *
+     * @param arguments the argument inputs to convert
      * @param context the context to convert in
      * @return the result of attempting to convert the argument
      */
-    ConversionResult<T> convert(String argument, InjectedValueAccess context);
+    ConversionResult<T> convert(Iterator<String> arguments, InjectedValueAccess context);
 
 }

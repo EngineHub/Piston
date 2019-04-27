@@ -409,8 +409,8 @@ public class CommandManagerImpl implements CommandManager {
                 char firstFlag = next.charAt(1);
                 if (!Character.isDigit(firstFlag) || parseCache.flags.containsKey(firstFlag)) {
                     // Pick out individual flags from the long-option form.
-                    consumeFlags(executionPath, context, parameters, parseCache, defaultsNeeded, argIter, next);
-                    continue;
+                        consumeFlags(executionPath, context, parameters, parseCache, defaultsNeeded, argIter, next);
+                        continue;
                 }
             }
 

@@ -19,10 +19,12 @@
 
 package org.enginehub.piston.converter;
 
+import com.google.common.reflect.TypeToken;
 import net.kyori.text.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Converts user input into an actual type. It can provide multiple
@@ -44,13 +46,18 @@ public interface ArgumentConverter<T> extends Converter<T> {
     Component describeAcceptableArguments();
 
     /**
+     * Get the type of the result that this converter produces.
+     */
+    TypeToken<? extends T> getType();
+
+    /**
      * Given {@code input} as the current input, provide some suggestions for the user.
      *
      * @param input the user's current input
      * @return suggestions for the user
      */
-    default List<String> getSuggestions(String input) {
-        return Collections.emptyList();
+    default Stream<String> getSuggestions(String input) {
+        return Stream.empty();
     }
 
 }
