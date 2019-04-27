@@ -136,13 +136,6 @@ fun Project.configureArtifactory() {
                 setPublishArtifacts(true)
             })
         })
-        resolve(delegateClosureOf<ResolverConfig> {
-            repository(delegateClosureOf<DoubleDelegateWrapper> {
-                invokeMethod("setRepoKey", "repo")
-                invokeMethod("setUsername", project.property("artifactory_user"))
-                invokeMethod("setPassword", project.property("artifactory_password"))
-            })
-        })
     }
     tasks.named<ArtifactoryTask>("artifactoryPublish") {
         skip = true
