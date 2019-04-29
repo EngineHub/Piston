@@ -38,7 +38,6 @@ import org.enginehub.piston.part.SubCommandPart;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static net.kyori.text.Component.newline;
 import static net.kyori.text.Component.space;
@@ -108,13 +107,22 @@ public class HelpGenerator {
                     name = metadata.getCalledName();
                 }
             }
-            usage.append(TextComponent.of(name, ColorConfig.getMainText())).append(space());
-            Stream<CommandPart> parts = command.getParts().stream();
+            usage.append(TextComponent.of(name, ColorConfig.getMainText()));
+            List<CommandPart> reducedParts;
             if (iterator.hasNext()) {
                 // drop the sub-command part
-                parts = parts.filter(x -> !(x instanceof SubCommandPart));
+                reducedParts = command.getParts().stream()
+                    .filter(x -> !(x instanceof SubCommandPart))
+                    .collect(Collectors.toList());
+            } else {
+                reducedParts = command.getParts();
             }
-            PartHelper.appendUsage(parts, usage);
+            // append a space before parts, if needed
+            if (!reducedParts.isEmpty()) {
+                usage.append(space());
+            }
+            PartHelper.appendUsage(reducedParts.stream(), usage);
+            // append a space after parts/command, if needed
             if (iterator.hasNext()) {
                 usage.append(space());
             }
