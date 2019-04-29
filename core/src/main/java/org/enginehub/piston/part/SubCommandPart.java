@@ -30,6 +30,8 @@ import org.enginehub.piston.Command;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
+
 @AutoValue
 public abstract class SubCommandPart implements CommandPart {
 
@@ -86,14 +88,11 @@ public abstract class SubCommandPart implements CommandPart {
         TextComponent.Builder builder = TextComponent.builder("")
             .color(ColorConfig.getPartWrapping());
         builder.append(TextComponent.of(isRequired() ? "<" : "["));
-        for (Iterator<Command> iterator = getCommands().iterator(); iterator.hasNext(); ) {
-            Command command = iterator.next();
-
-            builder.append(TextComponent.of(command.getName(), ColorConfig.getMainText()));
-            if (iterator.hasNext()) {
-                builder.append(TextComponent.of("|", ColorConfig.getTextModifier()));
-            }
-        }
+        builder.append(getCommands().stream()
+            .map(Command::getName)
+            .map(n -> TextComponent.of(n, ColorConfig.getMainText()))
+            .collect(joiningWithBar())
+            .children());
         builder.append(TextComponent.of(isRequired() ? ">" : "]"));
         return builder.build();
     }

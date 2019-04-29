@@ -19,38 +19,41 @@
 
 package org.enginehub.piston.converter;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
+
 /**
- * Converts using a BiMap.
+ * Converts using a Map.
  */
-public final class BiMapArgumentConverter<T> implements ArgumentConverter<T> {
+public final class MapArgumentConverter<T> implements ArgumentConverter<T> {
 
     /**
      * Construct a converter for simple string choices from a set.
      */
-    public static BiMapArgumentConverter<String> forChoices(Set<String> choices) {
-        ImmutableBiMap.Builder<String, String> map = ImmutableBiMap.builder();
+    public static MapArgumentConverter<String> forChoices(Set<String> choices) {
+        ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
         choices.forEach(c -> map.put(c, c));
         return from(map.build());
     }
 
-    public static <T> BiMapArgumentConverter<T> from(BiMap<String, T> map) {
-        return new BiMapArgumentConverter<>(map);
+    public static <T> MapArgumentConverter<T> from(Map<String, T> map) {
+        return new MapArgumentConverter<>(map);
     }
 
-    private final ImmutableBiMap<String, T> map;
+    private final ImmutableMap<String, T> map;
 
-    private BiMapArgumentConverter(BiMap<String, T> map) {
-        this.map = ImmutableBiMap.copyOf(map);
+    private MapArgumentConverter(Map<String, T> map) {
+        this.map = ImmutableMap.copyOf(map);
     }
 
     @Override
@@ -64,7 +67,9 @@ public final class BiMapArgumentConverter<T> implements ArgumentConverter<T> {
 
     @Override
     public Component describeAcceptableArguments() {
-        return TextComponent.of(String.join("|", map.keySet()));
+        return map.keySet().stream()
+            .map(content -> TextComponent.of(content, ColorConfig.getMainText()))
+            .collect(joiningWithBar());
     }
 
     @Override
