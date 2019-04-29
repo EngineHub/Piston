@@ -110,6 +110,8 @@ class CommandParser {
     private ImmutableSet.Builder<CommandPart> argBindings = ImmutableSet.builder();
     @Nullable
     private PerCommandDetails perCommandDetails;
+    @Nullable
+    private CommandArgument lastFailedOptional;
 
     CommandParser(CommandManager manager, CommandInfoCache commandInfoCache, Command initial,
                   CommandMetadata metadata, InjectedValueAccess context) {
@@ -141,6 +143,18 @@ class CommandParser {
 
     private UsageException tooManyArgumentsException() {
         return usageException(TextComponent.of("Too many arguments."));
+    }
+
+    private ConversionFailedException conversionFailedException(CommandArgument nextArg, String token) {
+        // TODO: Make this print all converters
+        ArgumentConverter<?> converter = nextArg.getTypes().stream()
+            .map(k -> manager.getConverter(k).orElse(null))
+            .filter(Objects::nonNull)
+            .findFirst().orElseThrow(IllegalStateException::new);
+        return new ConversionFailedException(buildParseResult(),
+            nextArg.getTextRepresentation(),
+            converter,
+            (FailedConversion<?>) converter.convert(token, context));
     }
 
     private PerCommandDetails perCommandDetails() {
@@ -267,7 +281,13 @@ class CommandParser {
             if (!parseRegularArgument(token)) {
                 log("Failed to parse {} as regular argument, attempting sub-command.", token);
                 // Hit end of parts. Maybe this belongs to sub-commands?
-                parseSubCommand(token);
+                if (!parseSubCommand(token)) {
+                    if (lastFailedOptional != null) {
+                        // fail on type-conversion to this instead
+                        throw conversionFailedException(lastFailedOptional, token);
+                    }
+                    throw tooManyArgumentsException();
+                }
             }
         }
         log("Finished looking at arguments. Finalizing command.");
@@ -284,10 +304,10 @@ class CommandParser {
         return !Character.isDigit(firstFlag) || perCommandDetails().commandInfo.flags.containsKey(firstFlag);
     }
 
-    private void parseSubCommand(String token) {
+    private boolean parseSubCommand(String token) {
         CommandInfo commandInfo = perCommandDetails().commandInfo;
         if (!commandInfo.subCommandPart.isPresent()) {
-            throw tooManyArgumentsException();
+            return false;
         }
         ImmutableMap<String, Command> subCommands = commandInfo.subCommands;
         Command sub = subCommands.get(token);
@@ -304,6 +324,7 @@ class CommandParser {
             perCommandDetails().remainingRequiredParts--;
         }
         switchToCommand(sub);
+        return true;
     }
 
     private boolean parseRegularArgument(String token) {
@@ -318,15 +339,7 @@ class CommandParser {
             if (nextArg.isRequired()) {
                 // good, we can just satisfy it
                 if (!isAcceptedByTypeParsers(nextArg, token)) {
-                    // TODO: Make this print all converters
-                    ArgumentConverter<?> converter = nextArg.getTypes().stream()
-                        .map(k -> manager.getConverter(k).orElse(null))
-                        .filter(Objects::nonNull)
-                        .findFirst().orElseThrow(IllegalStateException::new);
-                    throw new ConversionFailedException(buildParseResult(),
-                        nextArg.getTextRepresentation(),
-                        converter,
-                        (FailedConversion<?>) converter.convert(token, context));
+                    throw conversionFailedException(nextArg, token);
                 }
                 details.remainingRequiredParts--;
                 addValueFull(nextArg, v -> v.values(consumeArguments(nextArg, token)));
@@ -359,6 +372,8 @@ class CommandParser {
             }
             log("parseRegularArgument: [{}] type-parser SOFT_FAIL:" +
                 " types={}", name, nextArg.getTypes());
+            // store it in case no required arguments match
+            lastFailedOptional = nextArg;
         }
         return false;
     }
