@@ -69,7 +69,7 @@ public class ComponentHelper {
 
         private TextComponent.Builder initBuilder() {
             if (value == null) {
-                value = TextComponent.builder();
+                value = TextComponent.builder("");
             } else {
                 value.append(delimiter);
             }
