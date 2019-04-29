@@ -141,13 +141,12 @@ public class HelpGenerator {
         builder.append(TextComponent.of("\nUsage: "));
 
         builder.append(getUsage());
-        builder.append(newline());
 
         appendArguments(builder);
 
         appendFlags(builder);
 
-        primary.getFooter().ifPresent(footer -> builder.append(footer).append(newline()));
+        primary.getFooter().ifPresent(footer -> builder.append(newline()).append(footer));
 
         return builder.build();
     }
@@ -159,8 +158,10 @@ public class HelpGenerator {
             .map(x -> (CommandArgument) x)
             .collect(Collectors.toList());
         if (args.size() > 0) {
+            builder.append(newline());
             builder.append(TextComponent.of("Arguments:\n"));
-            for (CommandArgument arg : args) {
+            for (Iterator<CommandArgument> iterator = args.iterator(); iterator.hasNext(); ) {
+                CommandArgument arg = iterator.next();
                 builder.append(TextComponent.of("  ")).append(arg.getTextRepresentation());
                 if (arg.getDefaults().size() > 0) {
                     builder.append(TextComponent.of(" (defaults to "));
@@ -179,8 +180,10 @@ public class HelpGenerator {
                     builder.append(TextComponent.of(")"));
                 }
                 builder.append(TextComponent.of(": "))
-                    .append(arg.getDescription())
-                    .append(newline());
+                    .append(arg.getDescription());
+                if (iterator.hasNext()) {
+                    builder.append(newline());
+                }
             }
         }
     }
@@ -192,13 +195,17 @@ public class HelpGenerator {
             .map(x -> (CommandFlag) x)
             .collect(Collectors.toList());
         if (flags.size() > 0) {
+            builder.append(newline());
             builder.append(TextComponent.of("Flags:\n"));
-            for (CommandFlag flag : flags) {
+            for (Iterator<CommandFlag> iterator = flags.iterator(); iterator.hasNext(); ) {
+                CommandFlag flag = iterator.next();
                 // produces text like "-f: Some description"
                 builder.append(TextComponent.of("  -" + flag.getName(), ColorConfig.getMainText()))
                     .append(TextComponent.of(": "))
-                    .append(flag.getDescription())
-                    .append(newline());
+                    .append(flag.getDescription());
+                if (iterator.hasNext()) {
+                    builder.append(newline());
+                }
             }
         }
     }
