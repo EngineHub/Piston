@@ -14,6 +14,8 @@ dependencies {
 
     "testImplementation"(Libs.compileTesting)
     "testImplementation"(Libs.mockito)
+    "testImplementation"(Libs.logbackCore)
+    "testImplementation"(Libs.logbackClassic)
     "testImplementation"(project(":default-impl"))
     "testAnnotationProcessor"(project(":core-ap:processor"))
 }

@@ -45,6 +45,7 @@ abstract class CommandImpl implements Command {
             .footer(null)
             .condition(Condition.TRUE)
             .name(name)
+            .aliases(ImmutableList.of())
             .parts(ImmutableList.of())
             .action(NULL_ACTION);
     }

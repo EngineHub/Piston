@@ -24,6 +24,7 @@ import com.google.common.collect.Iterables;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
+import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.util.HelpGenerator;
 
@@ -38,11 +39,11 @@ public class NoSuchFlagException extends UsageException {
             .collect(joining());
     }
 
-    private static Component getMessage(ImmutableList<Command> commands, char requestedFlag) {
+    private static Component getMessage(CommandParseResult parseResult, char requestedFlag) {
         TextComponent.Builder message = TextComponent.builder("");
         message.append(TextComponent.of("Flag '" + requestedFlag + "' is not a valid flag for "));
-        message.append(HelpGenerator.create(commands).getFullName());
-        String allFlags = getAllFlags(commands);
+        message.append(HelpGenerator.create(parseResult).getFullName());
+        String allFlags = getAllFlags(parseResult.getExecutionPath());
         message.append(TextComponent.of(
             allFlags.isEmpty()
                 ? ", as it does not have any flags"
@@ -53,8 +54,8 @@ public class NoSuchFlagException extends UsageException {
 
     private final char requestedFlag;
 
-    public NoSuchFlagException(ImmutableList<Command> command, char requestedFlag) {
-        super(getMessage(command, requestedFlag), command);
+    public NoSuchFlagException(CommandParseResult parseResult, char requestedFlag) {
+        super(getMessage(parseResult, requestedFlag), parseResult);
         this.requestedFlag = requestedFlag;
     }
 

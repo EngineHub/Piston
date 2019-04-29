@@ -19,7 +19,11 @@
 
 package org.enginehub.piston;
 
+import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.converter.ArgumentConverter;
+import org.enginehub.piston.exception.CommandException;
+import org.enginehub.piston.exception.CommandExecutionException;
+import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 
@@ -119,6 +123,8 @@ public interface CommandManager {
      */
     Optional<Command> getCommand(String name);
 
+    CommandParseResult parse(InjectedValueAccess context, List<String> args);
+
     /**
      * Execute a command, given a set of arguments and a context.
      *
@@ -131,6 +137,26 @@ public interface CommandManager {
      * @param args the arguments to include
      * @return the count from the executed command
      */
-    int execute(InjectedValueAccess context, List<String> args);
+    default int execute(InjectedValueAccess context, List<String> args) {
+        CommandParseResult parse = parse(context, args);
+
+        try {
+            // validate conditions
+            ImmutableList<Command> executionPath = parse.getExecutionPath();
+            for (int i = 0; i < executionPath.size(); i++) {
+                Command command = executionPath.get(i);
+                if (!command.getCondition().satisfied(parse.getParameters())) {
+                    throw new ConditionFailedException(parse.getExecutionPath()
+                        .subList(0, i + 1));
+                }
+            }
+
+            return parse.getPrimaryCommand().getAction().run(parse.getParameters());
+        } catch (CommandException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CommandExecutionException(e, parse.getExecutionPath());
+        }
+    }
 
 }

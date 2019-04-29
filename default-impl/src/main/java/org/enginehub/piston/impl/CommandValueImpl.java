@@ -20,22 +20,22 @@
 package org.enginehub.piston.impl;
 
 import com.google.auto.value.AutoValue;
+import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.TextComponent;
-import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
+import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ConversionResult;
 import org.enginehub.piston.converter.FailedConversion;
 import org.enginehub.piston.exception.ConversionFailedException;
-import org.enginehub.piston.exception.UsageException;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandPart;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -51,7 +51,7 @@ abstract class CommandValueImpl implements CommandValue {
 
         Builder manager(CommandManager manager);
 
-        Builder commandContext(Collection<Command> ctx);
+        Builder commandContextSupplier(Supplier<CommandParseResult> ctx);
 
         Builder partContext(CommandPart ctx);
 
@@ -72,7 +72,12 @@ abstract class CommandValueImpl implements CommandValue {
 
     abstract CommandManager manager();
 
-    abstract ImmutableList<Command> commandContext();
+    abstract Supplier<CommandParseResult> commandContextSupplier();
+
+    @Memoized
+    CommandParseResult commandContext() {
+        return commandContextSupplier().get();
+    }
 
     abstract CommandPart partContext();
 

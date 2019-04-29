@@ -19,27 +19,38 @@
 
 package org.enginehub.piston.exception;
 
-import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
-import org.enginehub.piston.Command;
+import org.enginehub.piston.CommandParseResult;
 
 /**
  * Parent class for all usage-related exceptions.
+ *
+ * Provides a partially complete parsing result to assist in providing better help messages.
  */
 public class UsageException extends CommandException {
-    public UsageException(ImmutableList<Command> commands) {
-        super(commands);
+    private final CommandParseResult commandParseResult;
+
+    public UsageException(CommandParseResult commandParseResult) {
+        super(commandParseResult.getExecutionPath());
+        this.commandParseResult = commandParseResult;
     }
 
-    public UsageException(Component message, ImmutableList<Command> commands) {
-        super(message, commands);
+    public UsageException(Component message, CommandParseResult commandParseResult) {
+        super(message, commandParseResult.getExecutionPath());
+        this.commandParseResult = commandParseResult;
     }
 
-    public UsageException(Component message, Throwable cause, ImmutableList<Command> commands) {
-        super(message, cause, commands);
+    public UsageException(Component message, Throwable cause, CommandParseResult commandParseResult) {
+        super(message, cause, commandParseResult.getExecutionPath());
+        this.commandParseResult = commandParseResult;
     }
 
-    public UsageException(Throwable cause, ImmutableList<Command> commands) {
-        super(cause, commands);
+    public UsageException(Throwable cause, CommandParseResult commandParseResult) {
+        super(cause, commandParseResult.getExecutionPath());
+        this.commandParseResult = commandParseResult;
+    }
+
+    public CommandParseResult getCommandParseResult() {
+        return commandParseResult;
     }
 }

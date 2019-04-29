@@ -20,17 +20,21 @@
 package org.enginehub.piston.util;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.enginehub.piston.ArgBinding;
 import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
+import org.enginehub.piston.CommandMetadata;
+import org.enginehub.piston.CommandParameters;
+import org.enginehub.piston.CommandParseResult;
+import org.enginehub.piston.NoInputCommandParameters;
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.SubCommandPart;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,14 +45,36 @@ import static net.kyori.text.Component.space;
 
 public class HelpGenerator {
 
-    public static HelpGenerator create(Collection<Command> executionPath) {
-        return new HelpGenerator(ImmutableList.copyOf(executionPath));
+    public static HelpGenerator create(Iterable<Command> commands) {
+        ImmutableList<Command> executionPath = ImmutableList.copyOf(commands);
+        return create(new CommandParseResult() {
+            @Override
+            public ImmutableList<Command> getExecutionPath() {
+                return executionPath;
+            }
+
+            @Override
+            public ImmutableList<ArgBinding> getBoundArguments() {
+                return ImmutableList.of();
+            }
+
+            @Override
+            public CommandParameters getParameters() {
+                return NoInputCommandParameters.builder()
+                    .injectedValues(InjectedValueAccess.EMPTY)
+                    .build();
+            }
+        });
     }
 
-    private final ImmutableList<Command> executionPath;
+    public static HelpGenerator create(CommandParseResult parseResult) {
+        return new HelpGenerator(parseResult);
+    }
 
-    private HelpGenerator(ImmutableList<Command> executionPath) {
-        this.executionPath = executionPath;
+    private final CommandParseResult parseResult;
+
+    private HelpGenerator(CommandParseResult parseResult) {
+        this.parseResult = parseResult;
     }
 
     /**
@@ -57,16 +83,11 @@ public class HelpGenerator {
     public Component getFullName() {
         TextComponent.Builder usage = TextComponent.builder("");
 
-        for (Iterator<Command> iterator = executionPath.iterator(); iterator.hasNext(); ) {
-            Command command = iterator.next();
-            usage.append(TextComponent.of(command.getName(), ColorConfig.getMainText()));
-            if (iterator.hasNext()) {
-                usage.append(space());
-                // drop the sub-command part
-                Stream<CommandPart> parts = command.getParts().stream();
-                parts = parts.filter(x -> !(x instanceof SubCommandPart));
-                PartHelper.appendUsage(parts, usage);
-            }
+        usage.append(TextComponent.of(parseResult.getExecutionPath().get(0).getName(), ColorConfig.getMainText()));
+
+        for (String input : parseResult.getOriginalArguments()) {
+            usage.append(space());
+            usage.append(TextComponent.of(input, ColorConfig.getMainText()));
         }
 
         return usage.build();
@@ -78,22 +99,32 @@ public class HelpGenerator {
     public Component getUsage() {
         TextComponent.Builder usage = TextComponent.builder("");
 
-        for (Iterator<Command> iterator = executionPath.iterator(); iterator.hasNext(); ) {
+        for (Iterator<Command> iterator = parseResult.getExecutionPath().iterator(); iterator.hasNext(); ) {
             Command command = iterator.next();
-            usage.append(TextComponent.of(command.getName(), ColorConfig.getMainText())).append(space());
+            String name = command.getName();
+            if (command == parseResult.getExecutionPath().get(0)) {
+                CommandMetadata metadata = parseResult.getParameters().getMetadata();
+                if (metadata != null) {
+                    name = metadata.getCalledName();
+                }
+            }
+            usage.append(TextComponent.of(name, ColorConfig.getMainText())).append(space());
             Stream<CommandPart> parts = command.getParts().stream();
             if (iterator.hasNext()) {
                 // drop the sub-command part
                 parts = parts.filter(x -> !(x instanceof SubCommandPart));
             }
             PartHelper.appendUsage(parts, usage);
+            if (iterator.hasNext()) {
+                usage.append(space());
+            }
         }
 
         return usage.build();
     }
 
     public Component getFullHelp() {
-        Command primary = Iterables.getLast(executionPath);
+        Command primary = parseResult.getPrimaryCommand();
         TextComponent.Builder builder = TextComponent.builder("")
             .color(ColorConfig.getHelpText());
 
@@ -114,7 +145,7 @@ public class HelpGenerator {
     }
 
     private void appendArguments(TextComponent.Builder builder) {
-        Command primary = Iterables.getLast(executionPath);
+        Command primary = parseResult.getPrimaryCommand();
         List<CommandArgument> args = primary.getParts().stream()
             .filter(x -> x instanceof CommandArgument)
             .map(x -> (CommandArgument) x)
@@ -147,7 +178,7 @@ public class HelpGenerator {
     }
 
     private void appendFlags(TextComponent.Builder builder) {
-        Command primary = Iterables.getLast(executionPath);
+        Command primary = parseResult.getPrimaryCommand();
         List<CommandFlag> flags = primary.getParts().stream()
             .filter(x -> x instanceof CommandFlag)
             .map(x -> (CommandFlag) x)
