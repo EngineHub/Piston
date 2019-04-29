@@ -328,7 +328,6 @@ class CommandParser {
                         converter,
                         (FailedConversion<?>) converter.convert(token, context));
                 }
-                bind(nextArg);
                 details.remainingRequiredParts--;
                 addValueFull(nextArg, v -> v.values(consumeArguments(nextArg, token)));
                 return true;
@@ -354,7 +353,6 @@ class CommandParser {
             log("parseRegularArgument: [{}] using type-parser test", name);
             if (isAcceptedByTypeParsers(nextArg, token)) {
                 log("parseRegularArgument: [{}] passed type-parser test", name);
-                bind(nextArg);
                 details.defaultsNeeded.remove(nextArg);
                 addValueFull(nextArg, v -> v.values(consumeArguments(nextArg, token)));
                 return true;
@@ -367,11 +365,13 @@ class CommandParser {
 
     private ImmutableList<String> consumeArguments(CommandArgument nextArg, String first) {
         ImmutableList.Builder<String> result = ImmutableList.builder();
+        bind(nextArg);
         result.add(first);
         if (nextArg.isVariable()) {
             while (hasNextArgument()) {
                 String next = nextArgument();
                 if (isAcceptedByTypeParsers(nextArg, next)) {
+                    bind(nextArg);
                     result.add(next);
                 } else {
                     unconsumeArgument();
