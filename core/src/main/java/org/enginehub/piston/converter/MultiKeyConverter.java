@@ -19,10 +19,12 @@
 
 package org.enginehub.piston.converter;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
@@ -34,15 +36,32 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Multimaps.asMap;
 import static org.enginehub.piston.converter.SuggestionHelper.limitByPrefix;
 import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 
 public class MultiKeyConverter<E> implements ArgumentConverter<E> {
 
-    public static <E> MultiKeyConverter<E> from(SetMultimap<E, String> keysByItems) {
-        return from(keysByItems.keySet(), keysByItems::get);
+    public static <E> Builder<E> builder(SetMultimap<E, String> items) {
+        return new AutoValue_MultiKeyConverter_Arguments.Builder<E>()
+            .errorMessage(arg -> "Not a valid argument: " + arg)
+            .items(items);
+    }
+
+    public static <E> Builder<E> builder(Collection<E> items,
+                                         Function<E, Set<String>> lookupKeys) {
+        ImmutableSetMultimap.Builder<E, String> map = ImmutableSetMultimap.builder();
+        for (E item : items) {
+            map.putAll(item, lookupKeys.apply(item));
+        }
+        return builder(map.build());
+    }
+
+    public static <E> MultiKeyConverter<E> from(SetMultimap<E, String> items) {
+        return from(items, null);
     }
 
     public static <E> MultiKeyConverter<E> from(Collection<E> items,
@@ -50,15 +69,57 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
         return from(items, lookupKeys, null);
     }
 
-    public static <E> MultiKeyConverter<E> from(SetMultimap<E, String> keysByItems,
+    public static <E> MultiKeyConverter<E> from(SetMultimap<E, String> items,
                                                 @Nullable E unknownValue) {
-        return from(keysByItems.keySet(), keysByItems::get, unknownValue);
+        return builder(items).unknownValue(unknownValue).build();
     }
 
     public static <E> MultiKeyConverter<E> from(Collection<E> items,
                                                 Function<E, Set<String>> lookupKeys,
                                                 @Nullable E unknownValue) {
-        return new MultiKeyConverter<>(items, lookupKeys, unknownValue);
+        return builder(items, lookupKeys).unknownValue(unknownValue).build();
+    }
+
+    public interface Builder<E> {
+        Builder<E> items(SetMultimap<E, String> items);
+
+        Builder<E> unknownValue(@Nullable E unknownValue);
+
+        Builder<E> errorMessage(UnaryOperator<String> handler);
+
+        MultiKeyConverter<E> build();
+    }
+
+    @AutoValue
+    abstract static class Arguments<E> {
+
+        @AutoValue.Builder
+        interface Builder<E> extends MultiKeyConverter.Builder<E> {
+
+            @Override
+            Builder<E> items(SetMultimap<E, String> items);
+
+            @Override
+            Builder<E> unknownValue(@Nullable E unknownValue);
+
+            @Override
+            Builder<E> errorMessage(UnaryOperator<String> handler);
+
+            Arguments<E> autoBuild();
+
+            @Override
+            default MultiKeyConverter<E> build() {
+                return new MultiKeyConverter<>(autoBuild());
+            }
+        }
+
+        abstract ImmutableSetMultimap<E, String> items();
+
+        @Nullable
+        abstract E unknownValue();
+
+        abstract UnaryOperator<String> errorMessage();
+
     }
 
     private final Component choices;
@@ -66,26 +127,26 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
     private final ImmutableMap<String, E> map;
     @Nullable
     private final E unknownValue;
+    private final UnaryOperator<String> errorMessage;
 
-    private MultiKeyConverter(Collection<E> items,
-                              Function<E, Set<String>> lookupKeys,
-                              @Nullable E unknownValue) {
+    private MultiKeyConverter(Arguments<E> arguments) {
         ImmutableSortedMap.Builder<String, E> map = ImmutableSortedMap.orderedBy(String.CASE_INSENSITIVE_ORDER);
         ImmutableSet.Builder<String> primaryKeysBuilder = ImmutableSet.builder();
-        for (E e : Iterables.filter(items, it -> it != unknownValue)) {
-            Set<String> keys = lookupKeys.apply(e);
-            checkState(keys.size() > 0, "No lookup keys for value %s", e);
-            primaryKeysBuilder.add(keys.iterator().next());
-            for (String key : keys) {
-                map.put(key, e);
-            }
-        }
+        Maps.filterKeys(asMap(arguments.items()), k -> k != arguments.unknownValue())
+            .forEach((item, keys) -> {
+                checkState(keys.size() > 0, "No lookup keys for value %s", item);
+                primaryKeysBuilder.add(keys.iterator().next());
+                for (String key : keys) {
+                    map.put(key, item);
+                }
+            });
         this.primaryKeys = primaryKeysBuilder.build();
         this.choices = primaryKeys.stream()
             .map(choice -> TextComponent.of(choice, ColorConfig.getMainText()))
             .collect(joiningWithBar());
         this.map = map.build();
-        this.unknownValue = unknownValue;
+        this.unknownValue = arguments.unknownValue();
+        this.errorMessage = arguments.errorMessage();
     }
 
     @Override
@@ -102,7 +163,7 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
     public ConversionResult<E> convert(String argument, InjectedValueAccess context) {
         E result = map.getOrDefault(argument, unknownValue);
         return result == null
-            ? FailedConversion.from(new IllegalArgumentException("Not a valid choice: " + argument))
+            ? FailedConversion.from(new IllegalArgumentException(errorMessage.apply(argument)))
             : SuccessfulConversion.fromSingle(result);
     }
 }
