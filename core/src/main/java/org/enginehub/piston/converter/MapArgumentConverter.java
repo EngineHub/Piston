@@ -28,8 +28,8 @@ import org.enginehub.piston.inject.InjectedValueAccess;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static org.enginehub.piston.converter.SuggestionHelper.limitByPrefix;
 import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 
 /**
@@ -74,8 +74,6 @@ public final class MapArgumentConverter<T> implements ArgumentConverter<T> {
 
     @Override
     public List<String> getSuggestions(String input) {
-        return map.keySet().stream()
-            .filter(s -> s.startsWith(input))
-            .collect(Collectors.toList());
+        return limitByPrefix(map.keySet().stream(), input);
     }
 }

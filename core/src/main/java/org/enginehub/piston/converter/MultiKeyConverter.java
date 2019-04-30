@@ -33,9 +33,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.enginehub.piston.converter.SuggestionHelper.limitByPrefix;
 import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 
 public class MultiKeyConverter<E> implements ArgumentConverter<E> {
@@ -85,9 +85,7 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
 
     @Override
     public List<String> getSuggestions(String input) {
-        return primaryKeys.stream()
-            .filter(s -> s.startsWith(input))
-            .collect(Collectors.toList());
+        return limitByPrefix(primaryKeys.stream(), input);
     }
 
     @Override
