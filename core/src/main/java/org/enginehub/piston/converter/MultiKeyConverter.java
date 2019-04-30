@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.SetMultimap;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.ColorConfig;
@@ -40,9 +41,18 @@ import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 
 public class MultiKeyConverter<E> implements ArgumentConverter<E> {
 
+    public static <E> MultiKeyConverter<E> from(SetMultimap<E, String> keysByItems) {
+        return from(keysByItems.keySet(), keysByItems::get);
+    }
+
     public static <E> MultiKeyConverter<E> from(Collection<E> items,
                                                 Function<E, Set<String>> lookupKeys) {
         return from(items, lookupKeys, null);
+    }
+
+    public static <E> MultiKeyConverter<E> from(SetMultimap<E, String> keysByItems,
+                                                @Nullable E unknownValue) {
+        return from(keysByItems.keySet(), keysByItems::get, unknownValue);
     }
 
     public static <E> MultiKeyConverter<E> from(Collection<E> items,
