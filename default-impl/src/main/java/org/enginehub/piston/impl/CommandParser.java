@@ -179,7 +179,7 @@ class CommandParser {
         }
         if (argIter.hasPrevious()) {
             ImmutableSet<CommandPart> binding = argBindings.build();
-            if (binding.isEmpty()) {
+            if (binding.isEmpty() && !currentArgument().equals("--")) {
                 throw new IllegalStateException("Argument never bound: " + currentArgument());
             }
             parseResult.addArgument(ArgBindingImpl.builder()
