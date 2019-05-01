@@ -296,12 +296,19 @@ class CommandParser {
     }
 
     private boolean isFlag(String token) {
-        if (token.length() <= 1 || !token.startsWith("-")
-            || token.equals("--") || !perCommandDetails().canMatchFlags) {
+        if (token.length() <= 1 || !perCommandDetails().canMatchFlags) {
             return false;
         }
-        char firstFlag = token.charAt(1);
-        return !Character.isDigit(firstFlag) || perCommandDetails().commandInfo.flags.containsKey(firstFlag);
+        if (!token.startsWith("-")) {
+            return false;
+        }
+        if (token.equals("--")) {
+            return true;
+        }
+
+        return token.codePoints()
+            .skip(1)
+            .allMatch(cp -> perCommandDetails().commandInfo.flags.containsKey((char) cp));
     }
 
     private boolean parseSubCommand(String token) {
