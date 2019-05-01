@@ -29,6 +29,7 @@ import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverters;
 import org.enginehub.piston.exception.NoSuchCommandException;
+import org.enginehub.piston.exception.UsageException;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.inject.MemoizingValueAccess;
@@ -174,7 +175,12 @@ public class CommandManagerImpl implements CommandManager {
                 return suggestCommands(name);
             }
             // parse also locks -- re-entrant lock required for this
-            parseResult = parse(context, args);
+            try {
+                parseResult = parse(context, args);
+            } catch (UsageException e) {
+                // perfect -- we have an input to suggest
+                parseResult = e.getCommandParseResult();
+            }
         } finally {
             lock.readLock().unlock();
         }
