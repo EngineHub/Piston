@@ -20,6 +20,7 @@
 package org.enginehub.piston.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
@@ -32,6 +33,7 @@ import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.inject.MemoizingValueAccess;
 import org.enginehub.piston.part.SubCommandPart;
+import org.enginehub.piston.suggestion.Suggestion;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -43,6 +45,9 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
+
+import static com.google.common.base.Preconditions.checkState;
+import static org.enginehub.piston.converter.SuggestionHelper.byPrefix;
 
 public class CommandManagerImpl implements CommandManager {
 
@@ -136,14 +141,14 @@ public class CommandManagerImpl implements CommandManager {
 
     @Override
     public Stream<Command> getAllCommands() {
-        ImmutableList<Command> allCommands;
+        ImmutableSet<Command> allCommands;
         lock.readLock().lock();
         try {
-            allCommands = ImmutableList.copyOf(commands.values());
+            allCommands = ImmutableSet.copyOf(commands.values());
         } finally {
             lock.readLock().unlock();
         }
-        return allCommands.stream().distinct();
+        return allCommands.stream();
     }
 
     @Override
@@ -154,6 +159,44 @@ public class CommandManagerImpl implements CommandManager {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    @Override
+    public ImmutableSet<Suggestion> getSuggestions(InjectedValueAccess context, List<String> args) {
+        Command command;
+        CommandParseResult parseResult;
+        lock.readLock().lock();
+        try {
+            String name = args.get(0);
+            command = commands.get(name);
+            if (command == null) {
+                // suggest on commands instead
+                return suggestCommands(name);
+            }
+            // parse also locks -- re-entrant lock required for this
+            parseResult = parse(context, args);
+        } finally {
+            lock.readLock().unlock();
+        }
+        List<String> reconstructedArguments = parseResult.getOriginalArguments();
+        // This makes no sense. Throw this case away.
+        checkState(reconstructedArguments.size() <= args.size(),
+            "Reconstructed arguments list bigger than original args list");
+        // And ask the command to suggest. In most cases this uses the default suggester.
+        return command.getSuggester().provideSuggestions(args, parseResult);
+    }
+
+    private ImmutableSet<Suggestion> suggestCommands(String name) {
+        return ImmutableSet.copyOf(
+            getAllCommands()
+                .map(Command::getName)
+                .filter(byPrefix(name))
+                .map(s -> Suggestion.builder()
+                    .suggestion(s)
+                    .replacedArgument(0)
+                    .build())
+                .iterator()
+        );
     }
 
     @Override

@@ -17,29 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.converter;
+@NonnullByDefault
+package org.enginehub.piston.suggestion;
 
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public class SuggestionHelper {
-
-    public static List<String> limitByPrefix(Stream<String> choices, String input) {
-        return choices.filter(byPrefix(input))
-            .collect(Collectors.toList());
-    }
-
-    // intended for use as stream.filter(byPrefix(input))
-    public static Predicate<String> byPrefix(String input) {
-        return s -> startsWithIgnoreCase(s, input);
-    }
-
-    private static boolean startsWithIgnoreCase(String whole, String prefix) {
-        return whole.regionMatches(true, 0, prefix, 0, prefix.length());
-    }
-
-    private SuggestionHelper() {
-    }
-}
+import org.enginehub.piston.util.NonnullByDefault;

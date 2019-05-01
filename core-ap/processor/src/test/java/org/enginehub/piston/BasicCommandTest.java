@@ -45,8 +45,7 @@ class BasicCommandTest {
     private <CMD> void testCommand(TestCommandConfig<CMD> config, InjectedValueAccess context) {
         CMD mock = mock(config.getCmdClass());
         CommandManager manager = DefaultCommandManagerService.getInstance().newCommandManager();
-        Optional.ofNullable(config.getManagerSetup())
-            .ifPresent(setup -> setup.accept(manager));
+        config.getManagerSetup().accept(manager);
         config.getRegistration().accept(manager, mock);
         manager.execute(
             context,

@@ -22,10 +22,10 @@ package org.enginehub.piston.impl;
 import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
 import com.google.common.collect.ImmutableList;
-import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.converter.ArgumentConverter;
+import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.converter.ConversionResult;
 import org.enginehub.piston.converter.FailedConversion;
 import org.enginehub.piston.exception.ConversionFailedException;
@@ -49,7 +49,7 @@ abstract class CommandValueImpl implements CommandValue {
     @AutoValue.Builder
     interface Builder {
 
-        Builder manager(CommandManager manager);
+        Builder manager(ArgumentConverterAccess manager);
 
         Builder commandContextSupplier(Supplier<CommandParseResult> ctx);
 
@@ -70,7 +70,7 @@ abstract class CommandValueImpl implements CommandValue {
     CommandValueImpl() {
     }
 
-    abstract CommandManager manager();
+    abstract ArgumentConverterAccess manager();
 
     abstract Supplier<CommandParseResult> commandContextSupplier();
 

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandValue;
+import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
@@ -61,6 +62,8 @@ abstract class CommandParametersImpl implements CommandParameters {
 
         Builder metadata(CommandMetadata metadata);
 
+        Builder converters(ArgumentConverterAccess converters);
+
         CommandParametersImpl build();
     }
 
@@ -74,6 +77,8 @@ abstract class CommandParametersImpl implements CommandParameters {
     abstract InjectedValueAccess injectedValues();
 
     abstract CommandMetadata metadata();
+
+    abstract ArgumentConverterAccess converters();
 
     @Override
     public final boolean has(CommandPart part) {
@@ -92,6 +97,11 @@ abstract class CommandParametersImpl implements CommandParameters {
     @Override
     public CommandMetadata getMetadata() {
         return metadata();
+    }
+
+    @Override
+    public ArgumentConverterAccess getConverters() {
+        return converters();
     }
 
     @Override

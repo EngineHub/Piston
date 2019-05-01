@@ -17,29 +17,45 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.converter;
+package org.enginehub.piston.suggestion;
 
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.google.auto.value.AutoValue;
 
-public class SuggestionHelper {
+/**
+ * Represents a suggestion.
+ */
+@AutoValue
+public abstract class Suggestion {
 
-    public static List<String> limitByPrefix(Stream<String> choices, String input) {
-        return choices.filter(byPrefix(input))
-            .collect(Collectors.toList());
+    public static Builder builder() {
+        return new AutoValue_Suggestion.Builder();
     }
 
-    // intended for use as stream.filter(byPrefix(input))
-    public static Predicate<String> byPrefix(String input) {
-        return s -> startsWithIgnoreCase(s, input);
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder suggestion(String suggestion);
+
+        Builder replacedArgument(int replaced);
+
+        Suggestion build();
+
     }
 
-    private static boolean startsWithIgnoreCase(String whole, String prefix) {
-        return whole.regionMatches(true, 0, prefix, 0, prefix.length());
+    Suggestion() {
     }
 
-    private SuggestionHelper() {
-    }
+    /**
+     * The suggestion value, to be inserted instead of the argument
+     * at index {@link #getReplacedArgument() replacedArgument}.
+     *
+     * @return the suggestion value
+     */
+    public abstract String getSuggestion();
+
+    /**
+     * The argument index to replace in the original input.
+     */
+    public abstract int getReplacedArgument();
+
 }

@@ -85,7 +85,6 @@ final class TestCommandConfig<CMD> {
         return this;
     }
 
-    @Nullable
     public Consumer<CommandManager> getManagerSetup() {
         return managerSetup;
     }

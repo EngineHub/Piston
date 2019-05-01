@@ -27,10 +27,10 @@ import com.google.common.collect.Iterators;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
-import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.converter.ArgumentConverter;
+import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.converter.FailedConversion;
 import org.enginehub.piston.exception.ConversionFailedException;
 import org.enginehub.piston.exception.NoSuchFlagException;
@@ -99,7 +99,7 @@ class CommandParser {
         }
     }
 
-    private final CommandManager manager;
+    private final ArgumentConverterAccess converters;
     private final CommandMetadata metadata;
     private final CommandParseResultImpl.Builder parseResult = CommandParseResultImpl.builder();
     private final CommandParametersImpl.Builder parameters = CommandParametersImpl.builder();
@@ -113,10 +113,10 @@ class CommandParser {
     @Nullable
     private CommandArgument lastFailedOptional;
 
-    CommandParser(CommandManager manager, CommandInfoCache commandInfoCache, Command initial,
+    CommandParser(ArgumentConverterAccess converters, CommandInfoCache commandInfoCache, Command initial,
                   CommandMetadata metadata, InjectedValueAccess context) {
         this.commandInfoCache = commandInfoCache;
-        this.manager = manager;
+        this.converters = converters;
         this.metadata = metadata;
         this.arguments = metadata.getArguments();
         this.argIter = this.arguments.listIterator();
@@ -129,6 +129,7 @@ class CommandParser {
             .parameters(parameters
                 .metadata(metadata)
                 .injectedValues(context)
+                .converters(converters)
                 .build())
             .build();
     }
@@ -148,7 +149,7 @@ class CommandParser {
     private ConversionFailedException conversionFailedException(CommandArgument nextArg, String token) {
         // TODO: Make this print all converters
         ArgumentConverter<?> converter = nextArg.getTypes().stream()
-            .map(k -> manager.getConverter(k).orElse(null))
+            .map(k -> converters.getConverter(k).orElse(null))
             .filter(Objects::nonNull)
             .findFirst().orElseThrow(IllegalStateException::new);
         return new ConversionFailedException(buildParseResult(),
@@ -417,7 +418,7 @@ class CommandParser {
         }
 
         return types.stream().anyMatch(type -> {
-            Optional<? extends ArgumentConverter<?>> argumentConverter = manager.getConverter(type);
+            Optional<? extends ArgumentConverter<?>> argumentConverter = converters.getConverter(type);
             if (!argumentConverter.isPresent()) {
                 throw new IllegalStateException("No argument converter for " + type);
             }
@@ -464,7 +465,7 @@ class CommandParser {
             .commandContextSupplier(this::buildParseResult)
             .partContext(part)
             .injectedValues(context)
-            .manager(manager)
+            .manager(converters)
             .build());
     }
 

@@ -20,6 +20,7 @@
 package org.enginehub.piston;
 
 import com.google.auto.value.AutoValue;
+import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
@@ -37,7 +38,9 @@ import java.util.Optional;
 public abstract class NoInputCommandParameters implements CommandParameters {
 
     public static Builder builder() {
-        return new AutoValue_NoInputCommandParameters.Builder();
+        return new AutoValue_NoInputCommandParameters.Builder()
+            .injectedValues(InjectedValueAccess.EMPTY)
+            .converters(ArgumentConverterAccess.EMPTY);
     }
 
     @AutoValue.Builder
@@ -46,6 +49,8 @@ public abstract class NoInputCommandParameters implements CommandParameters {
         Builder injectedValues(InjectedValueAccess values);
 
         Builder metadata(@Nullable CommandMetadata metadata);
+
+        Builder converters(ArgumentConverterAccess access);
 
         NoInputCommandParameters build();
     }
@@ -57,6 +62,8 @@ public abstract class NoInputCommandParameters implements CommandParameters {
 
     @Nullable
     abstract CommandMetadata metadata();
+
+    abstract ArgumentConverterAccess converters();
 
     @Override
     public boolean has(CommandPart part) {
@@ -75,7 +82,13 @@ public abstract class NoInputCommandParameters implements CommandParameters {
     }
 
     @Override
+    public ArgumentConverterAccess getConverters() {
+        return converters();
+    }
+
+    @Override
     public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
         return injectedValues().injectedValue(key, context);
     }
+
 }
