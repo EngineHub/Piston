@@ -26,7 +26,9 @@ dependencies {
     "kapt"(Libs.autoService)
 
     "testImplementation"(kotlin("stdlib-jdk8"))
-    "testImplementation"(Libs.compileTesting)
+    "testImplementation"(Libs.compileTesting) {
+        exclude("junit", "junit")
+    }
     "testImplementation"(Libs.mockito)
     "testImplementation"(Libs.logbackCore)
     "testImplementation"(Libs.logbackClassic)

@@ -34,7 +34,7 @@ import org.enginehub.piston.util.ValueProvider
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verify
 
-internal class BasicCommandTest {
+class BasicCommandTest {
 
     @Test
     fun noArgCommand() {

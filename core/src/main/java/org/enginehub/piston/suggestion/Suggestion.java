@@ -58,4 +58,9 @@ public abstract class Suggestion {
      */
     public abstract int getReplacedArgument();
 
+    /**
+     * Convert this suggestion back to a builder.
+     */
+    public abstract Builder toBuilder();
+
 }

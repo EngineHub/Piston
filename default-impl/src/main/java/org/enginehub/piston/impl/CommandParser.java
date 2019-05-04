@@ -125,6 +125,10 @@ class CommandParser {
     }
 
     private CommandParseResult buildParseResult() {
+        if (argBindings.build().size() > 0 && argIter.hasPrevious()) {
+            bindArgument();
+        }
+        fillInDefaults();
         return parseResult
             .parameters(parameters
                 .metadata(metadata)
@@ -179,18 +183,22 @@ class CommandParser {
             throw notEnoughArgumentsException();
         }
         if (argIter.hasPrevious()) {
-            ImmutableSet<CommandPart> binding = argBindings.build();
-            if (binding.isEmpty() && !currentArgument().equals("--")) {
-                throw new IllegalStateException("Argument never bound: " + currentArgument());
-            }
-            parseResult.addArgument(ArgBindingImpl.builder()
-                .input(currentArgument())
-                .parts(binding)
-                .build());
+            bindArgument();
         }
         String next = argIter.next();
         argBindings = ImmutableSet.builder();
         return next;
+    }
+
+    private void bindArgument() {
+        ImmutableSet<CommandPart> binding = argBindings.build();
+        if (binding.isEmpty() && !currentArgument().equals("--")) {
+            throw new IllegalStateException("Argument never bound: " + currentArgument());
+        }
+        parseResult.addArgument(ArgBindingImpl.builder()
+            .input(currentArgument())
+            .parts(binding)
+            .build());
     }
 
     private void unconsumeArgument() {
@@ -259,7 +267,6 @@ class CommandParser {
                     .collect(Collectors.joining(", "))));
             }
         }
-        fillInDefaults();
     }
 
     CommandParseResult parse() {

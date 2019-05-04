@@ -19,11 +19,25 @@
 
 package org.enginehub.piston.suggestion;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import org.enginehub.piston.CommandParseResult;
+import org.enginehub.piston.converter.ArgumentConverterAccess;
+import org.enginehub.piston.part.ArgAcceptingCommandFlag;
+import org.enginehub.piston.part.ArgAcceptingCommandPart;
+import org.enginehub.piston.part.CommandFlag;
+import org.enginehub.piston.part.CommandPart;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Default provider for suggestions. Asks the argument converters for the given types
@@ -42,29 +56,113 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
 
     @Override
     public ImmutableSet<Suggestion> provideSuggestions(List<String> args, CommandParseResult parseResult) {
-        Stream<String> suggestions;
+        return ImmutableSet.copyOf(getSuggestionStream(args, parseResult).iterator());
+    }
+
+    private Stream<Suggestion> getSuggestionStream(List<String> args, CommandParseResult parseResult) {
+        String last = Iterables.getLast(args, "");
+        if (last.startsWith("-")) {
+            // complete flags if we have any
+
+            // check if the last flag in `last` is an arg-flag
+            Optional<Stream<String>> argSuggestions = maybeSuggestArgFlag(last, "", parseResult);
+            if (argSuggestions.isPresent()) {
+                return argSuggestions.get()
+                    .map(asSuggestion(args.size()));
+            }
+            Set<CommandFlag> flags = unmatchedFlags(parseResult);
+            if (!flags.isEmpty()) {
+                return suggestFlags(last, flags)
+                    .map(asSuggestion(args.size() - 1));
+            }
+        }
         if (args.size() == parseResult.getBoundArguments().size()) {
             // all provided arguments are valid
-            // consult the next argument converters for suggestions
-            suggestions = suggestNewArgument(parseResult);
-        } else {
-            // filter arguments instead
-            suggestions = suggestExistingArgument(args.get(args.size() - 1), parseResult);
+            // suggest on empty for next argument
+            return suggestUnmatchedArguments("", parseResult)
+                .map(asSuggestion(args.size()));
         }
-        return ImmutableSet.copyOf(
-            suggestions
-                .map(s -> Suggestion.builder()
-                    .suggestion(s)
-                    .replacedArgument(args.size())
-                    .build())
+        if (args.size() > 1) {
+            String secondToLast = args.get(args.size() - 2);
+            if (secondToLast.startsWith("-")) {
+                // this special case means we might be matching an arg-flag
+                Optional<Stream<String>> argSuggestions =
+                    maybeSuggestArgFlag(secondToLast, last, parseResult);
+                if (argSuggestions.isPresent()) {
+                    return argSuggestions.get()
+                        .map(asSuggestion(args.size() - 1));
+                }
+            }
+        }
+        return suggestUnmatchedArguments(last, parseResult)
+            .map(asSuggestion(args.size() - 1));
+    }
+
+    private Optional<Stream<String>> maybeSuggestArgFlag(String flags, String input, CommandParseResult parseResult) {
+        if (flags.length() > 1) {
+            char lastFlag = flags.charAt(flags.length() - 1);
+            return parseResult.getPrimaryCommand().getParts()
+                .stream()
+                .filter(ArgAcceptingCommandFlag.class::isInstance)
+                .map(ArgAcceptingCommandFlag.class::cast)
+                .filter(f -> f.getName() == lastFlag)
+                .findAny()
+                .map(matchingArgLast ->
+                    suggestFromParts(input, ImmutableSet.of(matchingArgLast), parseResult)
+                );
+        }
+        return Optional.empty();
+    }
+
+    private Function<String, Suggestion> asSuggestion(int replacing) {
+        return suggestion ->
+            Suggestion.builder().suggestion(suggestion).replacedArgument(replacing).build();
+    }
+
+    private Stream<String> suggestFlags(String input, Set<CommandFlag> flags) {
+        return flags.stream().map(flag -> input + flag.getName());
+    }
+
+    private Stream<String> suggestUnmatchedArguments(String input, CommandParseResult parseResult) {
+        ImmutableList.Builder<ArgAcceptingCommandPart> parts = ImmutableList.builder();
+        ImmutableSet<CommandPart> usedParts = ImmutableSet.copyOf(
+            parseResult.getBoundArguments().stream()
+                .flatMap(a -> a.getParts().stream())
                 .iterator());
+        for (CommandPart part : parseResult.getPrimaryCommand().getParts()) {
+            if (part instanceof CommandFlag || usedParts.contains(part)) {
+                continue;
+            }
+            checkState(part instanceof ArgAcceptingCommandPart, "%s does not accept arguments",
+                part.getTextRepresentation());
+            parts.add((ArgAcceptingCommandPart) part);
+            if (part.isRequired()) {
+                break;
+            }
+        }
+        return suggestFromParts(input, parts.build(), parseResult);
     }
 
-    private Stream<String> suggestNewArgument(CommandParseResult parseResult) {
-        return null;
+    private Set<CommandFlag> unmatchedFlags(CommandParseResult result) {
+        Set<CommandPart> usedParts = result.getBoundArguments().stream()
+            .flatMap(a -> a.getParts().stream())
+            .collect(Collectors.toSet());
+        return result.getPrimaryCommand().getParts().stream()
+            .filter(CommandFlag.class::isInstance)
+            .map(CommandFlag.class::cast)
+            .filter(flag -> !usedParts.contains(flag))
+            .collect(Collectors.toSet());
     }
 
-    private Stream<String> suggestExistingArgument(String input, CommandParseResult parseResult) {
-        return null;
+    private Stream<String> suggestFromParts(String input,
+                                            Collection<ArgAcceptingCommandPart> parts,
+                                            CommandParseResult parseResult) {
+        ArgumentConverterAccess converters = parseResult.getParameters().getConverters();
+        return parts.stream()
+            .filter(part -> part.getTypes().size() > 0)
+            .flatMap(part -> part.getTypes().stream())
+            .map(key -> converters.getConverter(key)
+                .orElseThrow(() -> new IllegalStateException("No converter for type " + key)))
+            .flatMap(converter -> converter.getSuggestions(input).stream());
     }
 }

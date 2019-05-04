@@ -189,7 +189,10 @@ public class CommandManagerImpl implements CommandManager {
         checkState(reconstructedArguments.size() <= args.size(),
             "Reconstructed arguments list bigger than original args list");
         // And ask the command to suggest. In most cases this uses the default suggester.
-        return command.getSuggester().provideSuggestions(args, parseResult);
+        return ImmutableSet.copyOf(command.getSuggester().provideSuggestions(args.subList(1, args.size()), parseResult)
+            .stream()
+            .map(s -> s.toBuilder().replacedArgument(s.getReplacedArgument() + 1).build())
+            .iterator());
     }
 
     private ImmutableSet<Suggestion> suggestCommands(String name) {

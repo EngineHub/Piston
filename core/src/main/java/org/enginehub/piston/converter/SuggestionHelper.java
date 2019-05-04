@@ -33,7 +33,8 @@ public class SuggestionHelper {
 
     // intended for use as stream.filter(byPrefix(input))
     public static Predicate<String> byPrefix(String input) {
-        return s -> startsWithIgnoreCase(s, input);
+        // Must be longer than the input, and start with it.
+        return s -> s.length() > input.length() && startsWithIgnoreCase(s, input);
     }
 
     private static boolean startsWithIgnoreCase(String whole, String prefix) {
