@@ -1,4 +1,17 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    kotlin("jvm") version "1.3.31"
+    kotlin("kapt") version "1.3.31"
+}
+
 applyCoreApConfig()
+
+kapt.includeCompileClasspath = false
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
+}
 
 dependencies {
     "implementation"(project(":core"))
@@ -8,16 +21,19 @@ dependencies {
     "implementation"(Libs.javapoet)
     "implementation"(Libs.autoCommon)
     "compileOnly"(Libs.autoValueAnnotations)
-    "annotationProcessor"(Libs.autoValueProcessor)
+    "kapt"(Libs.autoValueProcessor)
     "compileOnly"(Libs.autoService)
-    "annotationProcessor"(Libs.autoService)
+    "kapt"(Libs.autoService)
 
-    "testImplementation"(Libs.compileTesting)
+    "testImplementation"(kotlin("stdlib-jdk8"))
+    "testImplementation"(Libs.compileTesting) {
+        exclude("junit", "junit")
+    }
     "testImplementation"(Libs.mockito)
     "testImplementation"(Libs.logbackCore)
     "testImplementation"(Libs.logbackClassic)
     "testImplementation"(project(":default-impl"))
-    "testAnnotationProcessor"(project(":core-ap:processor"))
+    "kaptTest"(project(":core-ap:processor"))
 }
 
 configurations.getByName("testAnnotationProcessor")

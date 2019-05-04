@@ -22,6 +22,7 @@ package org.enginehub.piston;
 import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import org.enginehub.piston.part.CommandPart;
+import org.enginehub.piston.suggestion.SuggestionProvider;
 import org.enginehub.piston.util.HelpGenerator;
 
 import javax.annotation.Nullable;
@@ -139,6 +140,8 @@ public interface Command {
 
         Builder condition(Condition condition);
 
+        Builder suggester(SuggestionProvider suggester);
+
         Command build();
 
     }
@@ -156,6 +159,8 @@ public interface Command {
     Condition getCondition();
 
     Action getAction();
+
+    SuggestionProvider getSuggester();
 
     Builder toBuilder();
 

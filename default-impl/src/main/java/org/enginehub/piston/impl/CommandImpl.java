@@ -27,6 +27,8 @@ import org.enginehub.piston.Command;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
+import org.enginehub.piston.suggestion.DefaultSuggestionProvider;
+import org.enginehub.piston.suggestion.SuggestionProvider;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -47,7 +49,8 @@ abstract class CommandImpl implements Command {
             .name(name)
             .aliases(ImmutableList.of())
             .parts(ImmutableList.of())
-            .action(NULL_ACTION);
+            .action(NULL_ACTION)
+            .suggester(DefaultSuggestionProvider.getInstance());
     }
 
     @AutoValue.Builder
@@ -73,6 +76,9 @@ abstract class CommandImpl implements Command {
 
         @Override
         Builder condition(Condition condition);
+
+        @Override
+        Builder suggester(SuggestionProvider suggester);
 
         ImmutableList.Builder<CommandPart> partsBuilder();
 

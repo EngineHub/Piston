@@ -17,17 +17,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.commands;
+package org.enginehub.piston.converter;
 
-import org.enginehub.piston.annotation.Command;
-import org.enginehub.piston.annotation.CommandContainer;
-import org.enginehub.piston.annotation.param.Arg;
+import org.enginehub.piston.inject.Key;
 
-@CommandContainer
-public interface SingleOptionalArgCommand {
-    @Command(
-        name = "single-arg-opt",
-        desc = "description"
-    )
-    void singleArg(@Arg(desc = "First argument", def = "") String first);
+import java.util.Optional;
+
+/**
+ * A simple, empty, registry.
+ */
+enum EmptyArgumentConverterAccess implements ArgumentConverterAccess {
+    INSTANCE;
+
+    @Override
+    public <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key) {
+        return Optional.empty();
+    }
 }

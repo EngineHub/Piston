@@ -17,17 +17,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.commands;
+package org.enginehub.piston
 
-import org.enginehub.piston.annotation.Command;
-import org.enginehub.piston.annotation.CommandContainer;
-import org.enginehub.piston.annotation.param.Arg;
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 
-@CommandContainer
-public interface SingleArgCommand {
-    @Command(
-        name = "single-arg",
-        desc = "description"
-    )
-    void singleArg(@Arg(desc = "First argument") String first);
+private fun prefix(message: String?): String {
+    return when (message) {
+        null -> ""
+        else -> "$message ==> "
+    }
+}
+
+fun <T> assertEqualUnordered(expected: Collection<T>, actual: Collection<T>, message: String? = null) {
+    assertNotNull(actual, message)
+    assertEquals(expected.size, actual.size,
+            prefix(message) + "Not of equal size: expected: $expected, actual: $actual")
+    val expectedSet = expected.toSet()
+    val actualSet = actual.toSet()
+    assertEquals(expectedSet, actualSet, message)
 }

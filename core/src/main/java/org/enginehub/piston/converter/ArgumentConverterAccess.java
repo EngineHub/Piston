@@ -19,28 +19,23 @@
 
 package org.enginehub.piston.converter;
 
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.enginehub.piston.inject.Key;
 
-public class SuggestionHelper {
+import java.util.Optional;
 
-    public static List<String> limitByPrefix(Stream<String> choices, String input) {
-        return choices.filter(byPrefix(input))
-            .collect(Collectors.toList());
-    }
+/**
+ * Access to converters.
+ */
+public interface ArgumentConverterAccess {
 
-    // intended for use as stream.filter(byPrefix(input))
-    public static Predicate<String> byPrefix(String input) {
-        // Must be longer than the input, and start with it.
-        return s -> s.length() > input.length() && startsWithIgnoreCase(s, input);
-    }
+    ArgumentConverterAccess EMPTY = EmptyArgumentConverterAccess.INSTANCE;
 
-    private static boolean startsWithIgnoreCase(String whole, String prefix) {
-        return whole.regionMatches(true, 0, prefix, 0, prefix.length());
-    }
-
-    private SuggestionHelper() {
-    }
+    /**
+     * Get a converter for a key.
+     *
+     * @param key the key the converter is registered under
+     * @param <T> the type of value returned by the converter
+     * @return the converter, if present
+     */
+    <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key);
 }

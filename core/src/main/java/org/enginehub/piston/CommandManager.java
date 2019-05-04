@@ -20,12 +20,13 @@
 package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
-import org.enginehub.piston.converter.ArgumentConverter;
+import com.google.common.collect.ImmutableSet;
+import org.enginehub.piston.converter.ArgumentConverterStore;
 import org.enginehub.piston.exception.CommandException;
 import org.enginehub.piston.exception.CommandExecutionException;
 import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.inject.InjectedValueAccess;
-import org.enginehub.piston.inject.Key;
+import org.enginehub.piston.suggestion.Suggestion;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 /**
  * Responsible for holding all commands, as well as parsing and dispatching from user input.
  */
-public interface CommandManager {
+public interface CommandManager extends ArgumentConverterStore {
 
     /**
      * Create a new command builder, using the default implementation of this manager.
@@ -78,24 +79,6 @@ public interface CommandManager {
     }
 
     /**
-     * Register a converter for {@link CommandValue#asMultiple(Key)} to use.
-     *
-     * @param key the key to register the converter under
-     * @param converter the converter to register
-     * @param <T> the type of value returned by the converter
-     */
-    <T> void registerConverter(Key<T> key, ArgumentConverter<T> converter);
-
-    /**
-     * Get a converter for a key.
-     *
-     * @param key the key the converter is registered under
-     * @param <T> the type of value returned by the converter
-     * @return the converter, if present
-     */
-    <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key);
-
-    /**
      * Retrieve all commands that are registered.
      */
     Stream<Command> getAllCommands();
@@ -123,6 +106,28 @@ public interface CommandManager {
      */
     Optional<Command> getCommand(String name);
 
+    /**
+     * Suggest inputs based on a current user input. This input should be the
+     * entire command line, so that partial parsing may occur.
+     *
+     * @param context the injected value context
+     * @param args the command line to suggest into
+     * @return the suggestions
+     */
+    ImmutableSet<Suggestion> getSuggestions(InjectedValueAccess context, List<String> args);
+
+    /**
+     * Parse a command, given a set of arguments and a context.
+     *
+     * <p>
+     * Argument zero is the command name, without any leading slash.
+     * The rest of the arguments will be parsed into the correct parts.
+     * </p>
+     *
+     * @param context the injected value context
+     * @param args the arguments to include
+     * @return the parsing output
+     */
     CommandParseResult parse(InjectedValueAccess context, List<String> args);
 
     /**
