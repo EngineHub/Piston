@@ -17,16 +17,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.commands;
+package org.enginehub.piston.commands
 
-import org.enginehub.piston.annotation.Command;
-import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command
+import org.enginehub.piston.annotation.CommandContainer
+import org.enginehub.piston.annotation.param.Arg
 
 @CommandContainer
-public interface NoArgCommand {
-    @Command(
-        name = "no-arg",
-        desc = "description"
-    )
-    void noArg();
+interface SingleArgCommand {
+    @Command(name = "single-arg", desc = "description")
+    fun singleArg(@Arg(desc = "First argument") first: String)
 }

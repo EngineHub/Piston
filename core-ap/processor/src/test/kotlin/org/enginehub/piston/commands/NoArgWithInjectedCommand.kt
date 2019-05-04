@@ -17,16 +17,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.commands;
+package org.enginehub.piston.commands
 
-import org.enginehub.piston.annotation.Command;
-import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.Command
+import org.enginehub.piston.annotation.CommandContainer
 
 @CommandContainer
-public interface NoArgWithInjectedCommand {
-    @Command(
-        name = "no-arg-injected",
-        desc = "description"
-    )
-    void noArg(String injected);
+interface NoArgWithInjectedCommand {
+    @Command(name = "no-arg-injected", desc = "description")
+    fun noArg(injected: String)
 }
