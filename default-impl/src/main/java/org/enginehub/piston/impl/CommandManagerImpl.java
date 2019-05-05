@@ -22,6 +22,7 @@ package org.enginehub.piston.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandMetadata;
@@ -36,7 +37,6 @@ import org.enginehub.piston.inject.MemoizingValueAccess;
 import org.enginehub.piston.part.SubCommandPart;
 import org.enginehub.piston.suggestion.Suggestion;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

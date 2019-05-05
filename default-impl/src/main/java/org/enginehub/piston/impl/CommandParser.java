@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParseResult;
@@ -47,7 +48,6 @@ import org.enginehub.piston.part.SubCommandPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;

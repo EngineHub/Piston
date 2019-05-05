@@ -20,9 +20,8 @@
 package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.inject.Key;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 

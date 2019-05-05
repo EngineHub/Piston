@@ -19,7 +19,8 @@
 
 package org.enginehub.piston.inject;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.annotation.Annotation;
 
 final class NullAnnotationWrapper implements AnnotationWrapper {

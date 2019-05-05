@@ -28,10 +28,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;

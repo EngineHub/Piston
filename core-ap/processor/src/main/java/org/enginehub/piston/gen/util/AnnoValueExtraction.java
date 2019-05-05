@@ -21,8 +21,8 @@ package org.enginehub.piston.gen.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;

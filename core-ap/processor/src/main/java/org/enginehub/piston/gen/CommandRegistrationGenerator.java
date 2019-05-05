@@ -32,7 +32,6 @@ import com.squareup.javapoet.TypeSpec;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.util.CodeBlockUtil;
-import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.gen.value.CommandInfo;
 import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.ExtractSpec;

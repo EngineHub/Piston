@@ -19,7 +19,8 @@
 
 package org.enginehub.piston.util;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Optional;
 
 /**

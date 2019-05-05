@@ -21,8 +21,8 @@ package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import javax.lang.model.element.ExecutableElement;
 import java.util.Collection;
 import java.util.Optional;

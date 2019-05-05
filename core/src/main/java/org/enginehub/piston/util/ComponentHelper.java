@@ -21,9 +21,9 @@ package org.enginehub.piston.util;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.ColorConfig;
 
-import javax.annotation.Nullable;
 import java.util.stream.Collector;
 
 public class ComponentHelper {
@@ -55,8 +55,7 @@ public class ComponentHelper {
         private final Component suffix;
         private final Component delimiter;
 
-        @Nullable
-        private TextComponent.Builder value;
+        private TextComponent.@Nullable Builder value;
 
         @Nullable
         private Component nullValue;

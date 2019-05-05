@@ -24,9 +24,9 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.internal.RegistrationUtil;
 
-import javax.annotation.Nullable;
 import javax.lang.model.element.ExecutableElement;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
@@ -107,8 +107,7 @@ public class CodeBlockUtil {
         private final CodeBlock suffix;
         @Nullable
         private CodeBlock emptyValue;
-        @Nullable
-        private CodeBlock.Builder value;
+        private CodeBlock.@Nullable Builder value;
 
         CodeBlockJoiner(CodeBlock prefix, CodeBlock delimiter, CodeBlock suffix) {
             this.prefix = requireNonNull(prefix);

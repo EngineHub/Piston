@@ -3,7 +3,7 @@ applyCommonConfig()
 dependencies {
     "api"(Libs.guava)
     "api"(Libs.kyoriText)
-    "api"(Libs.javaxAnnotations)
+    "api"(Libs.checkerQualAnnotations)
     "compileOnly"(Libs.autoValueAnnotations)
     "annotationProcessor"(Libs.autoValueProcessor)
 }

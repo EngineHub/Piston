@@ -22,21 +22,15 @@ package org.enginehub.piston.impl;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.Command;
-import org.enginehub.piston.part.CommandArgument;
-import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.suggestion.DefaultSuggestionProvider;
 import org.enginehub.piston.suggestion.SuggestionProvider;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
-import static net.kyori.text.TextComponent.newline;
 import static org.enginehub.piston.Command.Action.NULL_ACTION;
 
 @AutoValue

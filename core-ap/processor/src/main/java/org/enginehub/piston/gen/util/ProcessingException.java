@@ -19,7 +19,8 @@
 
 package org.enginehub.piston.gen.util;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 

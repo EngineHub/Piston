@@ -22,9 +22,8 @@ package org.enginehub.piston.gen.value;
 import com.google.auto.value.AutoValue;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.CommandParameters;
-
-import javax.annotation.Nullable;
 
 /**
  * Information that can be used to supply a parameter for a

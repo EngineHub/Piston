@@ -20,8 +20,8 @@
 package org.enginehub.piston.inject;
 
 import com.google.auto.value.AutoValue;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 
 @AutoValue
@@ -34,7 +34,7 @@ abstract class InstanceAnnotationWrapper implements AnnotationWrapper {
     InstanceAnnotationWrapper() {
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public abstract Annotation getAnnotation();
 

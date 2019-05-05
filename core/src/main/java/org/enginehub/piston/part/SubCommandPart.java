@@ -28,7 +28,6 @@ import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 

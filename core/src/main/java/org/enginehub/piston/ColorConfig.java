@@ -20,8 +20,7 @@
 package org.enginehub.piston;
 
 import net.kyori.text.format.TextColor;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Global color configuration.

@@ -21,11 +21,11 @@ package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.suggestion.SuggestionProvider;
 import org.enginehub.piston.util.HelpGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 

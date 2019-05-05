@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.annotation.Command;
 import org.enginehub.piston.annotation.CommandCondition;
 import org.enginehub.piston.annotation.CommandContainer;
@@ -42,7 +43,6 @@ import org.enginehub.piston.gen.value.CommandInfo;
 import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.RegistrationInfo;
 
-import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;

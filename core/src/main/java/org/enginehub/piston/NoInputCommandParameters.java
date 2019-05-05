@@ -20,13 +20,13 @@
 package org.enginehub.piston;
 
 import com.google.auto.value.AutoValue;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 
-import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 

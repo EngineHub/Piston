@@ -23,8 +23,6 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import org.enginehub.piston.Command;
 
-import javax.annotation.Nullable;
-
 /**
  * Signal to stop executing a command. Command reference not required.
  */

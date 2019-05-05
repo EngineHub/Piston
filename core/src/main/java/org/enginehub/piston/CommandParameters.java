@@ -19,12 +19,11 @@
 
 package org.enginehub.piston;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
-
-import javax.annotation.Nullable;
 
 /**
  * Access to part values derived from user input.
