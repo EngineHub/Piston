@@ -1,11 +1,11 @@
 object Libs {
-    private const val junitVersion = "5.4.0"
+    private const val junitVersion = "5.4.2"
     const val junitApi = "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     const val guava = "com.google.guava:guava:21.0"
     const val kyoriText = "net.kyori:text-api:3.0.0"
     const val autoCommon = "com.google.auto:auto-common:0.10"
-    private const val autoValueVersion = "1.6.3"
+    private const val autoValueVersion = "1.6.5"
     const val autoValueAnnotations = "com.google.auto.value:auto-value-annotations:$autoValueVersion"
     const val autoValueProcessor = "com.google.auto.value:auto-value:$autoValueVersion"
     const val autoService = "com.google.auto.service:auto-service:1.0-rc4"
@@ -15,6 +15,6 @@ object Libs {
     const val logbackClassic = "ch.qos.logback:logback-classic:$logbackVersion"
     const val logbackCore = "ch.qos.logback:logback-core:$logbackVersion"
     const val javaxAnnotations = "com.google.code.findbugs:jsr305:3.0.2"
-    const val compileTesting = "com.google.testing.compile:compile-testing:0.15"
-    const val mockito = "org.mockito:mockito-core:2.25.0"
+    const val compileTesting = "com.google.testing.compile:compile-testing:0.16"
+    const val mockito = "org.mockito:mockito-core:2.27.0"
 }
