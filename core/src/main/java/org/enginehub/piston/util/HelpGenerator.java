@@ -39,8 +39,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static net.kyori.text.Component.newline;
-import static net.kyori.text.Component.space;
+import static net.kyori.text.TextComponent.newline;
+import static net.kyori.text.TextComponent.space;
 
 public class HelpGenerator {
 

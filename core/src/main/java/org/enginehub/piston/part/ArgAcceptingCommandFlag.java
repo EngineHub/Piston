@@ -95,7 +95,7 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
             .color(ColorConfig.getPartWrapping())
             .append(TextComponent.of("["))
             .append(TextComponent.of("-" + getName(), ColorConfig.getMainText()))
-            .append(Component.space())
+            .append(TextComponent.space())
             .append(TextComponent.of("<"))
             .append(TextComponent.builder("")
                 .color(ColorConfig.getMainText())

@@ -34,9 +34,9 @@ public class ComponentHelper {
      */
     public static Collector<Component, ?, Component> joiningWithBar() {
         return joiningTexts(
-            Component.empty(),
+            TextComponent.empty(),
             TextComponent.of("|", ColorConfig.getPartWrapping()),
-            Component.empty()
+            TextComponent.empty()
         );
     }
 

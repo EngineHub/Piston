@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
-import static net.kyori.text.Component.newline;
+import static net.kyori.text.TextComponent.newline;
 import static org.enginehub.piston.Command.Action.NULL_ACTION;
 
 @AutoValue
