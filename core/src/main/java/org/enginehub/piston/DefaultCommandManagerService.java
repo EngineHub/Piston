@@ -57,22 +57,23 @@ public class DefaultCommandManagerService implements CommandManagerService {
 
     private final Lock sealLock = new ReentrantLock();
     private CommandManagerService defaultService;
-    @Nullable
-    private CommandManagerService sealedDefaultService;
+    private @Nullable CommandManagerService sealedDefaultService;
 
     private DefaultCommandManagerService(CommandManagerService defaultService) {
         this.defaultService = defaultService;
     }
 
     private CommandManagerService sealDelegate() {
-        if (sealedDefaultService == null) {
+        CommandManagerService service = sealedDefaultService;
+        if (service == null) {
             sealLock.lock();
             try {
                 // double-check under lock, it may have been sealed by another thread
-                if (sealedDefaultService == null) {
+                service = sealedDefaultService;
+                if (service == null) {
                     // capture this under the lock to ensure thread-safety
                     // once done, it will forever be the same value
-                    sealedDefaultService = defaultService;
+                    service = sealedDefaultService = defaultService;
                 }
             } finally {
                 sealLock.unlock();
@@ -80,7 +81,7 @@ public class DefaultCommandManagerService implements CommandManagerService {
         }
         // this can be done out of the lock, since the seal already
         // makes this effectively final -- it will never be changed again
-        return sealedDefaultService;
+        return service;
     }
 
     public void setDefaultService(CommandManagerService defaultService) {

@@ -34,9 +34,8 @@ abstract class InstanceAnnotationWrapper implements AnnotationWrapper {
     InstanceAnnotationWrapper() {
     }
 
-    @NonNull
     @Override
-    public abstract Annotation getAnnotation();
+    public abstract @NonNull Annotation getAnnotation();
 
     @Override
     public final Class<? extends Annotation> getAnnotationType() {

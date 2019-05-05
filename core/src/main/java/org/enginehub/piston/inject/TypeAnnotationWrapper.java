@@ -35,13 +35,11 @@ abstract class TypeAnnotationWrapper implements AnnotationWrapper {
     TypeAnnotationWrapper() {
     }
 
-    @NonNull
     @Override
-    public abstract Class<? extends Annotation> getAnnotationType();
+    public abstract @NonNull Class<? extends Annotation> getAnnotationType();
 
-    @Nullable
     @Override
-    public final Annotation getAnnotation() {
+    public final @Nullable Annotation getAnnotation() {
         return null;
     }
 }

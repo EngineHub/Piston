@@ -18,6 +18,7 @@ dependencies {
     "implementation"(project(":core-ap:annotations"))
     "implementation"(project(":core-ap:runtime"))
     "implementation"(Libs.guava)
+    "compileOnly"(Libs.guavaCompatibleErrorprone)
     "implementation"(Libs.javapoet)
     "implementation"(Libs.autoCommon)
     "compileOnly"(Libs.autoValueAnnotations)

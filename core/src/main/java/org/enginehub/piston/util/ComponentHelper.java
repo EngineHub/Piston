@@ -56,9 +56,7 @@ public class ComponentHelper {
         private final Component delimiter;
 
         private TextComponent.@Nullable Builder value;
-
-        @Nullable
-        private Component nullValue;
+        private @Nullable Component nullValue;
 
         private ComponentJoiner(Component prefix, Component delimiter, Component suffix) {
             this.prefix = prefix;
@@ -80,14 +78,16 @@ public class ComponentHelper {
         }
 
         public ComponentJoiner merge(ComponentJoiner other) {
-            if (other.value != null) {
-                initBuilder().append(other.value.build());
+            TextComponent.Builder otherValue = other.value;
+            if (otherValue != null) {
+                initBuilder().append(otherValue.build());
             }
             return this;
         }
 
         public Component finish() {
-            if (value == null) {
+            TextComponent.Builder finalValue = this.value;
+            if (finalValue == null) {
                 if (nullValue != null) {
                     return nullValue;
                 }
@@ -95,7 +95,7 @@ public class ComponentHelper {
             }
             return TextComponent.builder("")
                 .append(prefix)
-                .append(value.build().children())
+                .append(finalValue.build().children())
                 .append(suffix)
                 .build();
         }

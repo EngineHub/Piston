@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Default provider for suggestions. Asks the argument converters for the given types
@@ -60,7 +61,7 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
     }
 
     private Stream<Suggestion> getSuggestionStream(List<String> args, CommandParseResult parseResult) {
-        String last = Iterables.getLast(args, "");
+        String last = requireNonNull(Iterables.getLast(args, ""));
         if (last.startsWith("-")) {
             // complete flags if we have any
 

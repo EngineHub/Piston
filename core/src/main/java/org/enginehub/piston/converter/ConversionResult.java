@@ -20,6 +20,7 @@
 package org.enginehub.piston.converter;
 
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.Collection;
@@ -74,7 +75,7 @@ public abstract class ConversionResult<T> {
      * @param <U> the new type
      * @return the new result
      */
-    public abstract <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper);
+    public abstract <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends @Nullable Collection<U>> mapper);
 
     public final <U> ConversionResult<U> mapSingle(Function<? super T, ? extends U> mapper) {
         return map(many -> {

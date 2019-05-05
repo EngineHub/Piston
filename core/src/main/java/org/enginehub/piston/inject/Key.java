@@ -89,9 +89,11 @@ public abstract class Key<T> {
         }
 
         validateAnnotationType(annotationType);
+        // for https://github.com/typetools/checker-framework/issues/1630
+        // noinspection RedundantTypeArguments
         if (annotationType.getDeclaredMethods().length > 0
             && Stream.of(annotationType.getDeclaredMethods())
-            .map(Method::getDefaultValue)
+            .<@Nullable Object> map(Method::getDefaultValue)
             .allMatch(Objects::nonNull)) {
             // all default values, match an instance made from them instead
             return strategyFor(Annotations.allDefaultsAnnotation(annotationType));
@@ -113,13 +115,11 @@ public abstract class Key<T> {
 
     abstract AnnotationWrapper getAnnotationWrapper();
 
-    @Nullable
-    public final Annotation getAnnotation() {
+    public final @Nullable Annotation getAnnotation() {
         return getAnnotationWrapper().getAnnotation();
     }
 
-    @Nullable
-    public final Class<? extends Annotation> getAnnotationType() {
+    public final @Nullable Class<? extends Annotation> getAnnotationType() {
         return getAnnotationWrapper().getAnnotationType();
     }
 

@@ -89,9 +89,7 @@ public abstract class RegistrationInfo {
     public abstract String getName();
 
     public abstract ClassName getTargetClassName();
-
-    @Nullable
-    public abstract Modifier getClassVisibility();
+    public abstract @Nullable Modifier getClassVisibility();
 
     public abstract ImmutableList<CommandInfo> getCommands();
 

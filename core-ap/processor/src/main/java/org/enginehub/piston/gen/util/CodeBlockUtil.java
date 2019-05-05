@@ -105,8 +105,7 @@ public class CodeBlockUtil {
         private final CodeBlock prefix;
         private final CodeBlock delimiter;
         private final CodeBlock suffix;
-        @Nullable
-        private CodeBlock emptyValue;
+        private @Nullable CodeBlock emptyValue;
         private CodeBlock.@Nullable Builder value;
 
         CodeBlockJoiner(CodeBlock prefix, CodeBlock delimiter, CodeBlock suffix) {

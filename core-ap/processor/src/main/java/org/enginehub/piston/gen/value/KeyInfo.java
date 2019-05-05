@@ -57,9 +57,7 @@ public abstract class KeyInfo {
     public final TypeName wrappedTypeName(Class<?> wrapper) {
         return ParameterizedTypeName.get(ClassName.get(wrapper), typeName());
     }
-
-    @Nullable
-    public abstract AnnotationSpec annotationSpec();
+    public abstract @Nullable AnnotationSpec annotationSpec();
 
     public final String getVariableName() {
         AnnotationSpec spec = annotationSpec();
@@ -116,8 +114,7 @@ public abstract class KeyInfo {
             .build());
     }
 
-    @Nullable
-    private CodeBlock getAnnotationArgumentCode() {
+    private @Nullable CodeBlock getAnnotationArgumentCode() {
         AnnotationSpec spec = annotationSpec();
         if (spec == null) {
             return null;

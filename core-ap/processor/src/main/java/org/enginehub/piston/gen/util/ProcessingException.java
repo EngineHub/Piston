@@ -25,11 +25,8 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
 public class ProcessingException extends RuntimeException {
-
-    @Nullable
-    private Element causingElement;
-    @Nullable
-    private AnnotationMirror causingMirror;
+    private @Nullable Element causingElement;
+    private @Nullable AnnotationMirror causingMirror;
 
     public ProcessingException(String message) {
         super(message);
@@ -49,13 +46,11 @@ public class ProcessingException extends RuntimeException {
         return this;
     }
 
-    @Nullable
-    public Element getCausingElement() {
+    public @Nullable Element getCausingElement() {
         return causingElement;
     }
 
-    @Nullable
-    public AnnotationMirror getCausingMirror() {
+    public @Nullable AnnotationMirror getCausingMirror() {
         return causingMirror;
     }
 }

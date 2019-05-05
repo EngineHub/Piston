@@ -22,8 +22,11 @@ package org.enginehub.piston;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Represents the result of parsing a command from arguments.
@@ -48,7 +51,7 @@ public interface CommandParseResult {
     ImmutableList<ArgBinding> getBoundArguments();
 
     default List<String> getOriginalArguments() {
-        return Lists.transform(getBoundArguments(), ArgBinding::getInput);
+        return Lists.transform(getBoundArguments(), a -> requireNonNull(a).getInput());
     }
 
     /**

@@ -114,9 +114,7 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
         }
 
         abstract ImmutableSetMultimap<E, String> items();
-
-        @Nullable
-        abstract E unknownValue();
+        abstract @Nullable E unknownValue();
 
         abstract UnaryOperator<String> errorMessage();
 
@@ -125,8 +123,7 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
     private final Component choices;
     private final ImmutableSet<String> primaryKeys;
     private final ImmutableMap<String, E> map;
-    @Nullable
-    private final E unknownValue;
+    private final @Nullable E unknownValue;
     private final UnaryOperator<String> errorMessage;
 
     private MultiKeyConverter(Arguments<E> arguments) {

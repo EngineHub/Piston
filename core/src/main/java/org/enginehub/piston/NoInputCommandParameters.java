@@ -59,9 +59,7 @@ public abstract class NoInputCommandParameters implements CommandParameters {
     }
 
     abstract InjectedValueAccess injectedValues();
-
-    @Nullable
-    abstract CommandMetadata metadata();
+    abstract @Nullable CommandMetadata metadata();
 
     abstract ArgumentConverterAccess converters();
 
@@ -76,8 +74,7 @@ public abstract class NoInputCommandParameters implements CommandParameters {
     }
 
     @Override
-    @Nullable
-    public CommandMetadata getMetadata() {
+    public @Nullable CommandMetadata getMetadata() {
         return metadata();
     }
 

@@ -61,11 +61,11 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-class CommandParser {
+final class CommandParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandParser.class);
 
-    private static final ThreadLocal<String> PARSE_ID = new ThreadLocal<>();
+    private static final ThreadLocal<@Nullable String> PARSE_ID = new ThreadLocal<>();
 
     private static void log(String message, Object... args) {
         if (LOGGER.isDebugEnabled()) {
@@ -108,10 +108,8 @@ class CommandParser {
     private final ListIterator<String> argIter;
     private final InjectedValueAccess context;
     private ImmutableSet.Builder<CommandPart> argBindings = ImmutableSet.builder();
-    @Nullable
-    private PerCommandDetails perCommandDetails;
-    @Nullable
-    private CommandArgument lastFailedOptional;
+    private @Nullable PerCommandDetails perCommandDetails;
+    private @Nullable CommandArgument lastFailedOptional;
 
     CommandParser(ArgumentConverterAccess converters, CommandInfoCache commandInfoCache, Command initial,
                   CommandMetadata metadata, InjectedValueAccess context) {
@@ -152,10 +150,11 @@ class CommandParser {
 
     private ConversionFailedException conversionFailedException(CommandArgument nextArg, String token) {
         // TODO: Make this print all converters
-        ArgumentConverter<?> converter = nextArg.getTypes().stream()
-            .map(k -> converters.getConverter(k).orElse(null))
+        // redundant requireNonNull since checker can't infer from `Objects::nonNull`
+        ArgumentConverter<?> converter = requireNonNull(nextArg.getTypes().stream()
+            .<@Nullable ArgumentConverter<?>>map(k -> converters.getConverter(k).orElse(null))
             .filter(Objects::nonNull)
-            .findFirst().orElseThrow(IllegalStateException::new);
+            .findFirst().orElseThrow(IllegalStateException::new));
         return new ConversionFailedException(buildParseResult(),
             nextArg.getTextRepresentation(),
             converter,
@@ -250,7 +249,8 @@ class CommandParser {
     private void finalizeCommand() {
         PerCommandDetails details = perCommandDetails();
         if (details.remainingRequiredParts > 0) {
-            Iterator<CommandArgument> requiredIter = Iterators.filter(details.partIter, CommandPart::isRequired);
+            Iterator<CommandArgument> requiredIter = Iterators.filter(details.partIter,
+                p -> requireNonNull(p).isRequired());
             if (requiredIter.hasNext()) {
                 CommandArgument missing = requiredIter.next();
                 throw usageException(TextComponent.builder("Missing argument for ")

@@ -73,6 +73,8 @@ fun Project.applyCommonConfig(
     addExtraArchiveArtifacts()
 
     configureMavenPublish()
+
+    addCheckerFramework()
 }
 
 private fun Project.addExtraArchiveArtifacts() {

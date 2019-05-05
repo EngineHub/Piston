@@ -55,20 +55,17 @@ public abstract class CommandParamInfo {
      *
      * <p>This is merely a suggestion. Do not rely on this name existing in generated code.</p>
      */
-    @Nullable
-    public abstract String getName();
+    public abstract @Nullable String getName();
 
     /**
      * Type of the param variable, if used to store data.
      */
-    @Nullable
-    public abstract TypeName getType();
+    public abstract @Nullable TypeName getType();
 
     /**
      * Code for initializing data the extraction code uses.
      */
-    @Nullable
-    public abstract CodeBlock getConstruction();
+    public abstract @Nullable CodeBlock getConstruction();
 
     /**
      * Spec for extracting the value from a {@link CommandParameters} instance.

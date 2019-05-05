@@ -27,8 +27,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class ColorConfig {
 
-    @Nullable
-    private static volatile TextColor TEXT_MODIFIER = TextColor.YELLOW;
+    private static volatile @Nullable TextColor TEXT_MODIFIER = TextColor.YELLOW;
 
     public static void setTextModifier(@Nullable TextColor textModifier) {
         TEXT_MODIFIER = textModifier;
@@ -37,13 +36,11 @@ public class ColorConfig {
     /**
      * Color for text that modifies the main text.
      */
-    @Nullable
-    public static TextColor getTextModifier() {
+    public static @Nullable TextColor getTextModifier() {
         return TEXT_MODIFIER;
     }
 
-    @Nullable
-    private static volatile TextColor MAIN_TEXT = TextColor.GOLD;
+    private static volatile @Nullable TextColor MAIN_TEXT = TextColor.GOLD;
 
     public static void setMainText(@Nullable TextColor mainText) {
         MAIN_TEXT = mainText;
@@ -52,13 +49,11 @@ public class ColorConfig {
     /**
      * Color for a command part label.
      */
-    @Nullable
-    public static TextColor getMainText() {
+    public static @Nullable TextColor getMainText() {
         return MAIN_TEXT;
     }
 
-    @Nullable
-    private static volatile TextColor HELP_TEXT = TextColor.GRAY;
+    private static volatile @Nullable TextColor HELP_TEXT = TextColor.GRAY;
 
     public static void setHelpText(@Nullable TextColor helpText) {
         HELP_TEXT = helpText;
@@ -67,13 +62,11 @@ public class ColorConfig {
     /**
      * Color for help text.
      */
-    @Nullable
-    public static TextColor getHelpText() {
+    public static @Nullable TextColor getHelpText() {
         return HELP_TEXT;
     }
 
-    @Nullable
-    private static volatile TextColor PART_WRAPPING = TextColor.YELLOW;
+    private static volatile @Nullable TextColor PART_WRAPPING = TextColor.YELLOW;
 
     public static void setPartWrapping(@Nullable TextColor partWrapping) {
         PART_WRAPPING = partWrapping;
@@ -82,8 +75,7 @@ public class ColorConfig {
     /**
      * Color for the wrapping text of a command part, e.g. {@code <>} or {@code []}.
      */
-    @Nullable
-    public static TextColor getPartWrapping() {
+    public static @Nullable TextColor getPartWrapping() {
         return PART_WRAPPING;
     }
 }

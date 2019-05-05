@@ -20,6 +20,7 @@
 package org.enginehub.piston.converter;
 
 import com.google.common.collect.ImmutableSet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -69,7 +70,7 @@ public final class FailedConversion<T> extends ConversionResult<T> {
     }
 
     @Override
-    public <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper) {
+    public <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends @Nullable Collection<U>> mapper) {
         return failureAsAny();
     }
 
@@ -87,7 +88,7 @@ public final class FailedConversion<T> extends ConversionResult<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FailedConversion<?> that = (FailedConversion<?>) o;

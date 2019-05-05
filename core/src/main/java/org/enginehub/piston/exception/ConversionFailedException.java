@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 /**
  * Thrown from {@link CommandValue} when all conversions to a type have failed.
  */
-public class ConversionFailedException extends UsageException {
+public final class ConversionFailedException extends UsageException {
 
     private static Component getMessage(Component conversionTarget, ArgumentConverter<?> converter,
                                         FailedConversion<?> conversion) {

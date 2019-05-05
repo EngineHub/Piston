@@ -20,6 +20,8 @@
 package org.enginehub.piston.inject;
 
 import com.google.common.collect.ImmutableMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.enginehub.piston.util.ValueProvider;
 
 import java.util.Optional;
@@ -37,7 +39,7 @@ public final class MemoizingValueAccess implements InjectedValueAccess {
         return new MemoizingValueAccess(delegate);
     }
 
-    private final ConcurrentHashMap<Key<?>, Optional<?>> memory = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Key<?>, Optional<Object>> memory = new ConcurrentHashMap<>();
     private final InjectedValueAccess delegate;
 
     private MemoizingValueAccess(InjectedValueAccess delegate) {
@@ -57,6 +59,8 @@ public final class MemoizingValueAccess implements InjectedValueAccess {
     @Override
     @SuppressWarnings("unchecked")
     public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
-        return (Optional<T>) memory.computeIfAbsent(key, k -> delegate.injectedValue(k, context));
+        return (Optional<T>) memory.computeIfAbsent(key, k ->
+            (Optional<Object>) delegate.injectedValue(k, context)
+        );
     }
 }

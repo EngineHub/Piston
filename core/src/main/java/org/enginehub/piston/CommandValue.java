@@ -82,8 +82,7 @@ public interface CommandValue {
      * @see #asString()
      * @see #asSingle(Key)
      */
-    @Nullable
-    default <T> T asSingle(Class<T> key) {
+    default <T> @Nullable T asSingle(Class<T> key) {
         return asSingle(Key.of(key));
     }
 
@@ -97,8 +96,7 @@ public interface CommandValue {
      * @throws IllegalStateException if not exactly one value is present
      * @see #asString()
      */
-    @Nullable
-    default <T> T asSingle(Key<T> key) {
+    default <T> @Nullable T asSingle(Key<T> key) {
         ImmutableList<T> values = asMultiple(key);
         if (values.size() == 0 && asStrings().size() > 0) {
             // special case -- this means that all values were "null", so use null here

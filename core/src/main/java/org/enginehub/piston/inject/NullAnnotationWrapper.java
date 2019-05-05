@@ -33,15 +33,13 @@ final class NullAnnotationWrapper implements AnnotationWrapper {
     private NullAnnotationWrapper() {
     }
 
-    @Nullable
     @Override
-    public Annotation getAnnotation() {
+    public @Nullable Annotation getAnnotation() {
         return null;
     }
 
-    @Nullable
     @Override
-    public Class<? extends Annotation> getAnnotationType() {
+    public @Nullable Class<? extends Annotation> getAnnotationType() {
         return null;
     }
 

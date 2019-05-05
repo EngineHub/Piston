@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
 class Annotations {
@@ -60,7 +61,7 @@ class Annotations {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             MethodKey methodKey = (MethodKey) o;
@@ -137,10 +138,10 @@ class Annotations {
         Map<String, Object> members = Stream.of(annotationType.getDeclaredMethods())
             .collect(toMap(
                 Method::getName,
-                Method::getDefaultValue
+                m -> requireNonNull(m.getDefaultValue())
             ));
         return (Annotation) Proxy.newProxyInstance(
-            Key.class.getClassLoader(),
+            requireNonNull(Key.class.getClassLoader()),
             new Class[] {annotationType},
             (proxy, method, args) -> {
                 AnnoMethod call = ANNOTATION_METHODS.get(MethodKey.from(method));
