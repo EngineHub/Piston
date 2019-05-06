@@ -44,6 +44,7 @@ import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
+import org.enginehub.piston.util.TextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -349,7 +350,7 @@ class CommandParser {
         }
         while (hasNextPart()) {
             CommandArgument nextArg = nextPart();
-            String name = nextArg.getName().key() + nextArg.getName().args();
+            String name = TextHelper.reduceToText(nextArg.getName());
             log("parseRegularArgument: [{}] test for matching", name);
             if (nextArg.isRequired()) {
                 // good, we can just satisfy it

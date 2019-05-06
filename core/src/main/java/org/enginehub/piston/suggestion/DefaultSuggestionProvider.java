@@ -28,6 +28,7 @@ import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
+import org.enginehub.piston.util.TextHelper;
 
 import java.util.Collection;
 import java.util.List;
@@ -134,7 +135,7 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
                 continue;
             }
             checkState(part instanceof ArgAcceptingCommandPart, "%s does not accept arguments",
-                part.getTextRepresentation());
+                TextHelper.reduceToText(part.getTextRepresentation()));
             parts.add((ArgAcceptingCommandPart) part);
             if (part.isRequired()) {
                 break;
