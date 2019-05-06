@@ -237,6 +237,7 @@ class CommandParser {
     private void switchToCommand(Command subCommand) {
         if (perCommandDetails != null) {
             finalizeCommand();
+            fillInDefaults();
         }
         parseResult.addCommand(subCommand);
         perCommandDetails = new PerCommandDetails(commandInfoCache.getInfo(subCommand));
