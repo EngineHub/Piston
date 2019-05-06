@@ -30,13 +30,13 @@ import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.util.HelpGenerator;
 
 import static java.util.stream.Collectors.joining;
+import static org.enginehub.piston.util.StreamHelper.cast;
 
 public class NoSuchFlagException extends UsageException {
 
     private static String getAllFlags(ImmutableList<Command> commands) {
-        return Iterables.getLast(commands).getParts().stream()
-            .filter(CommandFlag.class::isInstance)
-            .map(f -> String.valueOf(((CommandFlag) f).getName()))
+        return cast(Iterables.getLast(commands).getParts().stream(), CommandFlag.class)
+            .map(f -> String.valueOf(f.getName()))
             .collect(joining());
     }
 

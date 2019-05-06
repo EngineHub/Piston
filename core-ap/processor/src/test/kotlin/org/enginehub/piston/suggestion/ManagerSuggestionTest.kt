@@ -19,12 +19,15 @@
 
 package org.enginehub.piston.suggestion
 
+import net.kyori.text.TextComponent
+import net.kyori.text.TranslatableComponent
 import org.enginehub.piston.CommandManager
 import org.enginehub.piston.assertEqualUnordered
 import org.enginehub.piston.inject.InjectedValueAccess
 import org.enginehub.piston.inject.Key
 import org.enginehub.piston.installCommands
 import org.enginehub.piston.newManager
+import org.enginehub.piston.part.SubCommandPart
 import org.enginehub.piston.withMockedContainer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
@@ -51,6 +54,16 @@ class ManagerSuggestionTest {
                 suggestionMatrix.forEachIndexed { index, set ->
                     registerConverter(Key.of(String::class.java, suggest(index + 1)),
                             SimpleSuggestingConverter(set.toList()))
+                }
+
+                register("sub") { cmd ->
+                    cmd.description(TextComponent.of("Sub-commands test command"))
+                    cmd.addPart(SubCommandPart.builder(
+                            TranslatableComponent.of("subs"),
+                            TextComponent.of("Sub-commands"))
+                            .withCommands(allCommands.toList())
+                            .required()
+                            .build())
                 }
             }
             block(manager)
@@ -168,6 +181,39 @@ class ManagerSuggestionTest {
             assertEqualUnordered(suggestionMatrix[2].filter(byPrefix("any")),
                     actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at third argument")
+        }
+    }
+
+    @Test
+    @DisplayName("suggests sub-commands")
+    fun suggestsSubCommands() {
+        withSuggestionManager { manager ->
+            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
+                    listOf("sub"))
+            assertEqualUnordered(setOf("cmd", "flags"), actualSuggestions.map { it.suggestion })
+            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+        }
+    }
+
+    @Test
+    @DisplayName("suggests partial sub-commands")
+    fun suggestsSubSubCommands() {
+        withSuggestionManager { manager ->
+            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
+                    listOf("sub", "c"))
+            assertEqualUnordered(setOf("cmd"), actualSuggestions.map { it.suggestion })
+            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+        }
+    }
+
+    @Test
+    @DisplayName("suggests sub-command's arguments")
+    fun suggestsSubCommandArguments() {
+        withSuggestionManager { manager ->
+            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
+                    listOf("sub", "cmd"))
+            assertEqualUnordered(suggestionMatrix[0], actualSuggestions.map { it.suggestion })
+            assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at thrid argument")
         }
     }
 }

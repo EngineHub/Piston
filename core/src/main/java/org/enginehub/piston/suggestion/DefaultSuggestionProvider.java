@@ -22,13 +22,14 @@ package org.enginehub.piston.suggestion;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
-import org.enginehub.piston.util.TextHelper;
+import org.enginehub.piston.part.SubCommandPart;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +39,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkState;
+import static org.enginehub.piston.converter.SuggestionHelper.byPrefix;
+import static org.enginehub.piston.util.StreamHelper.cast;
 
 /**
  * Default provider for suggestions. Asks the argument converters for the given types
@@ -102,10 +104,7 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
     private Optional<Stream<String>> maybeSuggestArgFlag(String flags, String input, CommandParseResult parseResult) {
         if (flags.length() > 1) {
             char lastFlag = flags.charAt(flags.length() - 1);
-            return parseResult.getPrimaryCommand().getParts()
-                .stream()
-                .filter(ArgAcceptingCommandFlag.class::isInstance)
-                .map(ArgAcceptingCommandFlag.class::cast)
+            return cast(parseResult.getPrimaryCommand().getParts().stream(), ArgAcceptingCommandFlag.class)
                 .filter(f -> f.getName() == lastFlag)
                 .findAny()
                 .map(matchingArgLast ->
@@ -125,7 +124,7 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
     }
 
     private Stream<String> suggestUnmatchedArguments(String input, CommandParseResult parseResult) {
-        ImmutableList.Builder<ArgAcceptingCommandPart> parts = ImmutableList.builder();
+        ImmutableList.Builder<CommandPart> parts = ImmutableList.builder();
         ImmutableSet<CommandPart> usedParts = ImmutableSet.copyOf(
             parseResult.getBoundArguments().stream()
                 .flatMap(a -> a.getParts().stream())
@@ -134,9 +133,7 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
             if (part instanceof CommandFlag || usedParts.contains(part)) {
                 continue;
             }
-            checkState(part instanceof ArgAcceptingCommandPart, "%s does not accept arguments",
-                TextHelper.reduceToText(part.getTextRepresentation()));
-            parts.add((ArgAcceptingCommandPart) part);
+            parts.add(part);
             if (part.isRequired()) {
                 break;
             }
@@ -148,22 +145,26 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
         Set<CommandPart> usedParts = result.getBoundArguments().stream()
             .flatMap(a -> a.getParts().stream())
             .collect(Collectors.toSet());
-        return result.getPrimaryCommand().getParts().stream()
-            .filter(CommandFlag.class::isInstance)
-            .map(CommandFlag.class::cast)
+        return cast(result.getPrimaryCommand().getParts().stream(), CommandFlag.class)
             .filter(flag -> !usedParts.contains(flag))
             .collect(Collectors.toSet());
     }
 
     private Stream<String> suggestFromParts(String input,
-                                            Collection<ArgAcceptingCommandPart> parts,
+                                            Collection<CommandPart> parts,
                                             CommandParseResult parseResult) {
         ArgumentConverterAccess converters = parseResult.getParameters().getConverters();
-        return parts.stream()
-            .filter(part -> part.getTypes().size() > 0)
-            .flatMap(part -> part.getTypes().stream())
-            .map(key -> converters.getConverter(key)
-                .orElseThrow(() -> new IllegalStateException("No converter for type " + key)))
-            .flatMap(converter -> converter.getSuggestions(input).stream());
+        return Stream.concat(
+            cast(parts.stream(), ArgAcceptingCommandPart.class)
+                .filter(part -> part.getTypes().size() > 0)
+                .flatMap(part -> part.getTypes().stream())
+                .map(key -> converters.getConverter(key)
+                    .orElseThrow(() -> new IllegalStateException("No converter for type " + key)))
+                .flatMap(converter -> converter.getSuggestions(input).stream()),
+            cast(parts.stream(), SubCommandPart.class)
+                .flatMap(part -> part.getCommands().stream())
+                .map(Command::getName)
+                .filter(byPrefix(input))
+        );
     }
 }
