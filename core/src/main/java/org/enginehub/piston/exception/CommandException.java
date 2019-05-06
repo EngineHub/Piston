@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.Command;
+import org.enginehub.piston.util.TextHelper;
 
 /**
  * Parent class for all command-related exceptions.
@@ -37,13 +38,13 @@ public class CommandException extends RuntimeException {
     }
 
     public CommandException(Component message, ImmutableList<Command> commands) {
-        super(message.toString());
+        super(TextHelper.reduceToText(message));
         this.message = message;
         this.commands = commands;
     }
 
     public CommandException(Component message, Throwable cause, ImmutableList<Command> commands) {
-        super(message.toString(), cause);
+        super(TextHelper.reduceToText(message), cause);
         this.message = message;
         this.commands = commands;
     }
