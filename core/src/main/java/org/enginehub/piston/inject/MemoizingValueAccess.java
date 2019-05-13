@@ -22,8 +22,11 @@ package org.enginehub.piston.inject;
 import com.google.common.collect.ImmutableMap;
 import org.enginehub.piston.util.ValueProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Memoizes accesses, so that only one value is used.
@@ -37,7 +40,8 @@ public final class MemoizingValueAccess implements InjectedValueAccess {
         return new MemoizingValueAccess(delegate);
     }
 
-    private final ConcurrentHashMap<Key<?>, Optional<?>> memory = new ConcurrentHashMap<>();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Map<Key<?>, Optional<?>> memory = new HashMap<>();
     private final InjectedValueAccess delegate;
 
     private MemoizingValueAccess(InjectedValueAccess delegate) {
@@ -50,13 +54,36 @@ public final class MemoizingValueAccess implements InjectedValueAccess {
     public InjectedValueAccess snapshotMemory() {
         ImmutableMap.Builder<Key<?>, ValueProvider<InjectedValueAccess, ?>> snapshot
             = ImmutableMap.builder();
-        memory.forEach((k, v) -> snapshot.put(k, ValueProvider.constant(v.orElse(null))));
+        lock.readLock().lock();
+        try {
+            memory.forEach((k, v) -> snapshot.put(k, ValueProvider.constant(v.orElse(null))));
+        } finally {
+            lock.readLock().unlock();
+        }
         return MapBackedValueStore.create(snapshot.build());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
-        return (Optional<T>) memory.computeIfAbsent(key, k -> delegate.injectedValue(k, context));
+        // Try to read out a value quickly
+        lock.readLock().lock();
+        try {
+            Optional<?> result = memory.get(key);
+            if (result != null) {
+                return (Optional<T>) result;
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+        // no dice -- exclusively compute it.
+        // if another thread raced us, computeIfAbsent will ensure only a single computation occurs
+        lock.writeLock().lock();
+        try {
+            return (Optional<T>) memory.computeIfAbsent(key, k -> delegate.injectedValue(k, context));
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
+
 }
