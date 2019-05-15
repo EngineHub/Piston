@@ -59,6 +59,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -113,6 +114,8 @@ class CommandParser {
     private PerCommandDetails perCommandDetails;
     @Nullable
     private CommandArgument lastFailedOptional;
+    @Nullable
+    private CommandParseResult result;
 
     CommandParser(ArgumentConverterAccess converters, CommandInfoCache commandInfoCache, Command initial,
                   CommandMetadata metadata, InjectedValueAccess context) {
@@ -125,12 +128,13 @@ class CommandParser {
         switchToCommand(initial);
     }
 
-    private CommandParseResult buildParseResult() {
+    private void buildParseResult() {
+        checkState(result == null, "Multiple calls to build final result");
         if (argBindings.build().size() > 0 && argIter.hasPrevious()) {
             bindArgument();
         }
         fillInDefaults();
-        return parseResult
+        result = parseResult
             .parameters(parameters
                 .metadata(metadata)
                 .injectedValues(context)
@@ -139,8 +143,13 @@ class CommandParser {
             .build();
     }
 
+    private CommandParseResult getResult() {
+        return checkNotNull(result, "Not finished parsing");
+    }
+
     private UsageException usageException(Component message) {
-        return new UsageException(message, buildParseResult());
+        buildParseResult();
+        return new UsageException(message, getResult());
     }
 
     private UsageException notEnoughArgumentsException() {
@@ -157,7 +166,8 @@ class CommandParser {
             .map(k -> converters.getConverter(k).orElse(null))
             .filter(Objects::nonNull)
             .findFirst().orElseThrow(IllegalStateException::new);
-        return new ConversionFailedException(buildParseResult(),
+        buildParseResult();
+        return new ConversionFailedException(getResult(),
             nextArg.getTextRepresentation(),
             converter,
             (FailedConversion<?>) converter.convert(token, context));
@@ -302,7 +312,8 @@ class CommandParser {
         }
         log("Finished looking at arguments. Finalizing command.");
         finalizeCommand();
-        return buildParseResult();
+        buildParseResult();
+        return getResult();
     }
 
     private boolean isFlag(String token) {
@@ -440,7 +451,8 @@ class CommandParser {
             char c = flags.charAt(i);
             CommandFlag flag = perCommandDetails().commandInfo.flags.get(c);
             if (flag == null) {
-                throw new NoSuchFlagException(buildParseResult(), c);
+                buildParseResult();
+                throw new NoSuchFlagException(getResult(), c);
             }
             if (flag instanceof ArgAcceptingCommandFlag) {
                 if (i + 1 < flags.length()) {
@@ -471,7 +483,7 @@ class CommandParser {
         CommandValueImpl.Builder builder = CommandValueImpl.builder();
         valueAdder.accept(builder);
         parameters.addValue(part, builder
-            .commandContextSupplier(this::buildParseResult)
+            .commandContextSupplier(this::getResult)
             .partContext(part)
             .injectedValues(context)
             .manager(converters)
