@@ -77,10 +77,14 @@ public final class MemoizingValueAccess implements InjectedValueAccess {
             lock.readLock().unlock();
         }
         // no dice -- exclusively compute it.
-        // if another thread raced us, computeIfAbsent will ensure only a single computation occurs
         lock.writeLock().lock();
         try {
-            return (Optional<T>) memory.computeIfAbsent(key, k -> delegate.injectedValue(k, context));
+            Optional<?> result = memory.get(key);
+            if (result == null) {
+                result = delegate.injectedValue(key, context);
+                memory.put(key, result);
+            }
+            return (Optional<T>) result;
         } finally {
             lock.writeLock().unlock();
         }
