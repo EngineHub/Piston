@@ -110,10 +110,15 @@ public class HelpGenerator {
             usage.append(TextComponent.of(name, ColorConfig.getMainText()));
             List<CommandPart> reducedParts;
             if (iterator.hasNext()) {
-                // drop the sub-command part
-                reducedParts = command.getParts().stream()
-                    .filter(x -> !(x instanceof SubCommandPart))
-                    .collect(Collectors.toList());
+                // drop once we hit the sub-command part
+                ImmutableList.Builder<CommandPart> parts = ImmutableList.builder();
+                for (CommandPart part : command.getParts()) {
+                    if (part instanceof SubCommandPart) {
+                        break;
+                    }
+                    parts.add(part);
+                }
+                reducedParts = parts.build();
             } else {
                 reducedParts = command.getParts();
             }

@@ -44,6 +44,7 @@ class CommandInfo {
         ImmutableMap.Builder<Character, CommandFlag> flags = ImmutableMap.builder();
         ImmutableMap.Builder<String, Command> subCommands = ImmutableMap.builder();
         Optional<SubCommandPart> subCommandPart = Optional.empty();
+        int subCommandArgIndex = -1;
         boolean seenOptionalArg = false;
         boolean middleOptionalArg = false;
         ImmutableList<CommandPart> parts = command.getParts();
@@ -74,6 +75,7 @@ class CommandInfo {
                     }
                 }
                 subCommandPart = Optional.of(scp);
+                subCommandArgIndex = requiredParts;
             } else {
                 throw new IllegalStateException("Unknown part implementation " + part);
             }
@@ -106,7 +108,8 @@ class CommandInfo {
             flags.build(),
             subCommands.build(),
             subCommandPart,
-            requiredParts);
+            requiredParts,
+            subCommandArgIndex);
     }
 
     final ImmutableList<CommandArgument> arguments;
@@ -115,17 +118,25 @@ class CommandInfo {
     final ImmutableMap<String, Command> subCommands;
     final Optional<SubCommandPart> subCommandPart;
     final int requiredParts;
+    /**
+     * Index where the sub-command is placed. The number of required arguments consumed
+     * should be <em>equal</em> to this for the sub-command to be matched.
+     */
+    final int subCommandArgIndex;
 
     CommandInfo(ImmutableList<CommandArgument> arguments,
                 ImmutableList<ArgAcceptingCommandPart> defaultProvided,
                 ImmutableMap<Character, CommandFlag> flags,
                 ImmutableMap<String, Command> subCommands,
-                Optional<SubCommandPart> subCommandPart, int requiredParts) {
+                Optional<SubCommandPart> subCommandPart,
+                int requiredParts,
+                int subCommandArgIndex) {
         this.arguments = arguments;
         this.defaultProvided = defaultProvided;
         this.flags = flags;
         this.subCommands = subCommands;
         this.subCommandPart = subCommandPart;
         this.requiredParts = requiredParts;
+        this.subCommandArgIndex = subCommandArgIndex;
     }
 }

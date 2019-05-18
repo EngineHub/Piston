@@ -130,7 +130,12 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
                 .flatMap(a -> a.getParts().stream())
                 .iterator());
         for (CommandPart part : parseResult.getPrimaryCommand().getParts()) {
-            if (part instanceof CommandFlag || usedParts.contains(part)) {
+            if (part instanceof CommandFlag) {
+                continue;
+            }
+            if (usedParts.contains(part)) {
+                // also reset parts, we won't match prior to this either
+                parts = ImmutableList.builder();
                 continue;
             }
             parts.add(part);

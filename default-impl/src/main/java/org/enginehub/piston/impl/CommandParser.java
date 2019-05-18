@@ -285,11 +285,12 @@ class CommandParser {
         while (hasNextArgument()) {
             String token = nextArgument();
             log("Consuming argument `{}`", token);
+            PerCommandDetails details = perCommandDetails();
 
             if (isFlag(token)) {
                 if (token.equals("--")) {
                     log("Encountered `--`, turning off flag matching.");
-                    perCommandDetails().canMatchFlags = false;
+                    details.canMatchFlags = false;
                     continue;
                 }
 
@@ -297,21 +298,22 @@ class CommandParser {
                 continue;
             }
 
-            // eagerly consume optional sub-commands
-            if (parseSubCommand(token, true)) {
-                continue;
+            int finishedReqParts = details.commandInfo.requiredParts - details.remainingRequiredParts;
+            if (finishedReqParts == details.commandInfo.subCommandArgIndex) {
+                log("matched subCommandArgIndex={}, trying to match sub-commands", finishedReqParts);
+                if (parseSubCommand(token)) {
+                    continue;
+                }
+                log("did not match sub-command at the index, token={}", token);
             }
 
             if (!parseRegularArgument(token)) {
-                log("Failed to parse {} as regular argument, attempting sub-command.", token);
-                // Hit end of parts. Maybe this belongs to sub-commands?
-                if (!parseSubCommand(token, false)) {
-                    if (lastFailedOptional != null) {
-                        // fail on type-conversion to this instead
-                        throw conversionFailedException(lastFailedOptional, token);
-                    }
-                    throw tooManyArgumentsException();
+                // Hit end of parts, this cannot be parsed
+                if (lastFailedOptional != null) {
+                    // fail on type-conversion to this instead
+                    throw conversionFailedException(lastFailedOptional, token);
                 }
+                throw tooManyArgumentsException();
             }
         }
         log("Finished looking at arguments. Finalizing command.");
@@ -336,19 +338,16 @@ class CommandParser {
             .allMatch(cp -> perCommandDetails().commandInfo.flags.containsKey((char) cp));
     }
 
-    private boolean parseSubCommand(String token, boolean onlyOptional) {
+    private boolean parseSubCommand(String token) {
         CommandInfo commandInfo = perCommandDetails().commandInfo;
         if (!commandInfo.subCommandPart.isPresent()) {
             return false;
         }
         SubCommandPart part = commandInfo.subCommandPart.get();
-        if (part.isRequired() && onlyOptional) {
-            return false;
-        }
         ImmutableMap<String, Command> subCommands = commandInfo.subCommands;
         Command sub = subCommands.get(token);
         if (sub == null) {
-            if (onlyOptional) {
+            if (!part.isRequired()) {
                 return false;
             }
             throw usageException(TextComponent.of("Invalid sub-command. Options: "
