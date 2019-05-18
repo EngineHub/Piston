@@ -29,6 +29,7 @@ import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.NoInputCommandParameters;
+import org.enginehub.piston.TextConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
@@ -80,9 +81,12 @@ public class HelpGenerator {
      * Generate a name for the set of commands as a whole.
      */
     public Component getFullName() {
-        TextComponent.Builder usage = TextComponent.builder("");
+        TextComponent.Builder usage = TextComponent.builder();
 
-        usage.append(TextComponent.of(parseResult.getExecutionPath().get(0).getName(), ColorConfig.getMainText()));
+        usage.append(TextComponent.of(
+            TextConfig.getCommandPrefix() + parseResult.getExecutionPath().get(0).getName(),
+            ColorConfig.getMainText())
+        );
 
         for (String input : parseResult.getOriginalArguments()) {
             usage.append(space());
@@ -96,7 +100,7 @@ public class HelpGenerator {
      * Generate a usage help text.
      */
     public Component getUsage() {
-        TextComponent.Builder usage = TextComponent.builder("");
+        TextComponent.Builder usage = TextComponent.builder(TextConfig.getCommandPrefix());
 
         for (Iterator<Command> iterator = parseResult.getExecutionPath().iterator(); iterator.hasNext(); ) {
             Command command = iterator.next();
