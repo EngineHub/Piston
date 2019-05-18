@@ -100,7 +100,8 @@ public class HelpGenerator {
      * Generate a usage help text.
      */
     public Component getUsage() {
-        TextComponent.Builder usage = TextComponent.builder(TextConfig.getCommandPrefix());
+        TextComponent.Builder usage = TextComponent.builder()
+            .append(TextComponent.of(TextConfig.getCommandPrefix(), ColorConfig.getMainText()));
 
         for (Iterator<Command> iterator = parseResult.getExecutionPath().iterator(); iterator.hasNext(); ) {
             Command command = iterator.next();
