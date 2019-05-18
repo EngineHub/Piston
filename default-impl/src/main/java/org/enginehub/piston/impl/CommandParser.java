@@ -246,7 +246,6 @@ class CommandParser {
 
     private void switchToCommand(Command subCommand) {
         if (perCommandDetails != null) {
-            finalizeCommand();
             fillInDefaults();
         }
         parseResult.addCommand(subCommand);
@@ -298,10 +297,15 @@ class CommandParser {
                 continue;
             }
 
+            // eagerly consume optional sub-commands
+            if (parseSubCommand(token, true)) {
+                continue;
+            }
+
             if (!parseRegularArgument(token)) {
                 log("Failed to parse {} as regular argument, attempting sub-command.", token);
                 // Hit end of parts. Maybe this belongs to sub-commands?
-                if (!parseSubCommand(token)) {
+                if (!parseSubCommand(token, false)) {
                     if (lastFailedOptional != null) {
                         // fail on type-conversion to this instead
                         throw conversionFailedException(lastFailedOptional, token);
@@ -332,21 +336,27 @@ class CommandParser {
             .allMatch(cp -> perCommandDetails().commandInfo.flags.containsKey((char) cp));
     }
 
-    private boolean parseSubCommand(String token) {
+    private boolean parseSubCommand(String token, boolean onlyOptional) {
         CommandInfo commandInfo = perCommandDetails().commandInfo;
         if (!commandInfo.subCommandPart.isPresent()) {
+            return false;
+        }
+        SubCommandPart part = commandInfo.subCommandPart.get();
+        if (part.isRequired() && onlyOptional) {
             return false;
         }
         ImmutableMap<String, Command> subCommands = commandInfo.subCommands;
         Command sub = subCommands.get(token);
         if (sub == null) {
+            if (onlyOptional) {
+                return false;
+            }
             throw usageException(TextComponent.of("Invalid sub-command. Options: "
                 + subCommands.values().stream()
                 .distinct()
                 .map(Command::getName)
                 .collect(Collectors.joining(", "))));
         }
-        SubCommandPart part = commandInfo.subCommandPart.get();
         bind(part);
         if (part.isRequired()) {
             perCommandDetails().remainingRequiredParts--;

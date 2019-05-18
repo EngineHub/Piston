@@ -22,8 +22,10 @@ package org.enginehub.piston.util;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.ColorConfig;
+import org.enginehub.piston.Command;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
+import org.enginehub.piston.part.SubCommandPart;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -31,6 +33,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.google.common.base.Preconditions.checkState;
 
 public class PartHelper {
 
@@ -41,13 +45,28 @@ public class PartHelper {
         Stream.Builder<Component> other = Stream.builder();
         SortedSet<Character> flags = new TreeSet<>();
         Iterator<CommandPart> iterator = parts.iterator();
+        Stream.Builder<Component> postOSC = Stream.builder();
+        SubCommandPart optionalSubCommand = null;
         while (iterator.hasNext()) {
             CommandPart part = iterator.next();
             if (part instanceof NoArgCommandFlag) {
+                // This is not a necessary restriction, but it simplified logic here
+                // If you need it, make an issue, and this can be rewritten to support it.
+                checkState(optionalSubCommand == null,
+                    "All flags should come before sub-commands.");
                 flags.add(((NoArgCommandFlag) part).getName());
-            } else {
-                other.add(part.getTextRepresentation());
+                continue;
             }
+
+            if (part instanceof SubCommandPart) {
+                // Make an optional sub-command part bind with the rest of the parts.
+                if (!part.isRequired()) {
+                    optionalSubCommand = (SubCommandPart) part;
+                    continue;
+                }
+            }
+
+            (optionalSubCommand == null ? other : postOSC).add(part.getTextRepresentation());
         }
         Stream<TextComponent> flagsString = Optional.of(flags)
             .filter(x -> !x.isEmpty())
@@ -62,13 +81,36 @@ public class PartHelper {
                 .build())
             .map(Stream::of).orElse(Stream.empty());
 
-        Iterator<Component> usages = Stream.concat(flagsString, other.build()).iterator();
+        Stream<Component> afterFlags = optionalSubCommand == null
+            ? other.build()
+            : Stream.concat(other.build(), buildOptionalMerging(optionalSubCommand, postOSC.build()));
+
+        Iterator<Component> usages = Stream.concat(flagsString, afterFlags).iterator();
         while (usages.hasNext()) {
             output.append(usages.next());
             if (usages.hasNext()) {
                 output.append(TextComponent.of(" "));
             }
         }
+    }
+
+    private static Stream<Component> buildOptionalMerging(SubCommandPart optionalSubCommand,
+                                                          Stream<Component> postComponents) {
+        TextComponent.Builder builder = TextComponent.builder()
+            .color(ColorConfig.getPartWrapping());
+        builder.append("<");
+        builder.append(optionalSubCommand.getCommands().stream()
+            .map(Command::getName)
+            .map(n -> TextComponent.of(n, ColorConfig.getMainText()))
+            .collect(ComponentHelper.joiningWithBar()));
+        builder.append("|");
+        builder.append(postComponents.collect(ComponentHelper.joiningTexts(
+            TextComponent.empty(),
+            TextComponent.of(" "),
+            TextComponent.empty()
+        )));
+        builder.append(">");
+        return Stream.of(builder.build());
     }
 
 }

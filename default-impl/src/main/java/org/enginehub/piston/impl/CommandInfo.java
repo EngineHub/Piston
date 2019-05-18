@@ -62,8 +62,10 @@ class CommandInfo {
                 }
                 arguments.add((CommandArgument) part);
             } else if (part instanceof SubCommandPart) {
-                checkState(i + 1 >= parts.size(),
-                    "Sub-command must be last part.");
+                if (part.isRequired()) {
+                    checkState(i + 1 >= parts.size(),
+                        "Required sub-command must be last part.");
+                }
                 SubCommandPart scp = (SubCommandPart) part;
                 for (Command cmd : scp.getCommands()) {
                     subCommands.put(cmd.getName(), cmd);
