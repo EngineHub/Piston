@@ -27,11 +27,14 @@ import org.enginehub.piston.commands.SingleArgCommand
 import org.enginehub.piston.commands.SingleArgCommandRegistration
 import org.enginehub.piston.commands.SingleOptionalArgCommand
 import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration
+import org.enginehub.piston.exception.UsageException
 import org.enginehub.piston.inject.InjectedValueAccess
 import org.enginehub.piston.inject.Key
 import org.enginehub.piston.inject.MapBackedValueStore
 import org.enginehub.piston.util.ValueProvider
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.verify
 
 class BasicCommandTest {
@@ -76,6 +79,35 @@ class BasicCommandTest {
             manager.execute(InjectedValueAccess.EMPTY, listOf("single-arg", testString))
 
             verify(ci).singleArg(testString)
+        }
+    }
+
+    @Test
+    fun singleArgCommandWithDashDash() {
+        val testString = "a varied argument"
+        withMockedContainer(SingleArgCommand::class.java) { ci ->
+            val manager = newManager().apply {
+                installCommands(ci, SingleArgCommandRegistration.builder())
+            }
+
+            manager.execute(InjectedValueAccess.EMPTY, listOf("single-arg", "--", testString))
+
+            verify(ci).singleArg(testString)
+        }
+    }
+
+    @Test
+    fun notEnoughArgsForSingleArg() {
+        withMockedContainer(SingleArgCommand::class.java) { ci ->
+            val manager = newManager().apply {
+                installCommands(ci, SingleArgCommandRegistration.builder())
+            }
+
+            val notEnoughArgEx = assertThrows<UsageException> {
+                manager.execute(InjectedValueAccess.EMPTY, listOf("single-arg"))
+            }
+
+            assertEquals("Missing argument for <piston.argument.first>.", notEnoughArgEx.message)
         }
     }
 

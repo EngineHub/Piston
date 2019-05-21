@@ -190,9 +190,8 @@ class CommandParser {
     }
 
     private String nextArgument() {
-        if (!hasNextArgument()) {
-            throw notEnoughArgumentsException();
-        }
+        checkState(hasNextArgument(),
+            "No next argument present, this call should be guarded with hasNextArgument");
         if (argIter.hasPrevious()) {
             bindArgument();
         }
@@ -203,9 +202,8 @@ class CommandParser {
 
     private void bindArgument() {
         ImmutableSet<CommandPart> binding = argBindings.build();
-        if (binding.isEmpty() && !currentArgument().equals("--")) {
-            throw new IllegalStateException("Argument never bound: " + currentArgument());
-        }
+        checkState(!binding.isEmpty() || currentArgument().equals("--"),
+            "Argument never bound: %s", currentArgument());
         parseResult.addArgument(ArgBindingImpl.builder()
             .input(currentArgument())
             .parts(binding)
@@ -213,12 +211,10 @@ class CommandParser {
     }
 
     private void unconsumeArgument() {
-        if (!argBindings.build().isEmpty()) {
-            throw new IllegalStateException("Argument already bound: " + currentArgument());
-        }
-        if (!argIter.hasPrevious()) {
-            throw new IllegalStateException("Trying to unconsume nothing");
-        }
+        checkState(argBindings.build().isEmpty(),
+            "Argument already bound: %s", currentArgument());
+        checkState(argIter.hasPrevious(),
+            "Trying to unconsume nothing");
         argIter.previous();
     }
 
@@ -234,9 +230,8 @@ class CommandParser {
     }
 
     private CommandArgument nextPart() {
-        if (!hasNextPart()) {
-            throw usageException(TextComponent.of("Too many arguments."));
-        }
+        checkState(hasNextPart(),
+            "No next part, this call should be guarded with hasNextPart()");
         return perCommandDetails().partIter.next();
     }
 
