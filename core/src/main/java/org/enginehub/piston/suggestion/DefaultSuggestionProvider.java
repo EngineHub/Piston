@@ -63,6 +63,11 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
     }
 
     private Stream<Suggestion> getSuggestionStream(List<String> args, CommandParseResult parseResult) {
+        // validate that we only have one invalid argument
+        if (args.size() - parseResult.getBoundArguments().size() > 1) {
+            // too many -- return no suggestions, to hint that the user should back up
+            return Stream.of();
+        }
         String last = Iterables.getLast(args, "");
         if (last.startsWith("-")) {
             // complete flags if we have any
