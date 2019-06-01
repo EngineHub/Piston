@@ -19,16 +19,25 @@
 
 package org.enginehub.piston.util;
 
-
 import com.google.common.base.Joiner;
 import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.text.KeybindComponent;
 import net.kyori.text.TranslatableComponent;
+import net.kyori.text.serializer.plain.PlainComponentSerializer;
 
 import java.util.Iterator;
 import java.util.List;
 
 public class TextHelper {
+
+    private static final PlainComponentSerializer PLAIN_COMPONENT_SERIALIZER = new PlainComponentSerializer(
+        KeybindComponent::keybind,
+        translatableComponent -> {
+            StringBuilder builder = new StringBuilder();
+            appendTranslatableTo(builder, translatableComponent);
+            return builder.toString();
+        }
+    );
 
     public static String reduceToText(Component component) {
         StringBuilder text = new StringBuilder();
@@ -37,14 +46,7 @@ public class TextHelper {
     }
 
     private static void appendTextTo(StringBuilder builder, Component component) {
-        if (component instanceof TextComponent) {
-            builder.append(((TextComponent) component).content());
-        } else if (component instanceof TranslatableComponent) {
-            appendTranslatableTo(builder, (TranslatableComponent) component);
-        }
-        for (Component child : component.children()) {
-            appendTextTo(builder, child);
-        }
+        PLAIN_COMPONENT_SERIALIZER.serialize(builder, component);
     }
 
     private static void appendTranslatableTo(StringBuilder builder, TranslatableComponent component) {
