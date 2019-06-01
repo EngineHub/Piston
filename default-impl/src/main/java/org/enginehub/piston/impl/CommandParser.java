@@ -250,6 +250,13 @@ class CommandParser {
         return perCommandDetails().partIter.next();
     }
 
+    private void unconsumePart() {
+        ListIterator<CommandArgument> partIter = perCommandDetails().partIter;
+        checkState(partIter.hasPrevious(),
+            "Trying to unconsume nothing");
+        partIter.previous();
+    }
+
     private void bind(CommandPart part) {
         argBindings.add(part);
     }
@@ -312,15 +319,6 @@ class CommandParser {
                 continue;
             }
 
-            int finishedReqParts = details.commandInfo.requiredParts - details.remainingRequiredParts;
-            if (finishedReqParts == details.commandInfo.subCommandArgIndex) {
-                log("matched subCommandArgIndex={}, trying to match sub-commands", finishedReqParts);
-                if (parseSubCommand(token)) {
-                    continue;
-                }
-                log("did not match sub-command at the index, token={}", token);
-            }
-
             if (!parseRegularArgument(token)) {
                 // Hit end of parts, this cannot be parsed
                 if (lastFailedOptional != null) {
@@ -350,6 +348,15 @@ class CommandParser {
         return token.codePoints()
             .skip(1)
             .allMatch(cp -> perCommandDetails().commandInfo.flags.containsKey((char) cp));
+    }
+
+    /**
+     * Is the current part index trying to also match a sub-command?
+     */
+    private boolean isSubCommandIndex() {
+        PerCommandDetails details = perCommandDetails();
+        int finishedReqParts = details.commandInfo.requiredParts - details.remainingRequiredParts;
+        return finishedReqParts == details.commandInfo.subCommandArgIndex;
     }
 
     private boolean parseSubCommand(String token) {
@@ -383,12 +390,21 @@ class CommandParser {
         if (!hasNextPart()) {
             log("parseRegularArgument: no arguments to attempt matching");
         }
+        boolean sci = isSubCommandIndex();
         CommandArgument lastFailedOptionalLocal = null;
         while (hasNextPart()) {
             CommandArgument nextArg = nextPart();
             String name = TextHelper.reduceToText(nextArg.getName());
             log("parseRegularArgument: [{}] test for matching", name);
             if (nextArg.isRequired()) {
+                if (sci) {
+                    log("parseRegularArgument: [{}] at sub-command index," +
+                        " will not match required commands", name);
+                    // unconsume and stop looping.
+                    // we tried all optionals, now we match for the sub-command or die.
+                    unconsumePart();
+                    break;
+                }
                 // good, we can just satisfy it
                 if (!isAcceptedByTypeParsers(nextArg, token)) {
                     throw conversionFailedException(nextArg, token);
@@ -426,6 +442,14 @@ class CommandParser {
                 " types={}", name, nextArg.getTypes());
             // store it in case no required arguments match
             lastFailedOptionalLocal = nextArg;
+        }
+        if (sci) {
+            log("matched subCommandArgIndex={}, trying to match sub-commands",
+                details.commandInfo.subCommandArgIndex);
+            if (parseSubCommand(token)) {
+                return true;
+            }
+            log("did not match sub-command at the index, token={}", token);
         }
         lastFailedOptional = lastFailedOptionalLocal;
         return false;

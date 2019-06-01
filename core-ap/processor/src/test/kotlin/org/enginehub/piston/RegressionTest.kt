@@ -19,6 +19,7 @@
 
 package org.enginehub.piston
 
+import net.kyori.text.TextComponent
 import org.enginehub.piston.commands.RegressionCommands
 import org.enginehub.piston.commands.RegressionCommandsRegistration
 import org.enginehub.piston.exception.UsageException
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
@@ -64,6 +66,40 @@ class RegressionTest {
                 assertEquals("Invalid value for <piston.argument.second> (For input string: \"5.x\")," +
                         " acceptable values are any double", usageEx.message)
             }
+        }
+    }
+
+    private interface CString {
+        operator fun invoke(str: String)
+    }
+
+    @Test
+    @DisplayName("Regression test for issue #9 part 2, regarding optionals mixing priority with sub-commands")
+    fun issue9OptionalSubCommandPriority() {
+        val action: CString = mock(CString::class.java)
+        withRegressionCommands { _, manager ->
+            manager.register("i9#2") { cmd ->
+                val arg = arg("prior", "Arg prior") {
+                    defaultsTo(listOf(""))
+                }
+                val sub = manager.newCommand("subcommand")
+                        .action {
+                            action(it.valueOf(arg).asString())
+                            1
+                        }
+                        .description(TextComponent.of("Sub-command"))
+                        .build()
+                cmd.run {
+                    description(TextComponent.of("Issue 9 #2"))
+                    // Optional arg prior to sub-command
+                    addPart(arg)
+                    addPart(subs(sub))
+                }
+            }
+
+            manager.execute(InjectedValueAccess.EMPTY, listOf("i9#2", "prior-opt", "subcommand"))
+
+            verify(action)("prior-opt")
         }
     }
 

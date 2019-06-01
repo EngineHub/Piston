@@ -19,7 +19,13 @@
 
 package org.enginehub.piston
 
+import com.google.common.collect.ImmutableList
+import net.kyori.text.TextComponent
+import net.kyori.text.TranslatableComponent
 import org.enginehub.piston.gen.CommandRegistration
+import org.enginehub.piston.part.CommandArgument
+import org.enginehub.piston.part.CommandParts
+import org.enginehub.piston.part.SubCommandPart
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
 
@@ -41,3 +47,21 @@ inline fun <CI, R> withMockedContainer(containerClass: Class<CI>, block: (CI) ->
         verifyNoMoreInteractions(mock)
     }
 }
+
+inline fun arg(name: String, desc: String, block: CommandArgument.Builder.() -> Unit): CommandArgument =
+        CommandParts.arg(
+                TranslatableComponent.of(name),
+                TextComponent.of(desc)
+        ).also(block).build()
+
+fun subs(vararg subCommands: Command, required: Boolean = true): SubCommandPart =
+        SubCommandPart.builder(
+                TranslatableComponent.of("actions"),
+                TextComponent.of("Sub-actions")
+        ).run {
+            withCommands(ImmutableList.copyOf(subCommands))
+
+            if (required) required() else optional()
+
+            build()
+        }
