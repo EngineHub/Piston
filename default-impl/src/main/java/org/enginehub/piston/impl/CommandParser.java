@@ -32,6 +32,7 @@ import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.converter.FailedConversion;
+import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.exception.ConversionFailedException;
 import org.enginehub.piston.exception.NoSuchFlagException;
 import org.enginehub.piston.exception.UsageException;
@@ -173,6 +174,15 @@ class CommandParser {
             (FailedConversion<?>) converter.convert(token, context));
     }
 
+    private ConditionFailedException conditionFailed() {
+        buildParseResult();
+        return new ConditionFailedException(getResult().getExecutionPath());
+    }
+
+    private boolean testCondition(Command.Condition condition) {
+        return condition.satisfied(context);
+    }
+
     private PerCommandDetails perCommandDetails() {
         return requireNonNull(perCommandDetails);
     }
@@ -245,6 +255,10 @@ class CommandParser {
         }
         parseResult.addCommand(subCommand);
         perCommandDetails = new PerCommandDetails(commandInfoCache.getInfo(subCommand));
+
+        if (!testCondition(subCommand.getCondition())) {
+            throw conditionFailed();
+        }
     }
 
     private void fillInDefaults() {

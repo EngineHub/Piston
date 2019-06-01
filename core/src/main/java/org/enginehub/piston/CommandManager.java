@@ -124,6 +124,15 @@ public interface CommandManager extends ArgumentConverterStore {
      * The rest of the arguments will be parsed into the correct parts.
      * </p>
      *
+     * <p>
+     * Note: Command conditions <em>must</em> pass when encountered,
+     * e.g. the root command condition will be tested <em>before</em>
+     * parsing its arguments. This is to ensure no information is leaked
+     * about sub-commands, etc. while parsing. This also means that there
+     * is no need to validate conditions after calling this method,
+     * unless you wish to use a different context.
+     * </p>
+     *
      * @param context the injected value context
      * @param args the arguments to include
      * @return the parsing output
@@ -146,16 +155,6 @@ public interface CommandManager extends ArgumentConverterStore {
         CommandParseResult parse = parse(context, args);
 
         try {
-            // validate conditions
-            ImmutableList<Command> executionPath = parse.getExecutionPath();
-            for (int i = 0; i < executionPath.size(); i++) {
-                Command command = executionPath.get(i);
-                if (!command.getCondition().satisfied(parse.getParameters())) {
-                    throw new ConditionFailedException(parse.getExecutionPath()
-                        .subList(0, i + 1));
-                }
-            }
-
             return parse.getPrimaryCommand().getAction().run(parse.getParameters());
         } catch (CommandException e) {
             throw e;

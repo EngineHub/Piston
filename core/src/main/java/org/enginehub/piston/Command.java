@@ -21,6 +21,7 @@ package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
+import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.suggestion.SuggestionProvider;
 import org.enginehub.piston.util.HelpGenerator;
@@ -80,20 +81,20 @@ public interface Command {
         /**
          * Determine if the condition is satisfied.
          *
-         * @param parameters the command parameters
+         * @param context the command context
          */
-        boolean satisfied(CommandParameters parameters);
+        boolean satisfied(InjectedValueAccess context);
 
         default Condition and(Condition other) {
-            return p -> satisfied(p) && other.satisfied(p);
+            return c -> satisfied(c) && other.satisfied(c);
         }
 
         default Condition or(Condition other) {
-            return p -> satisfied(p) || other.satisfied(p);
+            return c -> satisfied(c) || other.satisfied(c);
         }
 
         default Condition not() {
-            return p -> !satisfied(p);
+            return c -> !satisfied(c);
         }
 
         /**
