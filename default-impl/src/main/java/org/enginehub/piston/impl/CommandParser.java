@@ -378,6 +378,7 @@ class CommandParser {
         if (!hasNextPart()) {
             log("parseRegularArgument: no arguments to attempt matching");
         }
+        CommandArgument lastFailedOptionalLocal = null;
         while (hasNextPart()) {
             CommandArgument nextArg = nextPart();
             String name = TextHelper.reduceToText(nextArg.getName());
@@ -419,8 +420,9 @@ class CommandParser {
             log("parseRegularArgument: [{}] type-parser SOFT_FAIL:" +
                 " types={}", name, nextArg.getTypes());
             // store it in case no required arguments match
-            lastFailedOptional = nextArg;
+            lastFailedOptionalLocal = nextArg;
         }
+        lastFailedOptional = lastFailedOptionalLocal;
         return false;
     }
 
