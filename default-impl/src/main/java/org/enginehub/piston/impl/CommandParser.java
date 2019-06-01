@@ -32,6 +32,7 @@ import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.converter.FailedConversion;
+import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.exception.ConversionFailedException;
 import org.enginehub.piston.exception.NoSuchFlagException;
 import org.enginehub.piston.exception.UsageException;
@@ -116,6 +117,7 @@ class CommandParser {
     private CommandArgument lastFailedOptional;
     @Nullable
     private CommandParseResult result;
+    private boolean justUnconsumed;
 
     CommandParser(ArgumentConverterAccess converters, CommandInfoCache commandInfoCache, Command initial,
                   CommandMetadata metadata, InjectedValueAccess context) {
@@ -160,7 +162,7 @@ class CommandParser {
         return usageException(TextComponent.of("Too many arguments."));
     }
 
-    private ConversionFailedException conversionFailedException(CommandArgument nextArg, String token) {
+    private ConversionFailedException conversionFailedException(ArgAcceptingCommandPart nextArg, String token) {
         // TODO: Make this print all converters
         ArgumentConverter<?> converter = nextArg.getTypes().stream()
             .map(k -> converters.getConverter(k).orElse(null))
@@ -171,6 +173,15 @@ class CommandParser {
             nextArg.getTextRepresentation(),
             converter,
             (FailedConversion<?>) converter.convert(token, context));
+    }
+
+    private ConditionFailedException conditionFailed() {
+        buildParseResult();
+        return new ConditionFailedException(getResult().getExecutionPath());
+    }
+
+    private boolean testCondition(Command.Condition condition) {
+        return condition.satisfied(context);
     }
 
     private PerCommandDetails perCommandDetails() {
@@ -192,9 +203,12 @@ class CommandParser {
     private String nextArgument() {
         checkState(hasNextArgument(),
             "No next argument present, this call should be guarded with hasNextArgument");
-        if (argIter.hasPrevious()) {
+        // don't try to re-bind the last argument if we have already done it,
+        // and reversed with unconsumeArgument
+        if (argIter.hasPrevious() && !justUnconsumed) {
             bindArgument();
         }
+        justUnconsumed = false;
         String next = argIter.next();
         argBindings = ImmutableSet.builder();
         return next;
@@ -216,6 +230,7 @@ class CommandParser {
         checkState(argIter.hasPrevious(),
             "Trying to unconsume nothing");
         argIter.previous();
+        justUnconsumed = true;
     }
 
     private int remainingNonFlagArguments() {
@@ -235,6 +250,13 @@ class CommandParser {
         return perCommandDetails().partIter.next();
     }
 
+    private void unconsumePart() {
+        ListIterator<CommandArgument> partIter = perCommandDetails().partIter;
+        checkState(partIter.hasPrevious(),
+            "Trying to unconsume nothing");
+        partIter.previous();
+    }
+
     private void bind(CommandPart part) {
         argBindings.add(part);
     }
@@ -245,6 +267,10 @@ class CommandParser {
         }
         parseResult.addCommand(subCommand);
         perCommandDetails = new PerCommandDetails(commandInfoCache.getInfo(subCommand));
+
+        if (!testCondition(subCommand.getCondition())) {
+            throw conditionFailed();
+        }
     }
 
     private void fillInDefaults() {
@@ -293,15 +319,6 @@ class CommandParser {
                 continue;
             }
 
-            int finishedReqParts = details.commandInfo.requiredParts - details.remainingRequiredParts;
-            if (finishedReqParts == details.commandInfo.subCommandArgIndex) {
-                log("matched subCommandArgIndex={}, trying to match sub-commands", finishedReqParts);
-                if (parseSubCommand(token)) {
-                    continue;
-                }
-                log("did not match sub-command at the index, token={}", token);
-            }
-
             if (!parseRegularArgument(token)) {
                 // Hit end of parts, this cannot be parsed
                 if (lastFailedOptional != null) {
@@ -331,6 +348,15 @@ class CommandParser {
         return token.codePoints()
             .skip(1)
             .allMatch(cp -> perCommandDetails().commandInfo.flags.containsKey((char) cp));
+    }
+
+    /**
+     * Is the current part index trying to also match a sub-command?
+     */
+    private boolean isSubCommandIndex() {
+        PerCommandDetails details = perCommandDetails();
+        int finishedReqParts = details.commandInfo.requiredParts - details.remainingRequiredParts;
+        return finishedReqParts == details.commandInfo.subCommandArgIndex;
     }
 
     private boolean parseSubCommand(String token) {
@@ -364,11 +390,21 @@ class CommandParser {
         if (!hasNextPart()) {
             log("parseRegularArgument: no arguments to attempt matching");
         }
+        boolean sci = isSubCommandIndex();
+        CommandArgument lastFailedOptionalLocal = null;
         while (hasNextPart()) {
             CommandArgument nextArg = nextPart();
             String name = TextHelper.reduceToText(nextArg.getName());
             log("parseRegularArgument: [{}] test for matching", name);
             if (nextArg.isRequired()) {
+                if (sci) {
+                    log("parseRegularArgument: [{}] at sub-command index," +
+                        " will not match required commands", name);
+                    // unconsume and stop looping.
+                    // we tried all optionals, now we match for the sub-command or die.
+                    unconsumePart();
+                    break;
+                }
                 // good, we can just satisfy it
                 if (!isAcceptedByTypeParsers(nextArg, token)) {
                     throw conversionFailedException(nextArg, token);
@@ -405,8 +441,17 @@ class CommandParser {
             log("parseRegularArgument: [{}] type-parser SOFT_FAIL:" +
                 " types={}", name, nextArg.getTypes());
             // store it in case no required arguments match
-            lastFailedOptional = nextArg;
+            lastFailedOptionalLocal = nextArg;
         }
+        if (sci) {
+            log("matched subCommandArgIndex={}, trying to match sub-commands",
+                details.commandInfo.subCommandArgIndex);
+            if (parseSubCommand(token)) {
+                return true;
+            }
+            log("did not match sub-command at the index, token={}", token);
+        }
+        lastFailedOptional = lastFailedOptionalLocal;
         return false;
     }
 
@@ -466,11 +511,20 @@ class CommandParser {
                 }
                 bind(flag);
                 if (!hasNextArgument()) {
-                    log("parseFlags: [-{}] skipping argument for arg-accepting flag",
+                    log("parseFlags: [-{}] skipping argument for arg-accepting flag, no argument available",
                         flag.getName());
                     break;
                 }
-                addValueFull(flag, v -> v.value(nextArgument()));
+                String nextToken = nextArgument();
+                ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
+                if (!isAcceptedByTypeParsers(argPart, nextToken)) {
+                    log("parseFlags: [-{}] skipping argument for arg-accepting flag, not accepted by type parsers",
+                        flag.getName());
+                    unconsumeArgument();
+                    break;
+                }
+                addValueFull(flag, v -> v.value(nextToken));
+                bind(flag);
                 perCommandDetails().defaultsNeeded.remove(flag);
             } else {
                 // Sanity-check. Real check is in `CommandInfo.from`.
