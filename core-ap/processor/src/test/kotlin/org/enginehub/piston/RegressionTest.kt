@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 
 class RegressionTest {
 
@@ -63,6 +65,18 @@ class RegressionTest {
                         " acceptable values are any double", usageEx.message)
             }
         }
+    }
 
+    @Test
+    @DisplayName("Regression test for issue #10, regarding arg flag positioning")
+    fun issue10ArgFlagPositioning() {
+        withRegressionCommands { ci, manager ->
+            // verify [root] -p 1 [arg] works
+            manager.execute(InjectedValueAccess.EMPTY, listOf("i10", "-p", "1", "req-arg"))
+            // verify [root] [arg] -p 1 works
+            manager.execute(InjectedValueAccess.EMPTY, listOf("i10", "req-arg", "-p", "1"))
+
+            verify(ci, times(2)).i10("req-arg", 1)
+        }
     }
 }

@@ -22,6 +22,7 @@ package org.enginehub.piston.commands
 import org.enginehub.piston.annotation.Command
 import org.enginehub.piston.annotation.CommandContainer
 import org.enginehub.piston.annotation.param.Arg
+import org.enginehub.piston.annotation.param.ArgFlag
 
 @CommandContainer
 interface RegressionCommands {
@@ -29,5 +30,10 @@ interface RegressionCommands {
     fun i9(
             @Arg(desc = "First argument", def = [""]) first: Int?,
             @Arg(desc = "Second argument") second: Double
+    )
+    @Command(name = "i10", desc = "description")
+    fun i10(
+            @Arg(desc = "First argument") first: String,
+            @ArgFlag(name = 'p', desc = "Page number") page: Int
     )
 }

@@ -117,6 +117,7 @@ class CommandParser {
     private CommandArgument lastFailedOptional;
     @Nullable
     private CommandParseResult result;
+    private boolean justUnconsumed;
 
     CommandParser(ArgumentConverterAccess converters, CommandInfoCache commandInfoCache, Command initial,
                   CommandMetadata metadata, InjectedValueAccess context) {
@@ -161,7 +162,7 @@ class CommandParser {
         return usageException(TextComponent.of("Too many arguments."));
     }
 
-    private ConversionFailedException conversionFailedException(CommandArgument nextArg, String token) {
+    private ConversionFailedException conversionFailedException(ArgAcceptingCommandPart nextArg, String token) {
         // TODO: Make this print all converters
         ArgumentConverter<?> converter = nextArg.getTypes().stream()
             .map(k -> converters.getConverter(k).orElse(null))
@@ -202,9 +203,12 @@ class CommandParser {
     private String nextArgument() {
         checkState(hasNextArgument(),
             "No next argument present, this call should be guarded with hasNextArgument");
-        if (argIter.hasPrevious()) {
+        // don't try to re-bind the last argument if we have already done it,
+        // and reversed with unconsumeArgument
+        if (argIter.hasPrevious() && !justUnconsumed) {
             bindArgument();
         }
+        justUnconsumed = false;
         String next = argIter.next();
         argBindings = ImmutableSet.builder();
         return next;
@@ -226,6 +230,7 @@ class CommandParser {
         checkState(argIter.hasPrevious(),
             "Trying to unconsume nothing");
         argIter.previous();
+        justUnconsumed = true;
     }
 
     private int remainingNonFlagArguments() {
@@ -482,11 +487,20 @@ class CommandParser {
                 }
                 bind(flag);
                 if (!hasNextArgument()) {
-                    log("parseFlags: [-{}] skipping argument for arg-accepting flag",
+                    log("parseFlags: [-{}] skipping argument for arg-accepting flag, no argument available",
                         flag.getName());
                     break;
                 }
-                addValueFull(flag, v -> v.value(nextArgument()));
+                String nextToken = nextArgument();
+                ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
+                if (!isAcceptedByTypeParsers(argPart, nextToken)) {
+                    log("parseFlags: [-{}] skipping argument for arg-accepting flag, not accepted by type parsers",
+                        flag.getName());
+                    unconsumeArgument();
+                    break;
+                }
+                addValueFull(flag, v -> v.value(nextToken));
+                bind(flag);
                 perCommandDetails().defaultsNeeded.remove(flag);
             } else {
                 // Sanity-check. Real check is in `CommandInfo.from`.
