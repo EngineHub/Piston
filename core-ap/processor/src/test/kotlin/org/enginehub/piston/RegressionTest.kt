@@ -32,6 +32,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
+@DisplayName("Regression tests")
 class RegressionTest {
 
     private inline fun withRegressionCommands(block: (RegressionCommands, CommandManager) -> Unit) {
@@ -45,7 +46,7 @@ class RegressionTest {
     }
 
     @Test
-    @DisplayName("Regression test for issue #9, regarding optionals in the middle of a command")
+    @DisplayName("issue #9, regarding optionals in the middle of a command")
     fun issue9MiddleOptionals() {
         withRegressionCommands { _, manager ->
             // Main issue: verify [root] [matching-second-not-first] [matching-first] fails
@@ -74,7 +75,7 @@ class RegressionTest {
     }
 
     @Test
-    @DisplayName("Regression test for issue #9 part 2, regarding optionals mixing priority with sub-commands")
+    @DisplayName("issue #9 part 2, regarding optionals mixing priority with sub-commands")
     fun issue9OptionalSubCommandPriority() {
         val action: CString = mock(CString::class.java)
         withRegressionCommands { _, manager ->
@@ -104,7 +105,7 @@ class RegressionTest {
     }
 
     @Test
-    @DisplayName("Regression test for issue #10, regarding arg flag positioning")
+    @DisplayName("issue #10, regarding arg flag positioning")
     fun issue10ArgFlagPositioning() {
         withRegressionCommands { ci, manager ->
             // verify [root] -p 1 [arg] works
@@ -115,4 +116,45 @@ class RegressionTest {
             verify(ci, times(2)).i10("req-arg", 1)
         }
     }
+
+    private val SUB_ACTION = 42
+    private val ROOT_ACTION = 0x42
+
+    @Test
+    @DisplayName("issue #14, regarding optional sub-commands")
+    fun issue14OptionalSubCommands() {
+        withRegressionCommands { _, manager ->
+            manager.register("i14") { cmd ->
+                val req = arg("required", "Required argument, not needed if sub-command matches")
+                val optAfter = arg("after", "Optional after sub-command, only matches without it") {
+                    defaultsTo(listOf("default-value"))
+                }
+                val sub = manager.newCommand("vert")
+                        .action { SUB_ACTION }
+                        .description(TextComponent.of("Sub-command"))
+                        .build()
+                cmd.run {
+                    action { ROOT_ACTION }
+                    description(TextComponent.of("Issue 14"))
+                    addPart(subs(sub, required = false))
+                    addPart(req)
+                    addPart(optAfter)
+                }
+            }
+
+            assertEquals(
+                    SUB_ACTION,
+                    manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "vert"))
+            )
+            assertEquals(
+                    ROOT_ACTION,
+                    manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "10"))
+            )
+            assertEquals(
+                    ROOT_ACTION,
+                    manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "10", "north"))
+            )
+        }
+    }
+
 }

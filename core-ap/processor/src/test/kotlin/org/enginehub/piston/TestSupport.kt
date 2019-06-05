@@ -48,7 +48,7 @@ inline fun <CI, R> withMockedContainer(containerClass: Class<CI>, block: (CI) ->
     }
 }
 
-inline fun arg(name: String, desc: String, block: CommandArgument.Builder.() -> Unit): CommandArgument =
+inline fun arg(name: String, desc: String, block: CommandArgument.Builder.() -> Unit = {}): CommandArgument =
         CommandParts.arg(
                 TranslatableComponent.of(name),
                 TextComponent.of(desc)

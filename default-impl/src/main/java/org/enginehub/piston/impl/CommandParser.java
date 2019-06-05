@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParseResult;
@@ -40,12 +41,13 @@ import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
+import org.enginehub.piston.part.ArgConsumingCommandPart;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
-import org.enginehub.piston.util.TextHelper;
+import org.enginehub.piston.util.ComponentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +92,7 @@ class CommandParser {
 
         final CommandInfo commandInfo;
         final Set<ArgAcceptingCommandPart> defaultsNeeded;
-        final ListIterator<CommandArgument> partIter;
+        final ListIterator<ArgConsumingCommandPart> partIter;
         boolean canMatchFlags = true;
         int remainingRequiredParts;
 
@@ -244,14 +246,14 @@ class CommandParser {
         return perCommandDetails().partIter.hasNext();
     }
 
-    private CommandArgument nextPart() {
+    private ArgConsumingCommandPart nextPart() {
         checkState(hasNextPart(),
             "No next part, this call should be guarded with hasNextPart()");
         return perCommandDetails().partIter.next();
     }
 
     private void unconsumePart() {
-        ListIterator<CommandArgument> partIter = perCommandDetails().partIter;
+        ListIterator<ArgConsumingCommandPart> partIter = perCommandDetails().partIter;
         checkState(partIter.hasPrevious(),
             "Trying to unconsume nothing");
         partIter.previous();
@@ -282,21 +284,23 @@ class CommandParser {
     private void finalizeCommand() {
         PerCommandDetails details = perCommandDetails();
         if (details.remainingRequiredParts > 0) {
-            Iterator<CommandArgument> requiredIter = Iterators.filter(details.partIter, CommandPart::isRequired);
+            Iterator<ArgConsumingCommandPart> requiredIter = Iterators.filter(details.partIter, CommandPart::isRequired);
             if (requiredIter.hasNext()) {
-                CommandArgument missing = requiredIter.next();
-                throw usageException(TextComponent.builder("Missing argument for ")
-                    .append(missing.getTextRepresentation())
-                    .append(TextComponent.of("."))
-                    .build());
-            } else {
-                // sanity check for remaining required parts
-                checkState(details.commandInfo.subCommandPart.filter(SubCommandPart::isRequired).isPresent());
-                throw usageException(TextComponent.of("No sub-command provided. Options: "
-                    + details.commandInfo.subCommands.values().stream()
-                    .distinct()
-                    .map(Command::getName)
-                    .collect(Collectors.joining(", "))));
+                ArgConsumingCommandPart missing = requiredIter.next();
+                if (missing instanceof CommandArgument) {
+                    throw usageException(TextComponent.builder("Missing argument for ")
+                        .append(missing.getTextRepresentation())
+                        .append(TextComponent.of("."))
+                        .build());
+                } else {
+                    checkState(missing instanceof SubCommandPart,
+                        "Unknown part interface: %s", missing.getClass());
+                    throw usageException(TextComponent.of("No sub-command provided. Options: "
+                        + ((SubCommandPart) missing).getCommands().stream()
+                        .distinct()
+                        .map(Command::getName)
+                        .collect(Collectors.joining(", "))));
+                }
             }
         }
     }
@@ -350,32 +354,12 @@ class CommandParser {
             .allMatch(cp -> perCommandDetails().commandInfo.flags.containsKey((char) cp));
     }
 
-    /**
-     * Is the current part index trying to also match a sub-command?
-     */
-    private boolean isSubCommandIndex() {
-        PerCommandDetails details = perCommandDetails();
-        int finishedReqParts = details.commandInfo.requiredParts - details.remainingRequiredParts;
-        return finishedReqParts == details.commandInfo.subCommandArgIndex;
-    }
-
-    private boolean parseSubCommand(String token) {
+    private boolean parseSubCommand(SubCommandPart part, String token) {
         CommandInfo commandInfo = perCommandDetails().commandInfo;
-        if (!commandInfo.subCommandPart.isPresent()) {
-            return false;
-        }
-        SubCommandPart part = commandInfo.subCommandPart.get();
-        ImmutableMap<String, Command> subCommands = commandInfo.subCommands;
+        ImmutableMap<String, Command> subCommands = commandInfo.subCommandTable.row(part);
         Command sub = subCommands.get(token);
         if (sub == null) {
-            if (!part.isRequired()) {
-                return false;
-            }
-            throw usageException(TextComponent.of("Invalid sub-command. Options: "
-                + subCommands.values().stream()
-                .distinct()
-                .map(Command::getName)
-                .collect(Collectors.joining(", "))));
+            return false;
         }
         bind(part);
         if (part.isRequired()) {
@@ -385,71 +369,75 @@ class CommandParser {
         return true;
     }
 
+    private TextComponent invalidSubCommandMessage(String token, ImmutableMap<String, Command> subCommands) {
+        return TextComponent.builder()
+            .append("Invalid sub-command '")
+            .append(TextComponent.builder(token).color(ColorConfig.getMainText()))
+            .append("'. Options: ")
+            .append(subCommands.values().stream()
+                .map(c -> TextComponent.of(c.getName(), ColorConfig.getMainText()))
+                .collect(ComponentHelper.joiningTexts(
+                    TextComponent.empty(),
+                    TextComponent.of(", "),
+                    TextComponent.empty()
+                )))
+            .build();
+    }
+
     private boolean parseRegularArgument(String token) {
         PerCommandDetails details = perCommandDetails();
         if (!hasNextPart()) {
             log("parseRegularArgument: no arguments to attempt matching");
         }
-        boolean sci = isSubCommandIndex();
         CommandArgument lastFailedOptionalLocal = null;
         while (hasNextPart()) {
-            CommandArgument nextArg = nextPart();
-            String name = TextHelper.reduceToText(nextArg.getName());
-            log("parseRegularArgument: [{}] test for matching", name);
-            if (nextArg.isRequired()) {
-                if (sci) {
-                    log("parseRegularArgument: [{}] at sub-command index," +
-                        " will not match required commands", name);
-                    // unconsume and stop looping.
-                    // we tried all optionals, now we match for the sub-command or die.
-                    unconsumePart();
-                    break;
+            ArgConsumingCommandPart nextArg = nextPart();
+            if (nextArg instanceof SubCommandPart) {
+                SubCommandPart subCommandPart = (SubCommandPart) nextArg;
+                if (parseSubCommand(subCommandPart, token)) {
+                    return true;
                 }
+                if (nextArg.isRequired()) {
+                    throw usageException(
+                        invalidSubCommandMessage(
+                            token,
+                            details.commandInfo.subCommandTable.row(subCommandPart)
+                        ));
+                }
+                continue;
+            }
+            checkState(nextArg instanceof CommandArgument,
+                "Unknown part interface: %s", nextArg.getClass());
+            CommandArgument argPart = (CommandArgument) nextArg;
+            if (nextArg.isRequired()) {
                 // good, we can just satisfy it
-                if (!isAcceptedByTypeParsers(nextArg, token)) {
-                    throw conversionFailedException(nextArg, token);
+                if (!isAcceptedByTypeParsers(argPart, token)) {
+                    throw conversionFailedException(argPart, token);
                 }
                 details.remainingRequiredParts--;
-                addValueFull(nextArg, v -> v.values(consumeArguments(nextArg, token)));
+                addValueFull(nextArg, v -> v.values(consumeArguments(argPart, token)));
                 return true;
-            }
-            log("parseRegularArgument: [{}] not required, trying optional tests", name);
-            if (details.commandInfo.subCommands.isEmpty()) {
-                log("parseRegularArgument: [{}] using remaining-required test", name);
-                // No sub-commands -- we can fill optionals based on remaining argument count
-                int remainingArguments = remainingNonFlagArguments();
-                int diff = remainingArguments - details.remainingRequiredParts;
-                if (diff < 0) {
-                    throw notEnoughArgumentsException();
-                } else if (diff == 0) {
-                    // do not fill -- save for a required argument
-                    log("parseRegularArgument: [{}] remaining-required SOFT_FAIL:" +
-                            " remaining={}, required={}",
-                        name, remainingArguments, details.remainingRequiredParts);
-                    continue;
+            } else {
+                if (details.commandInfo.subCommandTable.isEmpty()) {
+                    // No sub-commands -- we can fill optionals based on remaining argument count
+                    int remainingArguments = remainingNonFlagArguments();
+                    int diff = remainingArguments - details.remainingRequiredParts;
+                    if (diff < 0) {
+                        throw notEnoughArgumentsException();
+                    } else if (diff == 0) {
+                        // do not fill -- save for a required argument
+                        continue;
+                    }
+                    // may fill this if it matches, fall to below
                 }
-                log("parseRegularArgument: [{}] passed remaining-required test", name);
-                // may fill this if it matches, fall to below
+                if (isAcceptedByTypeParsers(argPart, token)) {
+                    details.defaultsNeeded.remove(nextArg);
+                    addValueFull(nextArg, v -> v.values(consumeArguments(argPart, token)));
+                    return true;
+                }
+                // store it in case no required arguments match
+                lastFailedOptionalLocal = argPart;
             }
-            log("parseRegularArgument: [{}] using type-parser test", name);
-            if (isAcceptedByTypeParsers(nextArg, token)) {
-                log("parseRegularArgument: [{}] passed type-parser test", name);
-                details.defaultsNeeded.remove(nextArg);
-                addValueFull(nextArg, v -> v.values(consumeArguments(nextArg, token)));
-                return true;
-            }
-            log("parseRegularArgument: [{}] type-parser SOFT_FAIL:" +
-                " types={}", name, nextArg.getTypes());
-            // store it in case no required arguments match
-            lastFailedOptionalLocal = nextArg;
-        }
-        if (sci) {
-            log("matched subCommandArgIndex={}, trying to match sub-commands",
-                details.commandInfo.subCommandArgIndex);
-            if (parseSubCommand(token)) {
-                return true;
-            }
-            log("did not match sub-command at the index, token={}", token);
         }
         lastFailedOptional = lastFailedOptionalLocal;
         return false;
