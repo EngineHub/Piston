@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -164,6 +165,7 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
                                             Collection<CommandPart> parts,
                                             CommandParseResult parseResult) {
         ArgumentConverterAccess converters = parseResult.getParameters().getConverters();
+        Predicate<String> nameFilter = byPrefix(input);
         return Stream.concat(
             cast(parts.stream(), ArgAcceptingCommandPart.class)
                 .filter(part -> part.getTypes().size() > 0)
@@ -173,8 +175,8 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
                 .flatMap(converter -> converter.getSuggestions(input).stream()),
             cast(parts.stream(), SubCommandPart.class)
                 .flatMap(part -> part.getCommands().stream())
+                .filter(c -> nameFilter.test(c.getName()) && c.getCondition().satisfied(parseResult.getParameters()))
                 .map(Command::getName)
-                .filter(byPrefix(input))
         );
     }
 }

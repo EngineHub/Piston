@@ -20,14 +20,14 @@
 package org.enginehub.piston.suggestion
 
 import net.kyori.text.TextComponent
-import net.kyori.text.TranslatableComponent
+import org.enginehub.piston.Command
 import org.enginehub.piston.CommandManager
 import org.enginehub.piston.assertEqualUnordered
 import org.enginehub.piston.inject.InjectedValueAccess
 import org.enginehub.piston.inject.Key
 import org.enginehub.piston.installCommands
 import org.enginehub.piston.newManager
-import org.enginehub.piston.part.SubCommandPart
+import org.enginehub.piston.subs
 import org.enginehub.piston.withMockedContainer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
@@ -56,14 +56,14 @@ class ManagerSuggestionTest {
                             SimpleSuggestingConverter(set.toList()))
                 }
 
+                register("notpermitted") { cmd ->
+                    cmd.description(TextComponent.of("Command with false condition"))
+                    cmd.condition(Command.Condition.FALSE)
+                }
+
                 register("sub") { cmd ->
                     cmd.description(TextComponent.of("Sub-commands test command"))
-                    cmd.addPart(SubCommandPart.builder(
-                            TranslatableComponent.of("subs"),
-                            TextComponent.of("Sub-commands"))
-                            .withCommands(allCommands.toList())
-                            .required()
-                            .build())
+                    cmd.addPart(subs(*allCommands.toList().toTypedArray()))
                 }
             }
             block(manager)
@@ -79,7 +79,7 @@ class ManagerSuggestionTest {
     fun suggestsCommandOnEmpty() {
         withSuggestionManager { manager ->
             val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY, listOf(""))
-            assertEqualUnordered(manager.allCommands.map { it.name }.toList(),
+            assertEqualUnordered(manager.allCommands.map { it.name }.filter { it != "notpermitted" }.toList(),
                     actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 0 }, "replacement not targeted at first argument")
         }

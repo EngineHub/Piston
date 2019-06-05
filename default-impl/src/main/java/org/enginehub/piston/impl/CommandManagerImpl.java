@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -172,7 +173,7 @@ public class CommandManagerImpl implements CommandManager {
             command = commands.get(name);
             if (command == null) {
                 // suggest on commands instead
-                return suggestCommands(name);
+                return suggestCommands(context, name);
             }
             // parse also locks -- re-entrant lock required for this
             try {
@@ -195,11 +196,12 @@ public class CommandManagerImpl implements CommandManager {
             .iterator());
     }
 
-    private ImmutableSet<Suggestion> suggestCommands(String name) {
+    private ImmutableSet<Suggestion> suggestCommands(InjectedValueAccess context, String name) {
+        Predicate<String> nameFilter = byPrefix(name);
         return ImmutableSet.copyOf(
             getAllCommands()
+                .filter(c -> nameFilter.test(c.getName()) && c.getCondition().satisfied(context))
                 .map(Command::getName)
-                .filter(byPrefix(name))
                 .map(s -> Suggestion.builder()
                     .suggestion(s)
                     .replacedArgument(0)
