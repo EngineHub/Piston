@@ -50,10 +50,10 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
         }
 
         public final Builder named(TranslatableComponent name) {
-            return name(name);
+            return argumentName(name);
         }
 
-        abstract Builder name(TranslatableComponent name);
+        abstract Builder argumentName(TranslatableComponent name);
 
         public final Builder describedBy(String description) {
             return describedBy(TextComponent.of(description));
@@ -82,8 +82,6 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
         public abstract CommandArgument build();
     }
 
-    public abstract TranslatableComponent getName();
-
     /**
      * Check if this argument a <em>variable argument</em>.
      *
@@ -111,7 +109,7 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
         builder.append(TextComponent.of(isRequired() ? "<" : "["));
         builder.append(TextComponent.builder("")
             .color(ColorConfig.getMainText())
-            .append(getName())
+            .append(getArgumentName())
             .build());
         if (isVariable()) {
             builder.append(TextComponent.of("...", ColorConfig.getTextModifier()));

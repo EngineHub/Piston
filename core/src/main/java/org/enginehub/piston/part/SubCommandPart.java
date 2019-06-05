@@ -33,7 +33,7 @@ import java.util.Iterator;
 import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 
 @AutoValue
-public abstract class SubCommandPart implements CommandPart {
+public abstract class SubCommandPart implements ArgConsumingCommandPart {
 
     public static Builder builder(TranslatableComponent name, Component description) {
         return new AutoValue_SubCommandPart.Builder()
@@ -45,10 +45,10 @@ public abstract class SubCommandPart implements CommandPart {
     public abstract static class Builder {
 
         public final Builder named(TranslatableComponent name) {
-            return name(name);
+            return argumentName(name);
         }
 
-        abstract Builder name(TranslatableComponent name);
+        abstract Builder argumentName(TranslatableComponent name);
 
         public final Builder describedBy(String description) {
             return describedBy(TextComponent.of(description));
@@ -78,8 +78,6 @@ public abstract class SubCommandPart implements CommandPart {
 
         public abstract SubCommandPart build();
     }
-
-    public abstract TranslatableComponent getName();
 
     public abstract ImmutableList<Command> getCommands();
 

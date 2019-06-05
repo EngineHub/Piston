@@ -19,28 +19,17 @@
 
 package org.enginehub.piston.part;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import org.enginehub.piston.CommandParameters;
-import org.enginehub.piston.CommandValue;
-import org.enginehub.piston.inject.Key;
+import net.kyori.text.TranslatableComponent;
 
-public interface ArgAcceptingCommandPart extends ArgConsumingCommandPart {
-
-    default CommandValue value(CommandParameters parameters) {
-        return parameters.valueOf(this);
-    }
+/**
+ * Marker interface for parts that consume arguments directly from the line,
+ * i.e. not flags.
+ */
+public interface ArgConsumingCommandPart extends CommandPart {
 
     /**
-     * All possible types for this argument. This allows for completions to
-     * be filled from converters registered with the manager.
-     *
-     * <p>
-     * This set may be empty, in which case there will be no completions.
-     * </p>
+     * The name of the argument taken from the command-line.
      */
-    ImmutableSet<Key<?>> getTypes();
-
-    ImmutableList<String> getDefaults();
+    TranslatableComponent getArgumentName();
 
 }

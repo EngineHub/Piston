@@ -87,8 +87,6 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
     ArgAcceptingCommandFlag() {
     }
 
-    public abstract TranslatableComponent getArgumentName();
-
     @Override
     public Component getTextRepresentation() {
         return TextComponent.builder("")

@@ -21,16 +21,17 @@ package org.enginehub.piston.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
+import org.enginehub.piston.part.ArgConsumingCommandPart;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
 
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -39,12 +40,11 @@ import static com.google.common.base.Preconditions.checkState;
 class CommandInfo {
 
     static CommandInfo from(Command command) {
-        ImmutableList.Builder<CommandArgument> arguments = ImmutableList.builder();
+        ImmutableList.Builder<ArgConsumingCommandPart> arguments = ImmutableList.builder();
         ImmutableList.Builder<ArgAcceptingCommandPart> defaultProvided = ImmutableList.builder();
         ImmutableMap.Builder<Character, CommandFlag> flags = ImmutableMap.builder();
-        ImmutableMap.Builder<String, Command> subCommands = ImmutableMap.builder();
-        Optional<SubCommandPart> subCommandPart = Optional.empty();
-        int subCommandArgIndex = -1;
+        ImmutableTable.Builder<SubCommandPart, String, Command> subCommandTable = ImmutableTable.builder();
+        boolean seenRequiredSubCommand = false;
         boolean seenOptionalArg = false;
         boolean middleOptionalArg = false;
         ImmutableList<CommandPart> parts = command.getParts();
@@ -61,21 +61,18 @@ class CommandInfo {
                 if (!part.isRequired()) {
                     seenOptionalArg = true;
                 }
-                arguments.add((CommandArgument) part);
+                arguments.add((ArgConsumingCommandPart) part);
             } else if (part instanceof SubCommandPart) {
                 if (part.isRequired()) {
                     checkState(i + 1 >= parts.size(),
                         "Required sub-command must be last part.");
+                    seenRequiredSubCommand = true;
                 }
-                SubCommandPart scp = (SubCommandPart) part;
-                for (Command cmd : scp.getCommands()) {
-                    subCommands.put(cmd.getName(), cmd);
-                    for (String alias : cmd.getAliases()) {
-                        subCommands.put(alias, cmd);
-                    }
+                SubCommandPart subCommandPart = (SubCommandPart) part;
+                for (Command cmd : subCommandPart.getCommands()) {
+                    subCommandTable.put(subCommandPart, cmd.getName(), cmd);
                 }
-                subCommandPart = Optional.of(scp);
-                subCommandArgIndex = requiredParts;
+                arguments.add(subCommandPart);
             } else {
                 throw new IllegalStateException("Unknown part implementation " + part);
             }
@@ -90,11 +87,12 @@ class CommandInfo {
             }
         }
         // guards against a specific, hard-to-solve, edge-case
-        checkState(!(subCommandPart.isPresent() && middleOptionalArg),
+        checkState(!(seenRequiredSubCommand && middleOptionalArg),
             "Cannot have middle-filled optionals and sub-commands");
-        ImmutableList<CommandArgument> commandArguments = arguments.build();
+        ImmutableList<ArgConsumingCommandPart> commandArguments = arguments.build();
         int[] indexes = IntStream.range(0, commandArguments.size())
-            .filter(idx -> commandArguments.get(idx).isVariable())
+            .filter(idx -> commandArguments.get(idx) instanceof CommandArgument)
+            .filter(idx -> ((CommandArgument) commandArguments.get(idx)).isVariable())
             .toArray();
         checkArgument(indexes.length <= 1, "Too many variable arguments");
         if (indexes.length > 0) {
@@ -106,37 +104,24 @@ class CommandInfo {
             commandArguments,
             defaultProvided.build(),
             flags.build(),
-            subCommands.build(),
-            subCommandPart,
-            requiredParts,
-            subCommandArgIndex);
+            subCommandTable.build(),
+            requiredParts);
     }
 
-    final ImmutableList<CommandArgument> arguments;
+    final ImmutableList<ArgConsumingCommandPart> arguments;
     final ImmutableList<ArgAcceptingCommandPart> defaultProvided;
     final ImmutableMap<Character, CommandFlag> flags;
-    final ImmutableMap<String, Command> subCommands;
-    final Optional<SubCommandPart> subCommandPart;
+    final ImmutableTable<SubCommandPart, String, Command> subCommandTable;
     final int requiredParts;
-    /**
-     * Index where the sub-command is placed. The number of required arguments consumed
-     * should be <em>equal</em> to this for the sub-command to be matched.
-     */
-    final int subCommandArgIndex;
 
-    CommandInfo(ImmutableList<CommandArgument> arguments,
+    CommandInfo(ImmutableList<ArgConsumingCommandPart> arguments,
                 ImmutableList<ArgAcceptingCommandPart> defaultProvided,
                 ImmutableMap<Character, CommandFlag> flags,
-                ImmutableMap<String, Command> subCommands,
-                Optional<SubCommandPart> subCommandPart,
-                int requiredParts,
-                int subCommandArgIndex) {
+                ImmutableTable<SubCommandPart, String, Command> subCommandTable, int requiredParts) {
         this.arguments = arguments;
         this.defaultProvided = defaultProvided;
         this.flags = flags;
-        this.subCommands = subCommands;
-        this.subCommandPart = subCommandPart;
+        this.subCommandTable = subCommandTable;
         this.requiredParts = requiredParts;
-        this.subCommandArgIndex = subCommandArgIndex;
     }
 }
