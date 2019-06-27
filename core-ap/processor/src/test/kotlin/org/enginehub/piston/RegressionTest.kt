@@ -157,4 +157,30 @@ class RegressionTest {
         }
     }
 
+    @Test
+    @DisplayName("issue #18, regarding sub-command aliases")
+    fun issue18SubCommandAliases() {
+        withRegressionCommands { _, manager ->
+            manager.register("hello") { cmd ->
+                val sub = manager.newCommand("world")
+                        .action { SUB_ACTION }
+                        .aliases(setOf("there"))
+                        .description(TextComponent.of("Sub-command"))
+                        .build()
+                cmd.run {
+                    description(TextComponent.of("hello"))
+                    addPart(subs(sub, required = true))
+                }
+            }
+
+            assertEquals(
+                    SUB_ACTION,
+                    manager.execute(InjectedValueAccess.EMPTY, listOf("hello", "world"))
+            )
+            assertEquals(
+                    SUB_ACTION,
+                    manager.execute(InjectedValueAccess.EMPTY, listOf("hello", "there")) // general kenobi
+            )
+        }
+    }
 }

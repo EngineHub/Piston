@@ -71,6 +71,9 @@ class CommandInfo {
                 SubCommandPart subCommandPart = (SubCommandPart) part;
                 for (Command cmd : subCommandPart.getCommands()) {
                     subCommandTable.put(subCommandPart, cmd.getName(), cmd);
+                    for (String alias : cmd.getAliases()) {
+                        subCommandTable.put(subCommandPart, alias, cmd);
+                    }
                 }
                 arguments.add(subCommandPart);
             } else {
