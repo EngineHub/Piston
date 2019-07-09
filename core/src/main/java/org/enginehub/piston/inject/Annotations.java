@@ -140,7 +140,7 @@ class Annotations {
                 Method::getDefaultValue
             ));
         return (Annotation) Proxy.newProxyInstance(
-            Key.class.getClassLoader(),
+            annotationType.getClassLoader(),
             new Class[] {annotationType},
             (proxy, method, args) -> {
                 AnnoMethod call = ANNOTATION_METHODS.get(MethodKey.from(method));
