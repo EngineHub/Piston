@@ -374,7 +374,7 @@ class CommandParser {
             .append("Invalid sub-command '")
             .append(TextComponent.builder(token).color(ColorConfig.getMainText()))
             .append("'. Options: ")
-            .append(subCommands.values().stream()
+            .append(subCommands.values().stream().distinct()
                 .map(c -> TextComponent.of(c.getName(), ColorConfig.getMainText()))
                 .collect(ComponentHelper.joiningTexts(
                     TextComponent.empty(),
