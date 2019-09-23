@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.time.Duration.ofSeconds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 @DisplayName("Values can be resolved in injected stores")
@@ -71,7 +72,7 @@ public class ValueResolutionTest {
 
         for (int i = 0; i < count; i++) {
             futures.add(threads.submit(() -> {
-                assertTimeoutPreemptively(ofSeconds(5), () -> {
+                assertTimeout(ofSeconds(5), () -> {
                     Optional<Integer> value = secondaryAccess.injectedValue(I_KEY);
 
                     assertEquals(Optional.of(storedInt), value);
