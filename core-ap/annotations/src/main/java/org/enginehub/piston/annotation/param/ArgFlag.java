@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface ArgFlag {
 
     /**

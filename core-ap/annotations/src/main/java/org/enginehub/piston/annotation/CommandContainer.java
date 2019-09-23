@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * Marks this class to be searched for {@link Command} annotations.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface CommandContainer {
 
     /**

@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface Arg {
 
     String NAME_IS_PARAMETER_NAME = "__NAME_IS_PARAMETER_NAME__";

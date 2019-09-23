@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * annotation that has additional parameters.
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface CommandCondition {
 
     /**
