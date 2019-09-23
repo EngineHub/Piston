@@ -21,8 +21,7 @@ package org.enginehub.piston.converter;
 
 import com.google.common.collect.ImmutableMap;
 import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import org.enginehub.piston.ColorConfig;
+import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.List;
@@ -68,7 +67,7 @@ public final class MapArgumentConverter<T> implements ArgumentConverter<T> {
     @Override
     public Component describeAcceptableArguments() {
         return map.keySet().stream()
-            .map(content -> TextComponent.of(content, ColorConfig.getMainText()))
+            .map(ColorConfig.mainText()::wrap)
             .collect(joiningWithBar());
     }
 

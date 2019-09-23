@@ -27,8 +27,7 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import org.enginehub.piston.ColorConfig;
+import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import javax.annotation.Nullable;
@@ -142,7 +141,7 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
             });
         this.primaryKeys = primaryKeysBuilder.build();
         this.choices = primaryKeys.stream()
-            .map(choice -> TextComponent.of(choice, ColorConfig.getMainText()))
+            .map(ColorConfig.mainText()::wrap)
             .collect(joiningWithBar());
         this.map = map.build();
         this.unknownValue = arguments.unknownValue();

@@ -24,11 +24,10 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
-import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
+import org.enginehub.piston.config.ColorConfig;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 
@@ -83,16 +82,15 @@ public abstract class SubCommandPart implements ArgConsumingCommandPart {
 
     @Override
     public Component getTextRepresentation() {
-        TextComponent.Builder builder = TextComponent.builder("")
-            .color(ColorConfig.getPartWrapping());
-        builder.append(TextComponent.of(isRequired() ? "<" : "["));
-        builder.append(getCommands().stream()
+        ImmutableList.Builder<Component> builder = ImmutableList.builder();
+        builder.add(TextComponent.of(isRequired() ? "<" : "["));
+        builder.addAll(getCommands().stream()
             .map(Command::getName)
-            .map(n -> TextComponent.of(n, ColorConfig.getMainText()))
+            .map(ColorConfig.mainText()::wrap)
             .collect(joiningWithBar())
             .children());
-        builder.append(TextComponent.of(isRequired() ? ">" : "]"));
-        return builder.build();
+        builder.add(TextComponent.of(isRequired() ? ">" : "]"));
+        return ColorConfig.partWrapping().wrap(builder.build());
     }
 
 }

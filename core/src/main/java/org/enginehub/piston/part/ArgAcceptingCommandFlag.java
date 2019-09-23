@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
-import org.enginehub.piston.ColorConfig;
+import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.Key;
 
 import java.util.Collection;
@@ -89,17 +89,13 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
 
     @Override
     public Component getTextRepresentation() {
-        return TextComponent.builder("")
-            .color(ColorConfig.getPartWrapping())
-            .append(TextComponent.of("["))
-            .append(TextComponent.of("-" + getName(), ColorConfig.getMainText()))
-            .append(TextComponent.space())
-            .append(TextComponent.of("<"))
-            .append(TextComponent.builder("")
-                .color(ColorConfig.getMainText())
-                .append(getArgumentName())
-                .build())
-            .append(TextComponent.of(">]"))
-            .build();
+        return ColorConfig.partWrapping().wrap(
+            TextComponent.of("["),
+            ColorConfig.mainText().wrap("-" + getName()),
+            TextComponent.space(),
+            TextComponent.of("<"),
+            ColorConfig.mainText().wrap(getArgumentName()),
+            TextComponent.of(">")
+        );
     }
 }

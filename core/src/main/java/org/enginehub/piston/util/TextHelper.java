@@ -24,6 +24,7 @@ import net.kyori.text.Component;
 import net.kyori.text.KeybindComponent;
 import net.kyori.text.TranslatableComponent;
 import net.kyori.text.serializer.plain.PlainComponentSerializer;
+import org.enginehub.piston.config.ConfigHolder;
 
 import java.util.Iterator;
 import java.util.List;
@@ -39,9 +40,11 @@ public class TextHelper {
         }
     );
 
+    private static final ConfigHolder CONFIG = ConfigHolder.create();
+
     public static String reduceToText(Component component) {
         StringBuilder text = new StringBuilder();
-        appendTextTo(text, component);
+        appendTextTo(text, CONFIG.replace(component));
         return text.toString();
     }
 

@@ -23,9 +23,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
-import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandParseResult;
+import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.util.HelpGenerator;
 
@@ -43,7 +43,7 @@ public class NoSuchFlagException extends UsageException {
     private static Component getMessage(CommandParseResult parseResult, char requestedFlag) {
         TextComponent.Builder message = TextComponent.builder("");
         message.append(TextComponent.of("Flag '"))
-            .append(TextComponent.of(String.valueOf(requestedFlag), ColorConfig.getMainText()))
+            .append(ColorConfig.mainText().wrap(String.valueOf(requestedFlag)))
             .append(TextComponent.of("' is not a valid flag for "));
         message.append(HelpGenerator.create(parseResult).getFullName());
         String allFlags = getAllFlags(parseResult.getExecutionPath());
@@ -51,7 +51,7 @@ public class NoSuchFlagException extends UsageException {
             message.append(TextComponent.of(", as it does not have any flags"));
         } else {
             message.append(TextComponent.of(". Options: "))
-            .append(TextComponent.of(allFlags, ColorConfig.getMainText()));
+                .append(ColorConfig.mainText().wrap(allFlags));
         }
         return message.build();
     }

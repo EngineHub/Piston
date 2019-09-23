@@ -21,7 +21,7 @@ package org.enginehub.piston.util;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
-import org.enginehub.piston.ColorConfig;
+import org.enginehub.piston.config.ColorConfig;
 
 import javax.annotation.Nullable;
 import java.util.stream.Collector;
@@ -30,12 +30,12 @@ public class ComponentHelper {
 
     /**
      * Join components together with a `|`, coloring the bar with {@link
-     * ColorConfig#getPartWrapping()}.
+     * ColorConfig#partWrapping()}.
      */
     public static Collector<Component, ?, Component> joiningWithBar() {
         return joiningTexts(
             TextComponent.empty(),
-            TextComponent.of("|", ColorConfig.getPartWrapping()),
+            ColorConfig.partWrapping().wrap("|"),
             TextComponent.empty()
         );
     }

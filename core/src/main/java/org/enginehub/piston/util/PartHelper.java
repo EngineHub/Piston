@@ -21,8 +21,8 @@ package org.enginehub.piston.util;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
-import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
+import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
@@ -68,17 +68,16 @@ public class PartHelper {
 
             (optionalSubCommand == null ? other : postOSC).add(part.getTextRepresentation());
         }
-        Stream<TextComponent> flagsString = Optional.of(flags)
+        Stream<Component> flagsString = Optional.of(flags)
             .filter(x -> !x.isEmpty())
             .map(f -> f.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining("")))
-            .map(text -> TextComponent.builder("")
-                .color(ColorConfig.getPartWrapping())
-                .append(TextComponent.of("["))
-                .append(TextComponent.of("-" + text, ColorConfig.getMainText()))
-                .append(TextComponent.of("]"))
-                .build())
+            .map(text -> ColorConfig.partWrapping().wrap(
+                TextComponent.of("["),
+                ColorConfig.mainText().wrap("-" + text),
+                TextComponent.of("]")
+            ))
             .map(Stream::of).orElse(Stream.empty());
 
         Stream<Component> afterFlags = optionalSubCommand == null
@@ -96,21 +95,20 @@ public class PartHelper {
 
     private static Stream<Component> buildOptionalMerging(SubCommandPart optionalSubCommand,
                                                           Stream<Component> postComponents) {
-        TextComponent.Builder builder = TextComponent.builder()
-            .color(ColorConfig.getPartWrapping());
-        builder.append("<");
-        builder.append(optionalSubCommand.getCommands().stream()
-            .map(Command::getName)
-            .map(n -> TextComponent.of(n, ColorConfig.getMainText()))
-            .collect(ComponentHelper.joiningWithBar()));
-        builder.append("|");
-        builder.append(postComponents.collect(ComponentHelper.joiningTexts(
-            TextComponent.empty(),
-            TextComponent.of(" "),
-            TextComponent.empty()
-        )));
-        builder.append(">");
-        return Stream.of(builder.build());
+        return Stream.of(ColorConfig.partWrapping().wrap(
+            TextComponent.of("<"),
+            optionalSubCommand.getCommands().stream()
+                .map(Command::getName)
+                .map(ColorConfig.mainText()::wrap)
+                .collect(ComponentHelper.joiningWithBar()),
+            TextComponent.of("|"),
+            postComponents.collect(ComponentHelper.joiningTexts(
+                TextComponent.empty(),
+                TextComponent.of(" "),
+                TextComponent.empty()
+            )),
+            TextComponent.of(">")
+        ));
     }
 
 }

@@ -26,10 +26,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
-import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParseResult;
+import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.converter.FailedConversion;
@@ -74,7 +74,7 @@ class CommandParser {
 
     private static void log(String message, Object... args) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("[" + PARSE_ID.get() + "]: " + message, (Object[]) args);
+            LOGGER.debug("[" + PARSE_ID.get() + "]: " + message, args);
         }
     }
 
@@ -372,10 +372,11 @@ class CommandParser {
     private TextComponent invalidSubCommandMessage(String token, ImmutableMap<String, Command> subCommands) {
         return TextComponent.builder()
             .append("Invalid sub-command '")
-            .append(TextComponent.builder(token).color(ColorConfig.getMainText()))
+            .append(ColorConfig.mainText().wrap(token))
             .append("'. Options: ")
             .append(subCommands.values().stream().distinct()
-                .map(c -> TextComponent.of(c.getName(), ColorConfig.getMainText()))
+                .map(Command::getName)
+                .map(ColorConfig.mainText()::wrap)
                 .collect(ComponentHelper.joiningTexts(
                     TextComponent.empty(),
                     TextComponent.of(", "),

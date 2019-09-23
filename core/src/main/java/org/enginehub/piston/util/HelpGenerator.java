@@ -23,13 +23,13 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.ArgBinding;
-import org.enginehub.piston.ColorConfig;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandMetadata;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.NoInputCommandParameters;
-import org.enginehub.piston.TextConfig;
+import org.enginehub.piston.config.ColorConfig;
+import org.enginehub.piston.config.TextConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
@@ -83,14 +83,14 @@ public class HelpGenerator {
     public Component getFullName() {
         TextComponent.Builder usage = TextComponent.builder();
 
-        usage.append(TextComponent.of(
-            TextConfig.getCommandPrefix() + parseResult.getExecutionPath().get(0).getName(),
-            ColorConfig.getMainText())
-        );
+        usage.append(ColorConfig.mainText().wrap(
+            TextConfig.commandPrefixValue(),
+            TextComponent.of(parseResult.getExecutionPath().get(0).getName())
+        ));
 
         for (String input : parseResult.getOriginalArguments()) {
             usage.append(space());
-            usage.append(TextComponent.of(input, ColorConfig.getMainText()));
+            usage.append(ColorConfig.mainText().wrap(input));
         }
 
         return usage.build();
@@ -101,7 +101,9 @@ public class HelpGenerator {
      */
     public Component getUsage() {
         TextComponent.Builder usage = TextComponent.builder()
-            .append(TextComponent.of(TextConfig.getCommandPrefix(), ColorConfig.getMainText()));
+            .append(ColorConfig.mainText().wrap(
+                TextConfig.commandPrefixValue()
+            ));
 
         for (Iterator<Command> iterator = parseResult.getExecutionPath().iterator(); iterator.hasNext(); ) {
             Command command = iterator.next();
@@ -112,7 +114,7 @@ public class HelpGenerator {
                     name = metadata.getCalledName();
                 }
             }
-            usage.append(TextComponent.of(name, ColorConfig.getMainText()));
+            usage.append(ColorConfig.mainText().wrap(name));
             List<CommandPart> reducedParts;
             if (iterator.hasNext()) {
                 // drop once we hit the sub-command part
@@ -143,38 +145,37 @@ public class HelpGenerator {
 
     public Component getFullHelp() {
         Command primary = parseResult.getPrimaryCommand();
-        TextComponent.Builder builder = TextComponent.builder("")
-            .color(ColorConfig.getHelpText());
+        ImmutableList.Builder<Component> builder = ImmutableList.builder();
 
-        builder.append(primary.getDescription());
+        builder.add(primary.getDescription());
 
-        builder.append(TextComponent.of("\nUsage: "));
+        builder.add(TextComponent.of("\nUsage: "));
 
-        builder.append(getUsage());
+        builder.add(getUsage());
 
         appendArguments(builder);
 
         appendFlags(builder);
 
-        primary.getFooter().ifPresent(footer -> builder.append(newline()).append(footer));
+        primary.getFooter().ifPresent(footer -> builder.add(newline()).add(footer));
 
-        return builder.build();
+        return ColorConfig.helpText().wrap(builder.build());
     }
 
-    private void appendArguments(TextComponent.Builder builder) {
+    private void appendArguments(ImmutableList.Builder<Component> builder) {
         Command primary = parseResult.getPrimaryCommand();
         List<CommandArgument> args = primary.getParts().stream()
             .filter(x -> x instanceof CommandArgument)
             .map(x -> (CommandArgument) x)
             .collect(Collectors.toList());
         if (args.size() > 0) {
-            builder.append(newline());
-            builder.append(TextComponent.of("Arguments:\n"));
+            builder.add(newline());
+            builder.add(TextComponent.of("Arguments:\n"));
             for (Iterator<CommandArgument> iterator = args.iterator(); iterator.hasNext(); ) {
                 CommandArgument arg = iterator.next();
-                builder.append(TextComponent.of("  ")).append(arg.getTextRepresentation());
+                builder.add(TextComponent.of("  ")).add(arg.getTextRepresentation());
                 if (arg.getDefaults().size() > 0) {
-                    builder.append(TextComponent.of(" (defaults to "));
+                    builder.add(TextComponent.of(" (defaults to "));
                     String value;
                     if (arg.getDefaults().size() == 1) {
                         value = arg.getDefaults().get(0);
@@ -186,35 +187,35 @@ public class HelpGenerator {
                             .filter(s -> s.trim().length() > 0)
                             .collect(Collectors.joining(", ", "[", "]"));
                     }
-                    builder.append(TextComponent.of(value));
-                    builder.append(TextComponent.of(")"));
+                    builder.add(TextComponent.of(value));
+                    builder.add(TextComponent.of(")"));
                 }
-                builder.append(TextComponent.of(": "))
-                    .append(arg.getDescription());
+                builder.add(TextComponent.of(": "))
+                    .add(arg.getDescription());
                 if (iterator.hasNext()) {
-                    builder.append(newline());
+                    builder.add(newline());
                 }
             }
         }
     }
 
-    private void appendFlags(TextComponent.Builder builder) {
+    private void appendFlags(ImmutableList.Builder<Component> builder) {
         Command primary = parseResult.getPrimaryCommand();
         List<CommandFlag> flags = primary.getParts().stream()
             .filter(x -> x instanceof CommandFlag)
             .map(x -> (CommandFlag) x)
             .collect(Collectors.toList());
         if (flags.size() > 0) {
-            builder.append(newline());
-            builder.append(TextComponent.of("Flags:\n"));
+            builder.add(newline());
+            builder.add(TextComponent.of("Flags:\n"));
             for (Iterator<CommandFlag> iterator = flags.iterator(); iterator.hasNext(); ) {
                 CommandFlag flag = iterator.next();
                 // produces text like "-f: Some description"
-                builder.append(TextComponent.of("  -" + flag.getName(), ColorConfig.getMainText()))
-                    .append(TextComponent.of(": "))
-                    .append(flag.getDescription());
+                builder.add(ColorConfig.mainText().wrap("  -" + flag.getName()))
+                    .add(TextComponent.of(": "))
+                    .add(flag.getDescription());
                 if (iterator.hasNext()) {
-                    builder.append(newline());
+                    builder.add(newline());
                 }
             }
         }
