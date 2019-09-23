@@ -28,7 +28,7 @@ val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
             reports {
                 xml.isEnabled = true
                 xml.destination = rootProject.buildDir.resolve("reports/jacoco/report.xml")
-                html.isEnabled = false
+                html.isEnabled = true
             }
             dependsOn(proj.tasks.named("test"))
         }
