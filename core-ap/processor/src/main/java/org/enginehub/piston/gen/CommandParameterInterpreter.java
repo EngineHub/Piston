@@ -183,7 +183,7 @@ class CommandParameterInterpreter {
     private ExtractSpec getArgExtractSpec(VariableElement parameter) {
         TypeMirror parameterType = parameter.asType();
         return ExtractSpec.builder()
-            .name(parameter.getSimpleName().toString())
+            .name("extract$" + parameter.getSimpleName().toString())
             .type(TypeName.get(parameterType))
             .extractMethodBody(var -> {
                 CodeBlock.Builder builder = CodeBlock.builder();

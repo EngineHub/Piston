@@ -32,7 +32,6 @@ import com.squareup.javapoet.TypeSpec;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.util.CodeBlockUtil;
-import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.gen.value.CommandInfo;
 import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.ExtractSpec;
@@ -89,6 +88,7 @@ class CommandRegistrationGenerator {
             ImmutableList.class,
             CommandCallListener.class
         ))
+        .inherited(true)
         .build();
     private final RegistrationInfo info;
     private final ImmutableList<RequiredVariable> injectedVariables;
@@ -118,10 +118,12 @@ class CommandRegistrationGenerator {
         b.add(RequiredVariable.builder()
             .type(ClassName.get(CommandManager.class))
             .name(ReservedNames.COMMAND_MANAGER)
+            .inherited(true)
             .build());
         b.add(RequiredVariable.builder()
             .type(info.getTargetClassName())
             .name(ReservedNames.CONTAINER_INSTANCE)
+            .inherited(true)
             .build());
         return b.build();
     }
@@ -200,8 +202,11 @@ class CommandRegistrationGenerator {
     }
 
     private MethodSpec.Builder setSpec(RequiredVariable var) {
+        Modifier[] modifiers = var.isInherited()
+            ? new Modifier[] {Modifier.PUBLIC}
+            : getApiVisibilityModifiers();
         return MethodSpec.methodBuilder(var.getName())
-            .addModifiers(getApiVisibilityModifiers())
+            .addModifiers(modifiers)
             .returns(getThisClass());
     }
 
@@ -284,10 +289,8 @@ class CommandRegistrationGenerator {
     }
 
     private MethodSpec generateBuildMethod() {
-        MethodSpec.Builder build = MethodSpec.methodBuilder("build");
-        if (info.getClassVisibility() != null) {
-            build.addModifiers(info.getClassVisibility());
-        }
+        MethodSpec.Builder build = MethodSpec.methodBuilder("build")
+            .addModifiers(Modifier.PUBLIC);
 
         for (CommandInfo cmd : info.getCommands()) {
             build.addCode(generateRegisterCommandCode(cmd));

@@ -31,11 +31,14 @@ public abstract class RequiredVariable {
 
     public static Builder builder() {
         return new AutoValue_RequiredVariable.Builder()
+            .inherited(false)
             .annotations(ImmutableList.of());
     }
 
     @AutoValue.Builder
     public interface Builder {
+
+        Builder inherited(boolean inherited);
 
         Builder type(TypeName type);
 
@@ -49,6 +52,11 @@ public abstract class RequiredVariable {
 
     RequiredVariable() {
     }
+
+    /**
+     * Is this variable inherited from another interface?
+     */
+    public abstract boolean isInherited();
 
     public abstract TypeName getType();
 

@@ -1,3 +1,4 @@
+import org.gradle.internal.jvm.Jvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -26,9 +27,12 @@ dependencies {
     "kapt"(Libs.autoService)
 
     "testImplementation"(kotlin("stdlib-jdk8"))
+    "testRuntime"(Libs.junitVintageEngine)
     "testImplementation"(Libs.compileTesting) {
         exclude("junit", "junit")
     }
+    // Hack - we need the tools jar
+    "testRuntime"(files(Jvm.current().toolsJar!!))
     "testImplementation"(Libs.mockito)
     "testImplementation"(Libs.logbackCore)
     "testImplementation"(Libs.logbackClassic)

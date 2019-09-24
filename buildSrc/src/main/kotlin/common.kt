@@ -39,6 +39,8 @@ fun Project.applyCommonConfig(
 
     configure<LicenseExtension> {
         header = rootProject.file("HEADER.txt")
+        exclude("**/META-INF/**")
+        exclude("**/*.properties")
     }
 
     tasks.withType<Test>().configureEach {
