@@ -27,13 +27,18 @@ class CodecovPlugin : Plugin<Project> {
 
     private fun Project.setupTasks() {
         val downloadCodecov = tasks.register<Download>("downloadCodecov") {
+            val codecovCache = gradle.gradleUserHomeDir.resolve("codecov")
             // no support for provider yet
             // https://github.com/michel-kraemer/gradle-download-task/issues/142
             val src = KotlinClosure0({
                 "https://github.com/codecov/codecov-exe/releases/download/${codecov.version.get()}/${codecovPackageName()}"
             })
             src(src)
-            dest(buildDir.resolve(name).resolve("codecov-executable"))
+            val dest = KotlinClosure0({
+                codecovCache.resolve("${codecov.version.get()}/codecov-executable")
+            })
+            dest(dest)
+            downloadTaskDir(codecovCache)
             onlyIfModified(true)
             useETag(true)
             tempAndMove(true)
