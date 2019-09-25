@@ -1,6 +1,6 @@
 /*
  * Piston, a flexible command management system.
- * Copyright (C) EngineHub <http://www.enginehub.com>
+ * Copyright (C) EngineHub <https://www.enginehub.org>
  * Copyright (C) Piston contributors
  *
  * This program is free software: you can redistribute it and/or modify it
