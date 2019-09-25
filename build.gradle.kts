@@ -1,3 +1,6 @@
+import codecov.CodecovExtension
+import codecov.CodecovPlugin
+
 plugins {
     id("net.researchgate.release") version "2.8.0"
     jacoco
@@ -12,9 +15,9 @@ repositories {
 release {
     tagTemplate = "v\${version}"
     buildTasks = project.everyProject
-            .filter { it.tasks.names.contains("build") }
-            .map { it.tasks.named("build") }
-            .toList()
+        .filter { it.tasks.names.contains("build") }
+        .map { it.tasks.named("build") }
+        .toList()
 }
 
 val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
@@ -23,7 +26,6 @@ val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
             executionData(
                 fileTree(proj.buildDir.absolutePath).include("**/jacoco/*.exec")
             )
-            println(proj)
             sourceSets(proj.the<JavaPluginConvention>().sourceSets["main"])
             reports {
                 xml.isEnabled = true
@@ -33,4 +35,9 @@ val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
             dependsOn(proj.tasks.named("test"))
         }
     }
+}
+
+apply<CodecovPlugin>()
+configure<CodecovExtension> {
+    reportTask.set(totalReport)
 }
