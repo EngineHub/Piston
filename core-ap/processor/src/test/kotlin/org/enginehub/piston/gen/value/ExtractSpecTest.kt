@@ -26,11 +26,8 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotSame
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 
 @DisplayName("An ExtractSpec")
-@Execution(ExecutionMode.CONCURRENT)
 class ExtractSpecTest {
 
     private val extractSpec = ExtractSpec.builder()

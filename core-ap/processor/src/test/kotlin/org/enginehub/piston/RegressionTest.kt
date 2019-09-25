@@ -28,14 +28,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @DisplayName("Regression tests")
-@Execution(ExecutionMode.CONCURRENT)
 class RegressionTest {
 
     private inline fun withRegressionCommands(block: (RegressionCommands, CommandManager) -> Unit) {

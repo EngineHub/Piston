@@ -33,12 +33,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.streams.toList
 
 @DisplayName("The manager's suggestion provider")
-@Execution(ExecutionMode.CONCURRENT)
 class ManagerSuggestionTest {
 
     private val suggestionMatrix = listOf(

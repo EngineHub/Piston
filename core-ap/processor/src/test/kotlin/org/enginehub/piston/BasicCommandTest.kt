@@ -35,11 +35,8 @@ import org.enginehub.piston.util.ValueProvider
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import org.mockito.Mockito.verify
 
-@Execution(ExecutionMode.CONCURRENT)
 class BasicCommandTest {
 
     @Test

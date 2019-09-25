@@ -35,8 +35,6 @@ import org.enginehub.piston.annotation.param.ArgFlag
 import org.enginehub.piston.annotation.param.Switch
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import java.util.concurrent.Callable
 import javax.lang.model.element.Modifier
 
