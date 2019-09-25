@@ -25,9 +25,11 @@ import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
 import org.enginehub.piston.CommandParameters
 import org.enginehub.piston.CommandValue
 import org.enginehub.piston.annotation.Command
+import org.enginehub.piston.annotation.CommandContainer
 import org.enginehub.piston.annotation.param.Arg
 import org.enginehub.piston.annotation.param.ArgFlag
 import org.enginehub.piston.annotation.param.Switch
@@ -40,7 +42,6 @@ import javax.lang.model.element.Modifier
 
 
 @DisplayName("core-ap can generate")
-@Execution(ExecutionMode.CONCURRENT)
 class GenerationTest {
 
     @DisplayName("some no argument commands")
@@ -346,6 +347,24 @@ class GenerationTest {
         assertThat(compilation)
             .generatedSourceFile("$PACKAGE.FlagsRegistration")
             .hasSourceEquivalentTo(JavaFileObjects.forResource("gen/FlagsRegistration.java"))
+    }
+
+    @DisplayName("container with super-class/super-interface")
+    @Test
+    fun generatesSuperTypes() {
+        val commands = TypeSpec.classBuilder("SuperType")
+            .addAnnotation(AnnotationSpec.builder(className<CommandContainer>())
+                .addMember("superTypes", "{ \$T.class, \$T.class }",
+                    className<EmptySuperClass>(), className<EmptySuperInterface>())
+                .build())
+            .build()
+            .toFileInPackage()
+        val compilation = compiler().compile(commands)
+        assertThat(compilation)
+            .succeededWithoutWarnings()
+        assertThat(compilation)
+            .generatedSourceFile("$PACKAGE.SuperTypeRegistration")
+            .hasSourceEquivalentTo(JavaFileObjects.forResource("gen/SuperTypeRegistration.java"))
     }
 
 }

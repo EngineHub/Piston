@@ -29,20 +29,22 @@ import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import org.enginehub.piston.annotation.CommandContainer
 import javax.tools.JavaFileObject
-import kotlin.reflect.KClass
 
 
 const val PACKAGE = "eh"
 
 fun commands(name: String, specs: List<MethodSpec>): JavaFileObject {
-    val source = JavaFile.builder(PACKAGE, TypeSpec.classBuilder(name)
+    return TypeSpec.classBuilder(name)
         .addAnnotation(CommandContainer::class.java)
         .addMethods(specs)
-        .build())
         .build()
-        .toString()
+        .toFileInPackage()
+}
+
+fun TypeSpec.toFileInPackage(pkg: String = PACKAGE): JavaFileObject {
+    val source = JavaFile.builder(pkg, this).build().toString()
     return JavaFileObjects.forSourceString(
-        "$PACKAGE.$name", source
+        "$pkg.$name", source
     )
 }
 
