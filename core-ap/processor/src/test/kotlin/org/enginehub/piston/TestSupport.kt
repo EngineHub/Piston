@@ -39,8 +39,10 @@ fun <CI> CommandManager.installCommands(containerInstance: CI,
             .build()
 }
 
-inline fun <CI, R> withMockedContainer(containerClass: Class<CI>, block: (CI) -> R): R {
-    val mock = mock(containerClass)
+inline fun <reified M> mock() = mock(M::class.java)!!
+
+inline fun <reified CI> withMockedContainer(block: (CI) -> Unit) {
+    val mock = mock<CI>()
     try {
         return block(mock)
     } finally {

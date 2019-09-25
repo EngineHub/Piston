@@ -39,7 +39,7 @@ import org.mockito.Mockito.verify
 class RegressionTest {
 
     private inline fun withRegressionCommands(block: (RegressionCommands, CommandManager) -> Unit) {
-        withMockedContainer(RegressionCommands::class.java) { ci ->
+        withMockedContainer<RegressionCommands> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, RegressionCommandsRegistration.builder())
             }

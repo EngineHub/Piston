@@ -29,6 +29,7 @@ import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
@@ -82,8 +83,7 @@ public class AnnoValueExtraction {
                     + ", got " + result.bad.getClass().getCanonicalName())
                 .withElement(annotated).withAnnotation(mirror);
         }
-        assert result.good != null;
-        return boxed.cast(result.good);
+        return Objects.requireNonNull(boxed.cast(result.good));
     }
 
     public static <T> List<T> getList(Element annotated,

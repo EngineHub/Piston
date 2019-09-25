@@ -44,7 +44,7 @@ class BasicCommandTest {
 
     @Test
     fun noArgCommand() {
-        withMockedContainer(NoArgCommand::class.java) { ci ->
+        withMockedContainer<NoArgCommand> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, NoArgCommandRegistration.builder())
             }
@@ -58,7 +58,7 @@ class BasicCommandTest {
     @Test
     fun noArgInjectedCommand() {
         val injected = Any().toString()
-        withMockedContainer(NoArgWithInjectedCommand::class.java) { ci ->
+        withMockedContainer<NoArgWithInjectedCommand> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, NoArgWithInjectedCommandRegistration.builder())
             }
@@ -74,7 +74,7 @@ class BasicCommandTest {
     @Test
     fun singleArgCommand() {
         val testString = "a varied argument"
-        withMockedContainer(SingleArgCommand::class.java) { ci ->
+        withMockedContainer<SingleArgCommand> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, SingleArgCommandRegistration.builder())
             }
@@ -88,7 +88,7 @@ class BasicCommandTest {
     @Test
     fun singleArgCommandWithDashDash() {
         val testString = "a varied argument"
-        withMockedContainer(SingleArgCommand::class.java) { ci ->
+        withMockedContainer<SingleArgCommand> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, SingleArgCommandRegistration.builder())
             }
@@ -101,7 +101,7 @@ class BasicCommandTest {
 
     @Test
     fun notEnoughArgsForSingleArg() {
-        withMockedContainer(SingleArgCommand::class.java) { ci ->
+        withMockedContainer<SingleArgCommand> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, SingleArgCommandRegistration.builder())
             }
@@ -117,7 +117,7 @@ class BasicCommandTest {
     @Test
     fun singleOptionalArgCommand() {
         val testString = "a varied argument"
-        withMockedContainer(SingleOptionalArgCommand::class.java) { ci ->
+        withMockedContainer<SingleOptionalArgCommand> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, SingleOptionalArgCommandRegistration.builder())
             }
@@ -126,7 +126,7 @@ class BasicCommandTest {
 
             verify(ci).singleArg(null)
         }
-        withMockedContainer(SingleOptionalArgCommand::class.java) { ci ->
+        withMockedContainer<SingleOptionalArgCommand> { ci ->
             val manager = newManager().apply {
                 installCommands(ci, SingleOptionalArgCommandRegistration.builder())
             }

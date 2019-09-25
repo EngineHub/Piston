@@ -51,7 +51,7 @@ class ManagerSuggestionTest {
     )
 
     private fun withSuggestionManager(block: (CommandManager) -> Unit) {
-        withMockedContainer(SuggestingCommand::class.java) {
+        withMockedContainer<SuggestingCommand> {
             val manager = newManager().apply {
                 installCommands(it, SuggestingCommandRegistration.builder())
                 suggestionMatrix.forEachIndexed { index, set ->
