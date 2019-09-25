@@ -36,7 +36,8 @@ public class TypeNameUtil {
         } else if (typeName.isPrimitive()) {
             return typeName;
         }
-        throw new IllegalArgumentException("Not able to create a raw type from " + typeName.getClass());
+        throw new IllegalArgumentException("Not able to create a raw type from " +
+            "'" + typeName + "' ("  + typeName.getClass() + ")");
     }
 
     public static TypeName firstTypeArg(TypeName typeName) {
