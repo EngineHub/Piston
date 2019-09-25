@@ -131,11 +131,11 @@ final class CollectionArgRegistration implements CommandRegistration<CollectionA
         }
     }
 
-    private Object extract$arg2(CommandParameters parameters) {
-        return argPart2.value(parameters).asSingle(object_Key);
-    }
-
     private Collection<String> extract$arg(CommandParameters parameters) {
         return argPart.value(parameters).asMultiple(string_Key);
+    }
+
+    private Object extract$arg2(CommandParameters parameters) {
+        return argPart2.value(parameters).asSingle(object_Key);
     }
 }

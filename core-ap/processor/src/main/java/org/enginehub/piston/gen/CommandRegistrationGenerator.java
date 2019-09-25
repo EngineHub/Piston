@@ -61,7 +61,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.concat;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -249,7 +248,8 @@ class CommandRegistrationGenerator {
                     .addCode(spec.getExtractMethodBody().generate(param.getName()))
                     .build();
             })
-            .collect(toSet());
+            .distinct()
+            .collect(toList());
     }
 
     private Iterable<FieldSpec> generateFields() {
