@@ -34,6 +34,15 @@ val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
         }
     }
 }
+afterEvaluate {
+    totalReport.configure {
+        classDirectories.setFrom(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude("**/AutoValue_*")
+            }
+        })
+    }
+}
 
 codecov {
     reportTask.set(totalReport)

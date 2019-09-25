@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandValue;
@@ -43,13 +42,11 @@ import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandParts;
 import org.enginehub.piston.part.NoArgCommandFlag;
-import org.enginehub.piston.util.CaseHelper;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -99,14 +96,6 @@ class CommandParameterInterpreter {
         this.method = method;
         this.generationSupport = generationSupport;
         this.env = env;
-    }
-
-    private MethodSpec.Builder extractSpec(VariableElement param, String name) {
-        return MethodSpec.methodBuilder(generationSupport.requestMethodName("extract"
-            + CaseHelper.camelToTitle(name)))
-            .addModifiers(Modifier.PRIVATE)
-            .addParameter(CommandParameters.class, ReservedNames.PARAMETERS)
-            .returns(TypeName.get(param.asType()));
     }
 
     private CommandParamInfo argTransform(VariableElement parameter) {
@@ -232,7 +221,7 @@ class CommandParameterInterpreter {
                 "$T.flag('$L', $L).build()",
                 CommandParts.class, name, textCompOf(desc)))
             .extractSpec(ExtractSpec.builder()
-                .name(parameter.getSimpleName().toString())
+                .name("extract$" + parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.in($L)",
@@ -242,7 +231,7 @@ class CommandParameterInterpreter {
             .build();
     }
 
-    private CommandParamInfo untypedParameter(VariableElement parameter) {
+    private CommandParamInfo untransformedParameter(VariableElement parameter) {
         if (TypeName.get(parameter.asType()).equals(ClassName.get(CommandParameters.class))) {
             return commandParameterValue(parameter);
         }
@@ -252,7 +241,7 @@ class CommandParameterInterpreter {
     private CommandParamInfo commandParameterValue(VariableElement parameter) {
         return CommandParamInfo.builder()
             .extractSpec(ExtractSpec.builder()
-                .name(parameter.getSimpleName().toString())
+                .name("extract$" + parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var ->
                     CodeBlock.of("$[return $L;\n$]", ReservedNames.PARAMETERS))
@@ -263,7 +252,7 @@ class CommandParameterInterpreter {
     private CommandParamInfo injectableValue(VariableElement parameter) {
         return CommandParamInfo.builder()
             .extractSpec(ExtractSpec.builder()
-                .name(parameter.getSimpleName().toString())
+                .name("extract$" + parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> {
                     CodeBlock paramKey = asKeyType(parameter);
@@ -318,7 +307,7 @@ class CommandParameterInterpreter {
                 "Too many transforms applicable. Did you add conflicting annotations?")
                 .withElement(parameter);
         }
-        ParamTransform transform = transforms.isEmpty() ? this::untypedParameter : transforms.get(0);
+        ParamTransform transform = transforms.isEmpty() ? this::untransformedParameter : transforms.get(0);
         return transform.createPartInfo(parameter);
     }
 }

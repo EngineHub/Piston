@@ -209,7 +209,7 @@ public class CommandProcessor extends BasicAnnotationProcessor {
         return builder
             .commandMethod(method)
             .name(name)
-            .generatedName(name)
+            .generatedName("cmd$" + name)
             .aliases(aliases)
             .description(desc)
             .footer(descFooter)

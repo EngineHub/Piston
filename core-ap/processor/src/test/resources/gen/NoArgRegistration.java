@@ -28,12 +28,15 @@ import static org.enginehub.piston.part.CommandParts.arg;
 import static org.enginehub.piston.part.CommandParts.flag;
 
 import com.google.common.collect.ImmutableList;
+import java.lang.Exception;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import net.kyori.text.TextComponent;
+import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
+import org.enginehub.piston.gen.AlwaysTrueConditionGenerator;
 import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
 
@@ -41,6 +44,8 @@ final class NoArgRegistration implements CommandRegistration<NoArg> {
     private CommandManager commandManager;
 
     private NoArg containerInstance;
+
+    private AlwaysTrueConditionGenerator alwaysTrueConditionGenerator;
 
     private ImmutableList<CommandCallListener> listeners;
 
@@ -62,6 +67,12 @@ final class NoArgRegistration implements CommandRegistration<NoArg> {
         return this;
     }
 
+    NoArgRegistration alwaysTrueConditionGenerator(
+        AlwaysTrueConditionGenerator alwaysTrueConditionGenerator) {
+        this.alwaysTrueConditionGenerator = alwaysTrueConditionGenerator;
+        return this;
+    }
+
     public NoArgRegistration listeners(Collection<CommandCallListener> listeners) {
         this.listeners = ImmutableList.copyOf(listeners);
         return this;
@@ -72,16 +83,83 @@ final class NoArgRegistration implements CommandRegistration<NoArg> {
             b.aliases(ImmutableList.of());
             b.description(TextComponent.of("DESCRIPTION"));
             b.parts(ImmutableList.of());
-            b.action(this::noArgument);
+            b.action(this::cmd$noArgument);
+        });
+        commandManager.register("noArgumentFooter", b -> {
+            b.aliases(ImmutableList.of());
+            b.description(TextComponent.of("DESCRIPTION"));
+            b.footer(TextComponent.of("DESC FOOTER"));
+            b.parts(ImmutableList.of());
+            b.action(this::cmd$noArgumentFooter);
+        });
+        commandManager.register("noArgumentCondition", b -> {
+            b.aliases(ImmutableList.of());
+            b.description(TextComponent.of("DESCRIPTION"));
+            b.parts(ImmutableList.of());
+            b.action(this::cmd$noArgumentCondition);
+            Method commandMethod = getCommandMethod(NoArg.class, "noArgCondition");
+            Command.Condition condition = alwaysTrueConditionGenerator.generateCondition(commandMethod);
+            b.condition(condition);
+        });
+        commandManager.register("noArgumentStatic", b -> {
+            b.aliases(ImmutableList.of());
+            b.description(TextComponent.of("DESCRIPTION"));
+            b.parts(ImmutableList.of());
+            b.action(this::cmd$noArgumentStatic);
         });
     }
 
-    private int noArgument(CommandParameters parameters) {
+    private int cmd$noArgument(CommandParameters parameters) throws Exception {
         Method cmdMethod = getCommandMethod(NoArg.class, "noArg");
         listenersBeforeCall(listeners, cmdMethod, parameters);
         try {
             int result;
             containerInstance.noArg();
+            result = 1;
+            listenersAfterCall(listeners, cmdMethod, parameters);
+            return result;
+        } catch (Throwable t) {
+            listenersAfterThrow(listeners, cmdMethod, parameters, t);
+            throw t;
+        }
+    }
+
+    private int cmd$noArgumentFooter(CommandParameters parameters) {
+        Method cmdMethod = getCommandMethod(NoArg.class, "noArgFooter");
+        listenersBeforeCall(listeners, cmdMethod, parameters);
+        try {
+            int result;
+            containerInstance.noArgFooter();
+            result = 1;
+            listenersAfterCall(listeners, cmdMethod, parameters);
+            return result;
+        } catch (Throwable t) {
+            listenersAfterThrow(listeners, cmdMethod, parameters, t);
+            throw t;
+        }
+    }
+
+    private int cmd$noArgumentCondition(CommandParameters parameters) {
+        Method cmdMethod = getCommandMethod(NoArg.class, "noArgCondition");
+        listenersBeforeCall(listeners, cmdMethod, parameters);
+        try {
+            int result;
+            containerInstance.noArgCondition();
+            result = 1;
+            listenersAfterCall(listeners, cmdMethod, parameters);
+            return result;
+        } catch (Throwable t) {
+            listenersAfterThrow(listeners, cmdMethod, parameters, t);
+            throw t;
+        }
+    }
+
+    private int cmd$noArgumentStatic(CommandParameters parameters) {
+        Method cmdMethod = getCommandMethod(NoArg.class, "noArgStatic");
+        listenersBeforeCall(listeners, cmdMethod, parameters);
+        try {
+            int result;
+            NoArg.noArgStatic();
             result = 1;
             listenersAfterCall(listeners, cmdMethod, parameters);
             return result;

@@ -19,6 +19,7 @@
 
 package eh;
 
+
 import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
 import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
 import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
@@ -28,7 +29,6 @@ import static org.enginehub.piston.part.CommandParts.arg;
 import static org.enginehub.piston.part.CommandParts.flag;
 
 import com.google.common.collect.ImmutableList;
-import java.lang.String;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -36,63 +36,60 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
+import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
-import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
 
-final class StringArgRegistration implements CommandRegistration<StringArg> {
-    private static final Key<String> string_Key = Key.of(String.class);
-
+final class CommandValueArgRegistration implements CommandRegistration<CommandValueArg> {
     private CommandManager commandManager;
 
-    private StringArg containerInstance;
+    private CommandValueArg containerInstance;
 
     private ImmutableList<CommandCallListener> listeners;
 
     private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
-        .ofTypes(ImmutableList.of(string_Key))
         .build();
 
-    private StringArgRegistration() {
+    private CommandValueArgRegistration() {
         this.listeners = ImmutableList.of();
     }
 
-    static StringArgRegistration builder() {
-        return new StringArgRegistration();
+    static CommandValueArgRegistration builder() {
+        return new CommandValueArgRegistration();
     }
 
-    public StringArgRegistration commandManager(CommandManager commandManager) {
+    public CommandValueArgRegistration commandManager(CommandManager commandManager) {
         this.commandManager = commandManager;
         return this;
     }
 
-    public StringArgRegistration containerInstance(StringArg containerInstance) {
+    public CommandValueArgRegistration containerInstance(CommandValueArg containerInstance) {
         this.containerInstance = containerInstance;
         return this;
     }
 
-    public StringArgRegistration listeners(Collection<CommandCallListener> listeners) {
+    public CommandValueArgRegistration listeners(Collection<CommandCallListener> listeners) {
         this.listeners = ImmutableList.copyOf(listeners);
         return this;
     }
 
     public void build() {
-        commandManager.register("stringArgument", b -> {
+        commandManager.register("valueArgument", b -> {
             b.aliases(ImmutableList.of());
             b.description(TextComponent.of("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart));
-            b.action(this::stringArgument);
+            b.action(this::cmd$valueArgument);
         });
     }
 
-    private int stringArgument(CommandParameters parameters) {
-        Method cmdMethod = getCommandMethod(StringArg.class, "stringArg", String.class);
+    private int cmd$valueArgument(CommandParameters parameters) {
+        Method cmdMethod = getCommandMethod(CommandValueArg.class, "valueArg", CommandValue.class);
         listenersBeforeCall(listeners, cmdMethod, parameters);
         try {
             int result;
-            containerInstance.stringArg(this.extract$arg(parameters));
+            containerInstance.valueArg(this.extract$arg(parameters));
             result = 1;
             listenersAfterCall(listeners, cmdMethod, parameters);
             return result;
@@ -102,7 +99,7 @@ final class StringArgRegistration implements CommandRegistration<StringArg> {
         }
     }
 
-    private String extract$arg(CommandParameters parameters) {
-        return argPart.value(parameters).asSingle(string_Key);
+    private CommandValue extract$arg(CommandParameters parameters) {
+        return argPart.value(parameters);
     }
 }
