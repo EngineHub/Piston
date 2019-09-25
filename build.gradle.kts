@@ -1,8 +1,6 @@
-import codecov.CodecovExtension
-import codecov.CodecovPlugin
-
 plugins {
     id("net.researchgate.release") version "2.8.0"
+    id("org.enginehub.codecov")
     jacoco
 }
 
@@ -37,7 +35,6 @@ val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
     }
 }
 
-apply<CodecovPlugin>()
-configure<CodecovExtension> {
+codecov {
     reportTask.set(totalReport)
 }
