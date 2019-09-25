@@ -39,6 +39,3 @@ dependencies {
     "testImplementation"(project(":default-impl"))
     "kaptTest"(project(":core-ap:processor"))
 }
-
-configurations.getByName("testAnnotationProcessor")
-        .extendsFrom(configurations.getByName("runtimeClasspath"))

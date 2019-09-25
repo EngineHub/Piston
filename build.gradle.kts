@@ -38,7 +38,7 @@ afterEvaluate {
     totalReport.configure {
         classDirectories.setFrom(classDirectories.files.map {
             fileTree(it).apply {
-                exclude("**/AutoValue_*")
+                exclude("**/*AutoValue_*")
             }
         })
     }

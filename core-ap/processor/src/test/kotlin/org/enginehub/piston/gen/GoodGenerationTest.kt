@@ -24,7 +24,6 @@ import com.google.testing.compile.JavaFileObjects
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
-import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import org.enginehub.piston.CommandParameters
 import org.enginehub.piston.CommandValue
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
+import java.util.concurrent.Callable
 import javax.lang.model.element.Modifier
 
 
@@ -106,7 +106,9 @@ class GenerationTest {
                     .addMember("desc", "\$S", "DESCRIPTION")
                     .build())
                 .returns(Void.TYPE)
-                .addParameter(Object::class.java, "injected")
+                .addParameter(
+                    className<Callable<*>>().parametrize(className<Any>()), "injected"
+                )
                 .build()
         ))
         val compilation = compiler().compile(commands)
@@ -156,7 +158,7 @@ class GenerationTest {
                 .returns(Void.TYPE)
                 .addParameter(
                     ParameterSpec.builder(
-                        ParameterizedTypeName.get(Collection::class.java, String::class.java), "arg"
+                        className<Collection<*>>().parametrize(className<String>()), "arg"
                     )
                         .addAnnotation(AnnotationSpec.builder(Arg::class.java)
                             .addMember("desc", "\$S", "ARG DESCRIPTION")
@@ -243,6 +245,21 @@ class GenerationTest {
                         .build()
                 )
                 .build(),
+            MethodSpec.methodBuilder("annotatedIntArg3")
+                .addAnnotation(AnnotationSpec.builder(Command::class.java)
+                    .addMember("name", "\$S", "annotatedIntArgument3")
+                    .addMember("desc", "\$S", "DESCRIPTION")
+                    .build())
+                .returns(TypeName.VOID)
+                .addParameter(
+                    ParameterSpec.builder(TypeName.INT, "alpha")
+                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
+                            .addMember("desc", "\$S", "ARG DESCRIPTION")
+                            .build())
+                        .addAnnotation(InjectAlpha::class.java)
+                        .build()
+                )
+                .build(),
             MethodSpec.methodBuilder("variableIntArg")
                 .addAnnotation(AnnotationSpec.builder(Command::class.java)
                     .addMember("name", "\$S", "variableIntArgument")
@@ -251,7 +268,7 @@ class GenerationTest {
                 .returns(TypeName.VOID)
                 .addParameter(
                     ParameterSpec.builder(
-                        ParameterizedTypeName.get(List::class.java, Integer::class.java), "arg"
+                        className<List<*>>().parametrize(className<Int>()), "arg"
                     )
                         .addAnnotation(AnnotationSpec.builder(Arg::class.java)
                             .addMember("name", "\$S", "args")

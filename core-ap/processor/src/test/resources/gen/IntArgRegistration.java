@@ -41,6 +41,7 @@ import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
+import org.enginehub.piston.gen.InjectAlpha;
 import org.enginehub.piston.gen.InjectDelta;
 import org.enginehub.piston.gen.InjectGamma;
 import org.enginehub.piston.inject.Key;
@@ -58,6 +59,7 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
             return getClass().getDeclaredMethods()[0].getParameterAnnotations()[0][0];
         }
     }.a(null));
+    private static final Key<Integer> integer_injectAlpha_Key = Key.of(Integer.class, InjectAlpha.class);
 
     private CommandManager commandManager;
 
@@ -78,6 +80,11 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
     private final CommandArgument deltaPart = arg(TranslatableComponent.of("piston.argument.delta"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_injectDeltaQux45$Baz32$Thq1099_Key))
+        .build();
+
+    private final CommandArgument alphaPart = arg(TranslatableComponent.of("piston.argument.alpha"), TextComponent.of("ARG DESCRIPTION"))
+        .defaultsTo(ImmutableList.of())
+        .ofTypes(ImmutableList.of(integer_injectAlpha_Key))
         .build();
 
     private final CommandArgument argPart3 = arg(TranslatableComponent.of("piston.argument.args"), TextComponent.of("ARG DESCRIPTION"))
@@ -127,6 +134,12 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
             b.description(TextComponent.of("DESCRIPTION"));
             b.parts(ImmutableList.of(deltaPart));
             b.action(this::cmd$annotatedIntArgument2);
+        });
+        commandManager.register("annotatedIntArgument3", b -> {
+            b.aliases(ImmutableList.of());
+            b.description(TextComponent.of("DESCRIPTION"));
+            b.parts(ImmutableList.of(alphaPart));
+            b.action(this::cmd$annotatedIntArgument3);
         });
         commandManager.register("variableIntArgument", b -> {
             b.aliases(ImmutableList.of());
@@ -180,6 +193,21 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
         }
     }
 
+    private int cmd$annotatedIntArgument3(CommandParameters parameters) {
+        Method cmdMethod = getCommandMethod(IntArg.class, "annotatedIntArg3", int.class);
+        listenersBeforeCall(listeners, cmdMethod, parameters);
+        try {
+            int result;
+            containerInstance.annotatedIntArg3(this.extract$alpha(parameters));
+            result = 1;
+            listenersAfterCall(listeners, cmdMethod, parameters);
+            return result;
+        } catch (Throwable t) {
+            listenersAfterThrow(listeners, cmdMethod, parameters, t);
+            throw t;
+        }
+    }
+
     private int cmd$variableIntArgument(CommandParameters parameters) {
         Method cmdMethod = getCommandMethod(IntArg.class, "variableIntArg", List.class);
         listenersBeforeCall(listeners, cmdMethod, parameters);
@@ -205,6 +233,10 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
 
     private int extract$delta(CommandParameters parameters) {
         return deltaPart.value(parameters).asSingle(integer_injectDeltaQux45$Baz32$Thq1099_Key);
+    }
+
+    private int extract$alpha(CommandParameters parameters) {
+        return alphaPart.value(parameters).asSingle(integer_injectAlpha_Key);
     }
 
     private List<Integer> extract$arg3(CommandParameters parameters) {

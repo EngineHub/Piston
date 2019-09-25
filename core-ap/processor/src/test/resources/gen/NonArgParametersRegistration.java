@@ -28,10 +28,12 @@ import static org.enginehub.piston.part.CommandParts.arg;
 import static org.enginehub.piston.part.CommandParts.flag;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 import java.lang.Object;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
@@ -40,7 +42,8 @@ import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.inject.Key;
 
 final class NonArgParametersRegistration implements CommandRegistration<NonArgParameters> {
-    private static final Key<Object> object_Key = Key.of(Object.class);
+    private static final Key<Callable<Object>> callable$Object_Key = Key.of(new TypeToken<Callable<Object>>() {
+    });
 
     private CommandManager commandManager;
 
@@ -102,7 +105,7 @@ final class NonArgParametersRegistration implements CommandRegistration<NonArgPa
     }
 
     private int cmd$nonArgInjected(CommandParameters parameters) {
-        Method cmdMethod = getCommandMethod(NonArgParameters.class, "nonArgInjected", Object.class);
+        Method cmdMethod = getCommandMethod(NonArgParameters.class, "nonArgInjected", Callable.class);
         listenersBeforeCall(listeners, cmdMethod, parameters);
         try {
             int result;
@@ -120,7 +123,7 @@ final class NonArgParametersRegistration implements CommandRegistration<NonArgPa
         return parameters;
     }
 
-    private Object extract$injected(CommandParameters parameters) {
-        return requireOptional(object_Key, "injected", parameters.injectedValue(object_Key));
+    private Callable<Object> extract$injected(CommandParameters parameters) {
+        return requireOptional(callable$Object_Key, "injected", parameters.injectedValue(callable$Object_Key));
     }
 }

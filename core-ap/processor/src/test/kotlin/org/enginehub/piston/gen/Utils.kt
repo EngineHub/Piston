@@ -21,11 +21,15 @@ package org.enginehub.piston.gen
 
 import com.google.testing.compile.Compiler
 import com.google.testing.compile.JavaFileObjects
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import org.enginehub.piston.annotation.CommandContainer
 import javax.tools.JavaFileObject
+import kotlin.reflect.KClass
 
 
 const val PACKAGE = "eh"
@@ -43,3 +47,8 @@ fun commands(name: String, specs: List<MethodSpec>): JavaFileObject {
 }
 
 fun compiler() = Compiler.javac().withProcessors(CommandProcessor())!!
+
+inline fun <reified T> className(): ClassName = ClassName.get(T::class.java)
+
+fun ClassName.parametrize(vararg arguments: TypeName): ParameterizedTypeName =
+    ParameterizedTypeName.get(this, *arguments)

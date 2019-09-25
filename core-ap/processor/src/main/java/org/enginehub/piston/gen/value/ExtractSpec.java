@@ -20,6 +20,7 @@
 package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
+import com.google.auto.value.extension.memoized.Memoized;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
@@ -75,6 +76,14 @@ public abstract class ExtractSpec {
      */
     public abstract ExtractMethodBody getExtractMethodBody();
 
+    /**
+     * Generated method body using current name.
+     */
+    @Memoized
+    CodeBlock getGeneratedMethodBody() {
+        return getExtractMethodBody().generate(getName());
+    }
+
     public abstract Builder toBuilder();
 
     @Override
@@ -91,13 +100,13 @@ public abstract class ExtractSpec {
         if (!fastChecks) {
             return false;
         }
-        CodeBlock body = getExtractMethodBody().generate(getName());
-        CodeBlock otherBody = spec.getExtractMethodBody().generate(spec.getName());
+        CodeBlock body = getGeneratedMethodBody();
+        CodeBlock otherBody = spec.getGeneratedMethodBody();
         return Objects.equals(body, otherBody);
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(getName(), getType(), getExtractMethodBody().generate(getName()));
+        return Objects.hash(getName(), getType(), getGeneratedMethodBody());
     }
 }
