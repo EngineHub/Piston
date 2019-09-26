@@ -71,4 +71,8 @@ public class RegistrationUtil {
         }
     }
 
+    private RegistrationUtil() {
+        throw new RuntimeException();
+    }
+
 }
