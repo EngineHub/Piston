@@ -37,5 +37,7 @@ dependencies {
     "testImplementation"(Libs.logbackCore)
     "testImplementation"(Libs.logbackClassic)
     "testImplementation"(project(":default-impl"))
+    "testCompileOnly"(Libs.autoService)
+    "kaptTest"(Libs.autoService)
     "kaptTest"(project(":core-ap:processor"))
 }

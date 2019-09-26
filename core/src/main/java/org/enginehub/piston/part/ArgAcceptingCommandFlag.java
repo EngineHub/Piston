@@ -95,7 +95,8 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
             TextComponent.space(),
             TextComponent.of("<"),
             ColorConfig.mainText().wrap(getArgumentName()),
-            TextComponent.of(">")
+            TextComponent.of(">"),
+            TextComponent.of("]")
         );
     }
 }

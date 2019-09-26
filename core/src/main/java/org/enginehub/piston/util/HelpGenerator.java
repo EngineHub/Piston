@@ -31,6 +31,8 @@ import org.enginehub.piston.NoInputCommandParameters;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.config.TextConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.part.ArgAcceptingCommandFlag;
+import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
@@ -83,9 +85,14 @@ public class HelpGenerator {
     public Component getFullName() {
         TextComponent.Builder usage = TextComponent.builder();
 
+        String name = parseResult.getExecutionPath().get(0).getName();
+        CommandMetadata metadata = parseResult.getParameters().getMetadata();
+        if (metadata != null) {
+            name = metadata.getCalledName();
+        }
         usage.append(ColorConfig.mainText().wrap(
             TextConfig.commandPrefixValue(),
-            TextComponent.of(parseResult.getExecutionPath().get(0).getName())
+            TextComponent.of(name)
         ));
 
         for (String input : parseResult.getOriginalArguments()) {
@@ -174,22 +181,7 @@ public class HelpGenerator {
             for (Iterator<CommandArgument> iterator = args.iterator(); iterator.hasNext(); ) {
                 CommandArgument arg = iterator.next();
                 builder.add(TextComponent.of("  ")).add(arg.getTextRepresentation());
-                if (arg.getDefaults().size() > 0) {
-                    builder.add(TextComponent.of(" (defaults to "));
-                    String value;
-                    if (arg.getDefaults().size() == 1) {
-                        value = arg.getDefaults().get(0);
-                        if (value.trim().isEmpty()) {
-                            value = "none";
-                        }
-                    } else {
-                        value = arg.getDefaults().stream()
-                            .filter(s -> s.trim().length() > 0)
-                            .collect(Collectors.joining(", ", "[", "]"));
-                    }
-                    builder.add(TextComponent.of(value));
-                    builder.add(TextComponent.of(")"));
-                }
+                addDefaultInfo(builder, arg);
                 builder.add(TextComponent.of(": "))
                     .add(arg.getDescription());
                 if (iterator.hasNext()) {
@@ -211,14 +203,37 @@ public class HelpGenerator {
             for (Iterator<CommandFlag> iterator = flags.iterator(); iterator.hasNext(); ) {
                 CommandFlag flag = iterator.next();
                 // produces text like "-f: Some description"
-                builder.add(ColorConfig.mainText().wrap("  -" + flag.getName()))
-                    .add(TextComponent.of(": "))
+                builder.add(ColorConfig.mainText().wrap("  -" + flag.getName()));
+                if (flag instanceof ArgAcceptingCommandFlag) {
+                    addDefaultInfo(builder, (ArgAcceptingCommandFlag) flag);
+                }
+                builder.add(TextComponent.of(": "))
                     .add(flag.getDescription());
                 if (iterator.hasNext()) {
                     builder.add(newline());
                 }
             }
         }
+    }
+
+    private void addDefaultInfo(ImmutableList.Builder<Component> builder, ArgAcceptingCommandPart arg) {
+        if (arg.getDefaults().isEmpty()) {
+            return;
+        }
+        builder.add(TextComponent.of(" (defaults to "));
+        String value;
+        if (arg.getDefaults().size() == 1) {
+            value = arg.getDefaults().get(0);
+            if (value.trim().isEmpty()) {
+                value = "none";
+            }
+        } else {
+            value = arg.getDefaults().stream()
+                .filter(s -> s.trim().length() > 0)
+                .collect(Collectors.joining(", ", "[", "]"));
+        }
+        builder.add(TextComponent.of(value));
+        builder.add(TextComponent.of(")"));
     }
 
 }
