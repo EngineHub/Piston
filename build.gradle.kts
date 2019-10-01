@@ -12,10 +12,7 @@ repositories {
 
 release {
     tagTemplate = "v\${version}"
-    buildTasks = project.everyProject
-        .filter { it.tasks.names.contains("build") }
-        .map { it.tasks.named("build") }
-        .toList()
+    buildTasks = listOf<String>()
 }
 
 val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {

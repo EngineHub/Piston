@@ -81,6 +81,11 @@ fun Project.applyCommonConfig(
     addExtraArchiveArtifacts()
 
     configureMavenPublish()
+
+    val build = tasks.named("build")
+    rootProject.tasks.named("afterReleaseBuild").configure {
+        dependsOn(build)
+    }
 }
 
 private fun Project.addExtraArchiveArtifacts() {
