@@ -54,6 +54,12 @@ public class TextConfig extends Config<String> {
         return new TextConfig(getKey());
     }
 
+    @Override
+    public TextConfig value(String value) {
+        super.value(value);
+        return this;
+    }
+
     @Deprecated
     @Override
     public Component wrap(Component... args) {

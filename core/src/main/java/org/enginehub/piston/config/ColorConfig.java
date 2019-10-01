@@ -32,13 +32,13 @@ import java.util.List;
 public class ColorConfig extends Config<TextColor> {
 
     private static final ColorConfig TEXT_MODIFIER =
-        new ColorConfig("piston.style.text.modifier");
+        new ColorConfig("piston.style.text.modifier", TextColor.YELLOW);
     private static final ColorConfig MAIN_TEXT =
-        new ColorConfig("piston.style.main.text");
+        new ColorConfig("piston.style.main.text", TextColor.GOLD);
     private static final ColorConfig HELP_TEXT =
-        new ColorConfig("piston.style.help.text");
+        new ColorConfig("piston.style.help.text", TextColor.GRAY);
     private static final ColorConfig PART_WRAPPING =
-        new ColorConfig("piston.style.part.wrapping");
+        new ColorConfig("piston.style.part.wrapping", TextColor.YELLOW);
 
     /**
      * Color for text that modifies the main text.
@@ -68,13 +68,19 @@ public class ColorConfig extends Config<TextColor> {
         return PART_WRAPPING;
     }
 
-    private ColorConfig(String key) {
-        super(key, null);
+    private ColorConfig(String key, TextColor color) {
+        super(key, color);
     }
 
     @Override
     protected Config<TextColor> copyForDefault() {
-        return new ColorConfig(getKey());
+        return new ColorConfig(getKey(), getValue());
+    }
+
+    @Override
+    public ColorConfig value(TextColor value) {
+        super.value(value);
+        return this;
     }
 
     public Component wrap(String text) {

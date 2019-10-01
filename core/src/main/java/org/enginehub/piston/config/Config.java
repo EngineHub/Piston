@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TranslatableComponent;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +37,9 @@ public abstract class Config<T> {
     private static final Set<String> defaultInstanceCheck = new CopyOnWriteArraySet<>();
 
     private final String key;
-    private T value;
+    private @Nullable T value;
 
-    protected Config(String key, T defaultValue) {
+    protected Config(String key, @Nullable T defaultValue) {
         this.key = key;
         checkValue(defaultValue);
         this.value = defaultValue;
@@ -53,16 +54,21 @@ public abstract class Config<T> {
         return key;
     }
 
-    public T getValue() {
+    public @Nullable T getValue() {
         return value;
     }
 
-    public void setValue(T value) {
+    public void setValue(@Nullable T value) {
         checkValue(value);
         this.value = value;
     }
 
-    protected void checkValue(T value) {
+    public Config<T> value(@Nullable T value) {
+        setValue(value);
+        return this;
+    }
+
+    protected void checkValue(@Nullable T value) {
     }
 
     public Component value() {
