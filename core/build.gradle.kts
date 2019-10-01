@@ -7,4 +7,5 @@ dependencies {
     "implementation"(Libs.kyoriTextPlain)
     "compileOnly"(Libs.autoValueAnnotations)
     "annotationProcessor"(Libs.autoValueProcessor)
+    "testImplementation"(Libs.mockito)
 }
