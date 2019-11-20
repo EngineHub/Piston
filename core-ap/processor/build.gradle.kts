@@ -32,7 +32,7 @@ dependencies {
         exclude("junit", "junit")
     }
     // Hack - we need the tools jar
-    "testRuntime"(files(Jvm.current().toolsJar!!))
+    "testRuntime"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))
     "testImplementation"(Libs.mockito)
     "testImplementation"(Libs.logbackCore)
     "testImplementation"(Libs.logbackClassic)
