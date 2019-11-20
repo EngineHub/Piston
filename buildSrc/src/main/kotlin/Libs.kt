@@ -18,6 +18,6 @@ object Libs {
     const val logbackClassic = "ch.qos.logback:logback-classic:$logbackVersion"
     const val logbackCore = "ch.qos.logback:logback-core:$logbackVersion"
     const val javaxAnnotations = "com.google.code.findbugs:jsr305:3.0.2"
-    const val compileTesting = "com.google.testing.compile:compile-testing:0.16"
+    const val compileTesting = "com.google.testing.compile:compile-testing:0.18"
     const val mockito = "org.mockito:mockito-core:2.27.0"
 }

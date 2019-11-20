@@ -29,7 +29,9 @@ import static org.enginehub.piston.part.CommandParts.flag;
 
 import com.google.common.collect.ImmutableList;
 import java.lang.Integer;
+import java.lang.NoSuchMethodException;
 import java.lang.Object;
+import java.lang.RuntimeException;
 import java.lang.Throwable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -51,12 +53,20 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
     private static final Key<Integer> integer_Key = Key.of(Integer.class);
     private static final Key<Integer> integer_injectGamma_something_to_match__Key = Key.of(Integer.class, new Object() {
         Annotation a(@InjectGamma("something to match") Object ah) {
-            return getClass().getDeclaredMethods()[0].getParameterAnnotations()[0][0];
+            try {
+                return getClass().getDeclaredMethod("a", Object.class).getParameterAnnotations()[0][0];
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
         }
     }.a(null));
     private static final Key<Integer> integer_injectDeltaQux45$Baz32$Thq1099_Key = Key.of(Integer.class, new Object() {
         Annotation a(@InjectDelta(qux = 45, baz = 32, thq = { 10, 99 }) Object ah) {
-            return getClass().getDeclaredMethods()[0].getParameterAnnotations()[0][0];
+            try {
+                return getClass().getDeclaredMethod("a", Object.class).getParameterAnnotations()[0][0];
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
         }
     }.a(null));
     private static final Key<Integer> integer_injectAlpha_Key = Key.of(Integer.class, InjectAlpha.class);

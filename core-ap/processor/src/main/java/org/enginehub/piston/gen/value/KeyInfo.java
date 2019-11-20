@@ -140,13 +140,17 @@ public abstract class KeyInfo {
                 .addParameter(ParameterSpec.builder(Object.class, "ah")
                     .addAnnotation(annotationSpec)
                     .build())
+                .beginControlFlow("try")
                 .addStatement(
                     // from this class
                     "return getClass()" +
-                        // retrieve this method (there's only one)
-                        ".getDeclaredMethods()[0]" +
+                        // retrieve this method
+                        ".getDeclaredMethod(\"a\", $T.class)" +
                         // and get its first parameter's first annotation (again, only one)
-                        ".getParameterAnnotations()[0][0]")
+                        ".getParameterAnnotations()[0][0]", Object.class)
+                .nextControlFlow("catch ($T e)", NoSuchMethodException.class)
+                .addStatement("throw new $T(e)", RuntimeException.class)
+                .endControlFlow()
                 .build())
             .build();
         // call the method with a null parameter, since it doesn't really matter

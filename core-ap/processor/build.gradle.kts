@@ -14,6 +14,12 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+configurations.named("testRuntimeClasspath") {
+    resolutionStrategy {
+        force("com.google.guava:guava:28.1-jre")
+    }
+}
+
 dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":core-ap:annotations"))
@@ -31,8 +37,10 @@ dependencies {
     "testImplementation"(Libs.compileTesting) {
         exclude("junit", "junit")
     }
-    // Hack - we need the tools jar
-    "testRuntime"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))
+    if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
+        // Needs tools.jar on JDK 8 or less
+        "testRuntime"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))
+    }
     "testImplementation"(Libs.mockito)
     "testImplementation"(Libs.logbackCore)
     "testImplementation"(Libs.logbackClassic)
