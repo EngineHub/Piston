@@ -19,7 +19,24 @@
 
 package eh;
 
+import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
+import static org.enginehub.piston.internal.RegistrationUtil.requireOptional;
+import static org.enginehub.piston.part.CommandParts.arg;
+import static org.enginehub.piston.part.CommandParts.flag;
+
 import com.google.common.collect.ImmutableList;
+import java.lang.Integer;
+import java.lang.NoSuchMethodException;
+import java.lang.Object;
+import java.lang.RuntimeException;
+import java.lang.Throwable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -31,17 +48,6 @@ import org.enginehub.piston.gen.InjectDelta;
 import org.enginehub.piston.gen.InjectGamma;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
-
-import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
-import static org.enginehub.piston.part.CommandParts.arg;
 
 final class IntArgRegistration implements CommandRegistration<IntArg> {
     private static final Key<Integer> integer_Key = Key.of(Integer.class);
