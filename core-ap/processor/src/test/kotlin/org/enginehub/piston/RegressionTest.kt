@@ -22,8 +22,12 @@ package org.enginehub.piston
 import net.kyori.text.TextComponent
 import org.enginehub.piston.commands.RegressionCommands
 import org.enginehub.piston.commands.RegressionCommandsRegistration
+import org.enginehub.piston.converter.SimpleArgumentConverter
+import org.enginehub.piston.converter.SuccessfulConversion
 import org.enginehub.piston.exception.UsageException
 import org.enginehub.piston.inject.InjectedValueAccess
+import org.enginehub.piston.inject.Key
+import org.enginehub.piston.suggestion.suggest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -182,5 +186,19 @@ class RegressionTest {
                     manager.execute(InjectedValueAccess.EMPTY, listOf("hello", "there")) // general kenobi
             )
         }
+    }
+
+    @Test
+    @DisplayName("issue #23, allowing converters to add from other converters")
+    fun issue23ConvertersFromOthers() {
+        val converter = SimpleArgumentConverter.from({ arg, _ -> SuccessfulConversion.fromSingle(arg) }, "Tester")
+        val key = Key.of(String::class.java, suggest(1))
+        val child = newManager().apply {
+            registerConverter(key, converter)
+        }
+        val parent = newManager().apply {
+            registerManager(child)
+        }
+        assertEquals(converter, parent.getConverter(key).orElse(null))
     }
 }

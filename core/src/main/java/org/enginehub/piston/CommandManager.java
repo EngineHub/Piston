@@ -74,6 +74,7 @@ public interface CommandManager extends ArgumentConverterStore {
      */
     default void registerManager(CommandManager manager) {
         manager.getAllCommands().forEach(this::register);
+        registerConverters(manager);
     }
 
     /**

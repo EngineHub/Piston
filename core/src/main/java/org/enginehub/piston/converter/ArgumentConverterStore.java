@@ -35,4 +35,22 @@ public interface ArgumentConverterStore extends ArgumentConverterAccess {
      */
     <T> void registerConverter(Key<T> key, ArgumentConverter<T> converter);
 
+    /**
+     * Register all the converters in {@code converters} with this store.
+     *
+     * @param converters the converters to register
+     */
+    default void registerConverters(ArgumentConverterAccess converters) {
+        for (Key<?> key : converters.keySet()) {
+            // A little hack since we know the types are compatible
+            @SuppressWarnings("unchecked")
+            Key<Object> typeSafeKey = (Key<Object>) key;
+            @SuppressWarnings("unchecked")
+            ArgumentConverter<Object> converter =
+                (ArgumentConverter<Object>) converters.getConverter(key)
+                    .orElseThrow(IllegalStateException::new);
+            registerConverter(typeSafeKey, converter);
+        }
+    }
+
 }

@@ -22,6 +22,7 @@ package org.enginehub.piston.converter;
 import org.enginehub.piston.inject.Key;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Access to converters.
@@ -29,6 +30,8 @@ import java.util.Optional;
 public interface ArgumentConverterAccess {
 
     ArgumentConverterAccess EMPTY = EmptyArgumentConverterAccess.INSTANCE;
+
+    Set<Key<?>> keySet();
 
     /**
      * Get a converter for a key.

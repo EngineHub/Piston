@@ -21,13 +21,20 @@ package org.enginehub.piston.converter;
 
 import org.enginehub.piston.inject.Key;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * A simple, empty, registry.
  */
 enum EmptyArgumentConverterAccess implements ArgumentConverterAccess {
     INSTANCE;
+
+    @Override
+    public Set<Key<?>> keySet() {
+        return Collections.emptySet();
+    }
 
     @Override
     public <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key) {

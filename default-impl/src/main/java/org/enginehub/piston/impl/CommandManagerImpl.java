@@ -125,6 +125,16 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @Override
+    public Set<Key<?>> keySet() {
+        lock.readLock().lock();
+        try {
+            return converters.keySet();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
     public <T> Optional<ArgumentConverter<T>> getConverter(Key<T> key) {
         @SuppressWarnings("unchecked")
         ArgumentConverter<T> converter = (ArgumentConverter<T>) getArgumentConverter(key);
