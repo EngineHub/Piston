@@ -106,10 +106,7 @@ public interface Command {
          */
         default <T extends Condition> Optional<T> as(Class<T> type) {
             if (type.isInstance(this)) {
-                // checked in `if` above
-                @SuppressWarnings("unchecked")
-                Optional<T> t = Optional.of((T) this);
-                return t;
+                return Optional.of(type.cast(this));
             }
             return Optional.empty();
         }
