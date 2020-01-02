@@ -22,8 +22,6 @@ package org.enginehub.piston.exception;
 import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.Command;
 
-import javax.annotation.Nullable;
-
 /**
  * Thrown when a command action throws an exception.
  *

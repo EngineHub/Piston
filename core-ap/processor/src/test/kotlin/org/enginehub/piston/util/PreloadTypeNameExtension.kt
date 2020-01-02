@@ -20,7 +20,6 @@
 package org.enginehub.piston.util
 
 import com.google.auto.service.AutoService
-import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.Extension

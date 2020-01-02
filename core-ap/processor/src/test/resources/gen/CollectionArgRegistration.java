@@ -20,20 +20,7 @@
 package eh;
 
 
-import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
-import static org.enginehub.piston.internal.RegistrationUtil.requireOptional;
-import static org.enginehub.piston.part.CommandParts.arg;
-import static org.enginehub.piston.part.CommandParts.flag;
-
 import com.google.common.collect.ImmutableList;
-import java.lang.Object;
-import java.lang.String;
-import java.lang.Throwable;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -42,6 +29,15 @@ import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
+
+import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
+import static org.enginehub.piston.part.CommandParts.arg;
 
 final class CollectionArgRegistration implements CommandRegistration<CollectionArg> {
     private static final Key<String> string_Key = Key.of(String.class);

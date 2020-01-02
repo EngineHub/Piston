@@ -20,18 +20,7 @@
 package eh;
 
 
-import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
-import static org.enginehub.piston.internal.RegistrationUtil.requireOptional;
-import static org.enginehub.piston.part.CommandParts.arg;
-import static org.enginehub.piston.part.CommandParts.flag;
-
 import com.google.common.collect.ImmutableList;
-import java.lang.Throwable;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -40,6 +29,15 @@ import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.part.CommandArgument;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
+
+import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
+import static org.enginehub.piston.part.CommandParts.arg;
 
 final class CommandValueArgRegistration implements CommandRegistration<CommandValueArg> {
     private CommandManager commandManager;
