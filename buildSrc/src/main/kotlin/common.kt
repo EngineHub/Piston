@@ -31,7 +31,6 @@ fun Project.applyCommonConfig(
     apply(plugin = "java-library")
     apply(plugin = "java")
     apply(plugin = "net.minecrell.licenser")
-    apply(plugin = "net.ltgt.apt-idea")
     apply(plugin = "maven-publish")
     apply(plugin = "com.jfrog.artifactory")
     apply(plugin = "jacoco")

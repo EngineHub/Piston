@@ -33,13 +33,13 @@ dependencies {
     "kapt"(Libs.autoService)
 
     "testImplementation"(kotlin("stdlib-jdk8"))
-    "testRuntime"(Libs.junitVintageEngine)
+    "testRuntimeOnly"(Libs.junitVintageEngine)
     "testImplementation"(Libs.compileTesting) {
         exclude("junit", "junit")
     }
     if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
         // Needs tools.jar on JDK 8 or less
-        "testRuntime"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))
+        "testRuntimeOnly"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))
     }
     "testImplementation"(Libs.mockito)
     "testImplementation"(Libs.logbackCore)
