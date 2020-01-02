@@ -172,7 +172,7 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
                 .flatMap(part -> part.getTypes().stream())
                 .map(key -> converters.getConverter(key)
                     .orElseThrow(() -> new IllegalStateException("No converter for type " + key)))
-                .flatMap(converter -> converter.getSuggestions(input).stream()),
+                .flatMap(converter -> converter.getSuggestions(input, parseResult.getParameters()).stream()),
             cast(parts.stream(), SubCommandPart.class)
                 .flatMap(part -> part.getCommands().stream())
                 .filter(c -> nameFilter.test(c.getName()) && c.getCondition().satisfied(parseResult.getParameters()))

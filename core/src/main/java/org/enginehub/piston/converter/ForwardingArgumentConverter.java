@@ -43,7 +43,7 @@ public class ForwardingArgumentConverter<T> implements ArgumentConverter<T> {
     }
 
     @Override
-    public List<String> getSuggestions(String input) {
-        return delegate.getSuggestions(input);
+    public List<String> getSuggestions(String input, InjectedValueAccess context) {
+        return delegate.getSuggestions(input, context);
     }
 }

@@ -154,7 +154,7 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
     }
 
     @Override
-    public List<String> getSuggestions(String input) {
+    public List<String> getSuggestions(String input, InjectedValueAccess context) {
         return limitByPrefix(primaryKeys.stream(), input);
     }
 

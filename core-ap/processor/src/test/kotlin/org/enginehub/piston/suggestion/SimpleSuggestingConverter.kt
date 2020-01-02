@@ -40,6 +40,7 @@ class SimpleSuggestingConverter(private val suggestions: List<String>) : Argumen
         return TextComponent.of("Any of $suggestions")
     }
 
-    override fun getSuggestions(input: String): List<String> = limitByPrefix(suggestions.stream(), input)
+    override fun getSuggestions(input: String, context: InjectedValueAccess): List<String> =
+        limitByPrefix(suggestions.stream(), input)
 
 }

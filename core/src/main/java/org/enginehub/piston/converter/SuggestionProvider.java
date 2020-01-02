@@ -19,34 +19,23 @@
 
 package org.enginehub.piston.converter;
 
-import net.kyori.text.Component;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
- * Converts user input into an actual type. It can provide multiple
- * results per argument.
- *
- * @param <T> the type of the result
+ * Represents an object than can provide suggestions, given an input and context.
  */
-public interface ArgumentConverter<T> extends Converter<T>, SuggestionProvider {
+@FunctionalInterface
+public interface SuggestionProvider {
 
     /**
-     * Describe the arguments that can be provided to this converter.
+     * Given {@code input} as the current input, provide some suggestions for the user.
      *
-     * <p>
-     * This information is displayed to the user.
-     * </p>
-     *
-     * @return a description of acceptable arguments
+     * @param input the user's current input
+     * @param context the context for the current command
+     * @return suggestions for the user
      */
-    Component describeAcceptableArguments();
-
-    @Override
-    default List<String> getSuggestions(String input, InjectedValueAccess context) {
-        return Collections.emptyList();
-    }
+    List<String> getSuggestions(String input, InjectedValueAccess context);
 
 }

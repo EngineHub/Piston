@@ -24,11 +24,10 @@ import net.kyori.text.TextComponent;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * A simple base implementation of {@link ArgumentConverter}. Provides no suggestions,
- * but you can call {@link #withSuggestions(Function)} to supply them.
+ * but you can call {@link #withSuggestions(SuggestionProvider)} to supply them.
  */
 public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
 
@@ -68,11 +67,11 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
         return description;
     }
 
-    public ArgumentConverter<T> withSuggestions(Function<String, List<String>> suggestions) {
+    public ArgumentConverter<T> withSuggestions(SuggestionProvider suggestions) {
         return new ForwardingArgumentConverter<T>(this) {
             @Override
-            public List<String> getSuggestions(String input) {
-                return suggestions.apply(input);
+            public List<String> getSuggestions(String input, InjectedValueAccess context) {
+                return suggestions.getSuggestions(input, context);
             }
         };
     }
