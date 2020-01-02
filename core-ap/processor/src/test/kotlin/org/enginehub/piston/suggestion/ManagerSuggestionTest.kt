@@ -80,7 +80,27 @@ class ManagerSuggestionTest {
         withSuggestionManager { manager ->
             val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY, listOf(""))
             assertEqualUnordered(manager.allCommands.map { it.name }.filter { it != "notpermitted" }.toList(),
-                    actualSuggestions.map { it.suggestion })
+                actualSuggestions.map { it.suggestion })
+            assertTrue(actualSuggestions.all { it.replacedArgument == 0 }, "replacement not targeted at first argument")
+        }
+    }
+
+    @Test
+    @DisplayName("suggests other-manager-registered commands on empty input")
+    fun suggestsOtherManagerRegisteredCommandsOnEmpty() {
+        withSuggestionManager { manager ->
+            manager.registerManager(newManager().apply {
+                register("permitted") { cmd ->
+                    cmd.description(TextComponent.of("Command with true condition"))
+                    cmd.condition(Command.Condition.TRUE)
+                }
+            })
+            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY, listOf(""))
+            assertTrue(actualSuggestions.map { it.suggestion }.any { it == "permitted" }) {
+                "`permitted` not contained in suggestions"
+            }
+            assertEqualUnordered(manager.allCommands.map { it.name }.filter { it != "notpermitted" }.toList(),
+                actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 0 }, "replacement not targeted at first argument")
         }
     }
