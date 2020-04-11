@@ -2,8 +2,8 @@ import org.gradle.internal.jvm.Jvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.31"
-    kotlin("kapt") version "1.3.31"
+    kotlin("jvm") version "1.3.71"
+    kotlin("kapt") version "1.3.71"
 }
 
 applyCoreApConfig()
