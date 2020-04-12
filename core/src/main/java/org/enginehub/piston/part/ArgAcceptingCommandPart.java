@@ -43,13 +43,4 @@ public interface ArgAcceptingCommandPart extends ArgConsumingCommandPart {
 
     ImmutableList<String> getDefaults();
 
-    /**
-     * Is the argument consumed by this command required to be present.
-     *
-     * @return {@code true} if it is required
-     */
-    default boolean isArgumentRequired() {
-        return getDefaults().isEmpty();
-    }
-
 }

@@ -207,7 +207,7 @@ class RegressionTest {
     @Test
     @DisplayName("issue #29, regarding arg flag's argument being required but missing")
     fun issue29ArgFlagRequiresArg() {
-        withRegressionCommands { _, manager ->
+        withRegressionCommands { ci, manager ->
             assertThrows<ConversionFailedException> {
                 manager.execute(InjectedValueAccess.EMPTY, listOf("i29", "-m", "parseable as req-arg"))
             }
@@ -215,6 +215,10 @@ class RegressionTest {
                 manager.execute(InjectedValueAccess.EMPTY, listOf("i29", "req-arg", "-m"))
             }
             assertEquals("Not enough arguments.", usageEx.message)
+
+            manager.execute(InjectedValueAccess.EMPTY, listOf("i29", "req-arg"))
+
+            verify(ci, times(1)).i29("req-arg", null)
         }
     }
 

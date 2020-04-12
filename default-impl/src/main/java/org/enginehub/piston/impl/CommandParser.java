@@ -64,6 +64,7 @@ import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
 import org.enginehub.piston.util.ComponentHelper;
+import org.enginehub.piston.util.StreamHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +94,7 @@ class CommandParser {
 
         final CommandInfo commandInfo;
         final Set<ArgAcceptingCommandPart> defaultsNeeded;
+        final Set<ArgAcceptingCommandFlag> argFlagsNeeded;
         final ListIterator<ArgConsumingCommandPart> partIter;
         boolean canMatchFlags = true;
         int remainingRequiredParts;
@@ -100,6 +102,14 @@ class CommandParser {
         private PerCommandDetails(CommandInfo commandInfo) {
             this.commandInfo = commandInfo;
             this.defaultsNeeded = new HashSet<>(commandInfo.defaultProvided);
+            // collect argument flags that don't have default values
+            // we'll provide `null` for them in this case.
+            this.argFlagsNeeded = StreamHelper.cast(
+                commandInfo.flags.values().stream(),
+                ArgAcceptingCommandFlag.class
+            )
+                .filter(arg -> !defaultsNeeded.contains(arg))
+                .collect(Collectors.toCollection(HashSet::new));
             this.partIter = commandInfo.arguments.listIterator();
             this.remainingRequiredParts = commandInfo.requiredParts;
         }
@@ -280,6 +290,9 @@ class CommandParser {
     private void fillInDefaults() {
         for (ArgAcceptingCommandPart part : perCommandDetails().defaultsNeeded) {
             addValueFull(part, v -> v.values(part.getDefaults()));
+        }
+        for (ArgAcceptingCommandFlag flag : perCommandDetails().argFlagsNeeded) {
+            addValueFull(flag, v -> v.value(""));
         }
     }
 
@@ -509,26 +522,16 @@ class CommandParser {
                 bind(flag);
                 ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
                 if (!hasNextArgument()) {
-                    if (argPart.isArgumentRequired()) {
-                        throw notEnoughArgumentsException();
-                    }
-                    log("parseFlags: [-{}] skipping argument for arg-accepting flag, no argument available",
-                        flag.getName());
-                    return;
+                    throw notEnoughArgumentsException();
                 }
                 String nextToken = nextArgument();
                 if (!isAcceptedByTypeParsers(argPart, nextToken)) {
-                    if (argPart.isArgumentRequired()) {
-                        throw conversionFailedException(argPart, nextToken);
-                    }
-                    log("parseFlags: [-{}] skipping argument for arg-accepting flag, not accepted by type parsers",
-                        flag.getName());
-                    unconsumeArgument();
-                    return;
+                    throw conversionFailedException(argPart, nextToken);
                 }
                 addValueFull(flag, v -> v.value(nextToken));
                 bind(flag);
                 perCommandDetails().defaultsNeeded.remove(flag);
+                perCommandDetails().argFlagsNeeded.remove(flag);
             } else {
                 // Sanity-check. Real check is in `CommandInfo.from`.
                 checkState(flag instanceof NoArgCommandFlag);
