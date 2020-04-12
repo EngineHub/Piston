@@ -207,7 +207,7 @@ class RegressionTest {
     @Test
     @DisplayName("issue #29, regarding arg flag's argument being required but missing")
     fun issue29ArgFlagRequiresArg() {
-        withRegressionCommands { ci, manager ->
+        withRegressionCommands { _, manager ->
             assertThrows<ConversionFailedException> {
                 manager.execute(InjectedValueAccess.EMPTY, listOf("i29", "-m", "parseable as req-arg"))
             }
@@ -215,8 +215,21 @@ class RegressionTest {
                 manager.execute(InjectedValueAccess.EMPTY, listOf("i29", "req-arg", "-m"))
             }
             assertEquals("Not enough arguments.", usageEx.message)
+        }
+    }
 
-            verifyNoInteractions(ci)
+    @Test
+    @DisplayName("issue #30, regarding repeated flags")
+    fun issue30RepeatedFlags() {
+        withRegressionCommands { _, manager ->
+            var usageEx = assertThrows<UsageException> {
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i30", "-m", "9", "-m", "8"))
+            }
+            assertEquals("Flag [-m <piston.argument.mask>] has already been specified.", usageEx.message)
+            usageEx = assertThrows {
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i30", "-g", "-g"))
+            }
+            assertEquals("Flag [-g] has already been specified.", usageEx.message)
         }
     }
 }

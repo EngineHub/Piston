@@ -19,6 +19,22 @@
 
 package org.enginehub.piston.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
+
+import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -50,21 +66,6 @@ import org.enginehub.piston.part.SubCommandPart;
 import org.enginehub.piston.util.ComponentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.requireNonNull;
 
 class CommandParser {
 
@@ -112,6 +113,7 @@ class CommandParser {
     private final ImmutableList<String> arguments;
     private final ListIterator<String> argIter;
     private final InjectedValueAccess context;
+    private final Set<CommandFlag> seenFlags = new HashSet<>();
     private ImmutableSet.Builder<CommandPart> argBindings = ImmutableSet.builder();
     @Nullable
     private PerCommandDetails perCommandDetails;
@@ -492,6 +494,12 @@ class CommandParser {
                 buildParseResult();
                 throw new NoSuchFlagException(getResult(), c);
             }
+            if (seenFlags.contains(flag)) {
+                throw usageException(TextComponent.builder("Flag ")
+                    .append(flag.getTextRepresentation())
+                    .append(" has already been specified.")
+                    .build());
+            }
             if (flag instanceof ArgAcceptingCommandFlag) {
                 if (i + 1 < flags.length()) {
                     // Only allow argument-flags at the end of flag-combos.
@@ -506,7 +514,7 @@ class CommandParser {
                     }
                     log("parseFlags: [-{}] skipping argument for arg-accepting flag, no argument available",
                         flag.getName());
-                    break;
+                    return;
                 }
                 String nextToken = nextArgument();
                 if (!isAcceptedByTypeParsers(argPart, nextToken)) {
@@ -516,7 +524,7 @@ class CommandParser {
                     log("parseFlags: [-{}] skipping argument for arg-accepting flag, not accepted by type parsers",
                         flag.getName());
                     unconsumeArgument();
-                    break;
+                    return;
                 }
                 addValueFull(flag, v -> v.value(nextToken));
                 bind(flag);
@@ -527,6 +535,7 @@ class CommandParser {
                 bind(flag);
                 parameters.addPresentPart(flag);
             }
+            seenFlags.add(flag);
         }
     }
 
