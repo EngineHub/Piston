@@ -14,12 +14,6 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-configurations.named("testRuntimeClasspath") {
-    resolutionStrategy {
-        force("com.google.guava:guava:28.1-jre")
-    }
-}
-
 dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":core-ap:annotations"))
