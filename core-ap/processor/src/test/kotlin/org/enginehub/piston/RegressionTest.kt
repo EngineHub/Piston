@@ -24,6 +24,7 @@ import org.enginehub.piston.commands.RegressionCommands
 import org.enginehub.piston.commands.RegressionCommandsRegistration
 import org.enginehub.piston.converter.SimpleArgumentConverter
 import org.enginehub.piston.converter.SuccessfulConversion
+import org.enginehub.piston.exception.ConversionFailedException
 import org.enginehub.piston.exception.UsageException
 import org.enginehub.piston.inject.InjectedValueAccess
 import org.enginehub.piston.inject.Key
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoInteractions
 
 @DisplayName("Regression tests")
 class RegressionTest {
@@ -200,5 +202,21 @@ class RegressionTest {
             registerManager(child)
         }
         assertEquals(converter, parent.getConverter(key).orElse(null))
+    }
+
+    @Test
+    @DisplayName("issue #29, regarding arg flag's argument being required but missing")
+    fun issue29ArgFlagRequiresArg() {
+        withRegressionCommands { ci, manager ->
+            assertThrows<ConversionFailedException> {
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i29", "-m", "parseable as req-arg"))
+            }
+            val usageEx = assertThrows<UsageException> {
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i29", "req-arg", "-m"))
+            }
+            assertEquals("Not enough arguments.", usageEx.message)
+
+            verifyNoInteractions(ci)
+        }
     }
 }

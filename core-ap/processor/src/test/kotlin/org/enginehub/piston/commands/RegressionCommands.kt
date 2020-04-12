@@ -28,12 +28,19 @@ import org.enginehub.piston.annotation.param.ArgFlag
 interface RegressionCommands {
     @Command(name = "i9", desc = "description")
     fun i9(
-            @Arg(desc = "First argument", def = [""]) first: Int?,
-            @Arg(desc = "Second argument") second: Double
+        @Arg(desc = "First argument", def = [""]) first: Int?,
+        @Arg(desc = "Second argument") second: Double
     )
+
     @Command(name = "i10", desc = "description")
     fun i10(
-            @Arg(desc = "First argument") first: String,
-            @ArgFlag(name = 'p', desc = "Page number") page: Int
+        @Arg(desc = "First argument") first: String,
+        @ArgFlag(name = 'p', desc = "Page number") page: Int?
+    )
+
+    @Command(name = "i29", desc = "description")
+    fun i29(
+        @Arg(desc = "First argument", def = [""]) first: String?,
+        @ArgFlag(name = 'm', desc = "Mask") mask: Int?
     )
 }

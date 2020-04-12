@@ -499,14 +499,20 @@ class CommandParser {
                         "at the end of combined flag groups."));
                 }
                 bind(flag);
+                ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
                 if (!hasNextArgument()) {
+                    if (argPart.isArgumentRequired()) {
+                        throw notEnoughArgumentsException();
+                    }
                     log("parseFlags: [-{}] skipping argument for arg-accepting flag, no argument available",
                         flag.getName());
                     break;
                 }
                 String nextToken = nextArgument();
-                ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
                 if (!isAcceptedByTypeParsers(argPart, nextToken)) {
+                    if (argPart.isArgumentRequired()) {
+                        throw conversionFailedException(argPart, nextToken);
+                    }
                     log("parseFlags: [-{}] skipping argument for arg-accepting flag, not accepted by type parsers",
                         flag.getName());
                     unconsumeArgument();
