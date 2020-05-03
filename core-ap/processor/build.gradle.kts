@@ -2,8 +2,8 @@ import org.gradle.internal.jvm.Jvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.71"
-    kotlin("kapt") version "1.3.71"
+    kotlin("jvm") version "1.3.72"
+    kotlin("kapt") version "1.3.72"
 }
 
 applyCoreApConfig()
@@ -31,6 +31,15 @@ dependencies {
     "testImplementation"(Libs.compileTesting) {
         exclude("junit", "junit")
     }
+
+    "testImplementation"("com.google.guava:guava") {
+        version {
+            prefer("27.1-jre")
+            reject("21.0")
+            because("Compile Testing & Truth won't work with 21.0")
+        }
+    }
+
     if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
         // Needs tools.jar on JDK 8 or less
         "testRuntimeOnly"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))

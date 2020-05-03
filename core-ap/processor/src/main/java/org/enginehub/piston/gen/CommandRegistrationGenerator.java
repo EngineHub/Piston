@@ -142,7 +142,7 @@ class CommandRegistrationGenerator {
     }
 
     private ClassName getThisClass() {
-        return info.getTargetClassName().peerClass(info.getName());
+        return ClassName.get(info.getTargetClassName().packageName(), info.getName());
     }
 
     void generate(Element originalElement, String pkgName, Filer filer) throws IOException {

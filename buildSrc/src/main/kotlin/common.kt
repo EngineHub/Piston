@@ -51,9 +51,19 @@ fun Project.applyCommonConfig(
         jcenter()
     }
 
-    configurations.all {
-        resolutionStrategy {
-            force(Libs.guava)
+    dependencies {
+        constraints {
+            for (configuration in listOf("implementation", "api")) {
+                configuration(Libs.guava) {
+                    version {
+                        // This isn't perfect -- I need some way to communicate that we should only build
+                        // Against 21.0, but also that the tests NEED to use 27.1 to be compatible
+                        // with google's truth library
+                        require("21.0")
+                        because("Minecraft uses Guava 21.0")
+                    }
+                }
+            }
         }
     }
 

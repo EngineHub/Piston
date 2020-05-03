@@ -66,6 +66,7 @@ import static com.google.auto.common.MoreElements.getPackage;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.stream.Collectors.joining;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getList;
 import static org.enginehub.piston.gen.util.AnnoValueExtraction.getValue;
 import static org.enginehub.piston.gen.util.ProcessingEnvValues.ARG_NAME_KEY_PREFIX;
@@ -138,10 +139,11 @@ public class CommandProcessor extends BasicAnnotationProcessor {
                 ).forEach(t -> registration.addSuperType(asTypeElement(t)));
 
                 try {
+                    ClassName className = ClassName.get(type);
                     new CommandRegistrationGenerator(
                         registration
-                            .name(type.getSimpleName() + "Registration")
-                            .targetClassName(ClassName.get(type))
+                            .name(getRegistrationClassName(className))
+                            .targetClassName(className)
                             .classVisibility(visibility(type.getModifiers()))
                             .commands(info)
                             .build())
@@ -160,6 +162,10 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             }
         }
         return ImmutableSet.of();
+    }
+
+    private String getRegistrationClassName(ClassName className) {
+        return className.simpleNames().stream().collect(joining("_", "", "Registration"));
     }
 
     private CommandInfoOptimization buildOptimizer(IdentifierTracker identifierTracker) {
