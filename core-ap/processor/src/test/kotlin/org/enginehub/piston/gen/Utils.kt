@@ -33,11 +33,15 @@ import javax.tools.JavaFileObject
 
 const val PACKAGE = "eh"
 
-fun commands(name: String, specs: List<MethodSpec>): JavaFileObject {
+fun commandsSpec(name: String, specs: List<MethodSpec>): TypeSpec {
     return TypeSpec.classBuilder(name)
         .addAnnotation(CommandContainer::class.java)
         .addMethods(specs)
         .build()
+}
+
+fun commands(name: String, specs: List<MethodSpec>): JavaFileObject {
+    return commandsSpec(name, specs)
         .toFileInPackage()
 }
 
