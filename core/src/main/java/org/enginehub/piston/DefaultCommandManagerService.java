@@ -101,4 +101,9 @@ public class DefaultCommandManagerService implements CommandManagerService {
     public CommandManager newCommandManager() {
         return sealDelegate().newCommandManager();
     }
+
+    @Override
+    public Command.Builder newCommand(String name) {
+        return sealDelegate().newCommand(name);
+    }
 }

@@ -40,4 +40,9 @@ public interface CommandManagerService {
      */
     CommandManager newCommandManager();
 
+    /**
+     * Creates a new command builder.
+     */
+    Command.Builder newCommand(String name);
+
 }
