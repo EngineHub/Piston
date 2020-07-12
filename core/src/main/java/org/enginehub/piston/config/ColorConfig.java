@@ -22,9 +22,14 @@ package org.enginehub.piston.config;
 import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
+import net.kyori.text.format.Style;
 import net.kyori.text.format.TextColor;
 
+import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Color configuration.
@@ -39,6 +44,10 @@ public class ColorConfig extends Config<TextColor> {
         new ColorConfig("piston.style.help.text", TextColor.GRAY);
     private static final ColorConfig PART_WRAPPING =
         new ColorConfig("piston.style.part.wrapping", TextColor.YELLOW);
+
+    private static final Set<Style.Merge> MERGE_NO_COLOR = Style.Merge.of(
+        Style.Merge.DECORATIONS, Style.Merge.INSERTION, Style.Merge.EVENTS
+    );
 
     /**
      * Color for text that modifies the main text.
@@ -68,7 +77,7 @@ public class ColorConfig extends Config<TextColor> {
         return PART_WRAPPING;
     }
 
-    private ColorConfig(String key, TextColor color) {
+    private ColorConfig(String key, @Nullable TextColor color) {
         super(key, color);
     }
 
@@ -78,7 +87,7 @@ public class ColorConfig extends Config<TextColor> {
     }
 
     @Override
-    public ColorConfig value(TextColor value) {
+    public ColorConfig value(@Nullable TextColor value) {
         super.value(value);
         return this;
     }
@@ -87,19 +96,37 @@ public class ColorConfig extends Config<TextColor> {
         return wrap(ImmutableList.of(TextComponent.of(text)));
     }
 
+    public Component wrap(Component... args) {
+        return wrap(Arrays.asList(args));
+    }
+
+    public Component wrap(List<Component> args) {
+        return super.wrapInternal(args);
+    }
+
     @Override
-    protected Component apply(List<Component> input) {
+    protected Component apply(TranslatableComponent placeholder) {
+        return renderFromArgs(placeholder.args())
+            .mergeStyle(placeholder, MERGE_NO_COLOR)
+            .append(placeholder.children())
+            .build();
+    }
+
+    private TextComponent.Builder renderFromArgs(List<Component> args) {
         TextColor color = getValue();
-        switch (input.size()) {
+        switch (args.size()) {
             case 0:
-                return TextComponent.of("", color);
+                return TextComponent.builder("", color);
             case 1:
-                return input.get(0).color(color);
+                Component only = args.get(0);
+                if (only instanceof TextComponent) {
+                    return ((TextComponent) only).toBuilder().color(color);
+                }
+                // fall-through
             default:
                 return TextComponent.builder()
                     .color(color)
-                    .append(input)
-                    .build();
+                    .append(args);
         }
     }
 }

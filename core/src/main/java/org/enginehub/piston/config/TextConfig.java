@@ -21,8 +21,9 @@ package org.enginehub.piston.config;
 
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 
-import java.util.List;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -55,31 +56,22 @@ public class TextConfig extends Config<String> {
     }
 
     @Override
-    public TextConfig value(String value) {
+    public TextConfig value(@Nullable String value) {
         super.value(value);
         return this;
     }
 
-    @Deprecated
     @Override
-    public Component wrap(Component... args) {
-        return super.wrap(args);
-    }
-
-    @Deprecated
-    @Override
-    public Component wrap(List<Component> args) {
-        return super.wrap(args);
-    }
-
-    @Override
-    protected void checkValue(String value) {
+    protected void checkValue(@Nullable String value) {
         checkNotNull(value);
     }
 
     @Override
-    protected Component apply(List<Component> input) {
-        checkState(input.isEmpty(), "TextConfig takes no arguments");
-        return TextComponent.of(getValue());
+    protected Component apply(TranslatableComponent placeholder) {
+        checkState(placeholder.args().isEmpty(), "TextConfig takes no arguments");
+        return TextComponent.builder(getValue())
+            .mergeStyle(placeholder)
+            .append(placeholder.children())
+            .build();
     }
 }

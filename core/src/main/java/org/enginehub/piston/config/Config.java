@@ -24,7 +24,6 @@ import net.kyori.text.Component;
 import net.kyori.text.TranslatableComponent;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +53,8 @@ public abstract class Config<T> {
         return key;
     }
 
-    public @Nullable T getValue() {
+    public @Nullable
+    T getValue() {
         return value;
     }
 
@@ -72,17 +72,13 @@ public abstract class Config<T> {
     }
 
     public Component value() {
-        return wrap(ImmutableList.of());
+        return wrapInternal(ImmutableList.of());
     }
 
-    public Component wrap(Component... args) {
-        return wrap(Arrays.asList(args));
-    }
-
-    public Component wrap(List<Component> args) {
+    protected Component wrapInternal(List<Component> args) {
         return TranslatableComponent.of(key, args);
     }
 
-    protected abstract Component apply(List<Component> input);
+    protected abstract Component apply(TranslatableComponent placeholder);
 
 }
