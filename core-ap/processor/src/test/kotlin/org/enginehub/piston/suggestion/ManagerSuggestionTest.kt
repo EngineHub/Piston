@@ -19,7 +19,7 @@
 
 package org.enginehub.piston.suggestion
 
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.TextComponent
 import org.enginehub.piston.Command
 import org.enginehub.piston.CommandManager
 import org.enginehub.piston.assertEqualUnordered

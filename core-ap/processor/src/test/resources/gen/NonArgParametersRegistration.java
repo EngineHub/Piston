@@ -34,7 +34,7 @@ import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;

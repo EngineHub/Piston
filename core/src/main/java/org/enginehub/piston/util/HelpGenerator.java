@@ -20,8 +20,8 @@
 package org.enginehub.piston.util;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.ArgBinding;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandMetadata;
@@ -42,8 +42,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static net.kyori.text.TextComponent.newline;
-import static net.kyori.text.TextComponent.space;
+import static net.kyori.adventure.text.TextComponent.newline;
+import static net.kyori.adventure.text.TextComponent.space;
 
 public class HelpGenerator {
 

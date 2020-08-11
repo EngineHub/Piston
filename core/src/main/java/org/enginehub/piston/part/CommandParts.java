@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.part;
 
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 
 public class CommandParts {
 

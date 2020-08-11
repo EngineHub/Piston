@@ -20,7 +20,7 @@
 package org.enginehub.piston.exception;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.TextComponent;
 
 public class NoSuchCommandException extends CommandException {
 

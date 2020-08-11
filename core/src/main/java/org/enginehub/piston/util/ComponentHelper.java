@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.util;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.config.ColorConfig;
 
 import javax.annotation.Nullable;

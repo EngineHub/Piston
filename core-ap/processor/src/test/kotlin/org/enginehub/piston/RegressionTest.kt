@@ -19,7 +19,7 @@
 
 package org.enginehub.piston
 
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.TextComponent
 import org.enginehub.piston.commands.RegressionCommands
 import org.enginehub.piston.commands.RegressionCommandsRegistration
 import org.enginehub.piston.converter.SimpleArgumentConverter
