@@ -20,8 +20,8 @@
 package org.enginehub.piston.exception;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.NoInputCommandParameters;

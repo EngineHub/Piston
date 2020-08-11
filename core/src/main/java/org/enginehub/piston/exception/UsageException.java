@@ -19,7 +19,7 @@
 
 package org.enginehub.piston.exception;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandParseResult;
 
 /**

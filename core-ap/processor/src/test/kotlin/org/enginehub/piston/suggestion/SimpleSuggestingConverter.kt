@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.suggestion
 
-import net.kyori.text.Component
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
 import org.enginehub.piston.converter.ArgumentConverter
 import org.enginehub.piston.converter.ConversionResult
 import org.enginehub.piston.converter.FailedConversion
