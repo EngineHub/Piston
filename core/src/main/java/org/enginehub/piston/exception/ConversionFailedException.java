@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.exception;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.converter.ArgumentConverter;

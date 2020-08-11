@@ -20,10 +20,10 @@
 package org.enginehub.piston.util;
 
 import com.google.common.base.Joiner;
-import net.kyori.text.Component;
-import net.kyori.text.KeybindComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.KeybindComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.enginehub.piston.config.ConfigHolder;
 import org.enginehub.piston.config.ConfigRenderer;
 

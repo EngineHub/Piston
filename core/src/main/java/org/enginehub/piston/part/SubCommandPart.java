@@ -21,9 +21,9 @@ package org.enginehub.piston.part;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.config.ColorConfig;
 

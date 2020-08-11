@@ -20,7 +20,7 @@
 package org.enginehub.piston.util
 
 import com.google.common.collect.ImmutableList
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.TextComponent
 import org.enginehub.piston.TestCommandMetadata
 import org.enginehub.piston.TestCommandParameters
 import org.enginehub.piston.TestParseResult

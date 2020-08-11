@@ -21,8 +21,8 @@ package org.enginehub.piston
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import net.kyori.text.TextComponent
-import net.kyori.text.TranslatableComponent
+import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.TranslatableComponent
 import org.enginehub.piston.gen.CommandRegistration
 import org.enginehub.piston.part.ArgAcceptingCommandFlag
 import org.enginehub.piston.part.CommandArgument

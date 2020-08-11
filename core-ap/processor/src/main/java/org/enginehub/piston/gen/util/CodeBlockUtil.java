@@ -22,8 +22,8 @@ package org.enginehub.piston.gen.util;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.enginehub.piston.internal.RegistrationUtil;
 
 import javax.annotation.Nullable;

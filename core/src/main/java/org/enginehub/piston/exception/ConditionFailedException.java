@@ -21,7 +21,7 @@ package org.enginehub.piston.exception;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.Command;
 
 public class ConditionFailedException extends CommandException {

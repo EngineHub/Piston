@@ -19,9 +19,9 @@
 
 package org.enginehub.piston.config;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 
 import javax.annotation.Nullable;
 

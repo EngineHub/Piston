@@ -20,9 +20,9 @@
 package org.enginehub.piston.config;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.renderer.ComponentRenderer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.renderer.ComponentRenderer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;

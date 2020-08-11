@@ -19,7 +19,7 @@
 
 package org.enginehub.piston.config;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -20,8 +20,8 @@
 package org.enginehub.piston.impl;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.exception.ConditionFailedException;

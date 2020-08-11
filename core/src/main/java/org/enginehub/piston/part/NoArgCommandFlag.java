@@ -20,8 +20,8 @@
 package org.enginehub.piston.part;
 
 import com.google.auto.value.AutoValue;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.config.ColorConfig;
 
 @AutoValue
