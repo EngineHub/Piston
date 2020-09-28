@@ -21,7 +21,6 @@ package org.enginehub.piston.part;
 
 import com.google.auto.value.AutoValue;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.config.ColorConfig;
 
 @AutoValue
@@ -29,7 +28,7 @@ public abstract class NoArgCommandFlag implements CommandFlag {
 
     public static NoArgCommandFlag.Builder builder(char name,
                                                    String description) {
-        return builder(name, TextComponent.of(description));
+        return builder(name, Component.text(description));
     }
 
     public static NoArgCommandFlag.Builder builder(char name,
@@ -49,7 +48,7 @@ public abstract class NoArgCommandFlag implements CommandFlag {
         abstract Builder name(char name);
 
         public final Builder describedBy(String description) {
-            return describedBy(TextComponent.of(description));
+            return describedBy(Component.text(description));
         }
 
         public final Builder describedBy(Component description) {
@@ -76,9 +75,9 @@ public abstract class NoArgCommandFlag implements CommandFlag {
     @Override
     public Component getTextRepresentation() {
         return ColorConfig.partWrapping().wrap(
-            TextComponent.of("["),
+            Component.text("["),
             ColorConfig.mainText().wrap("-" + getName()),
-            TextComponent.of("]")
+            Component.text("]")
         );
     }
 }

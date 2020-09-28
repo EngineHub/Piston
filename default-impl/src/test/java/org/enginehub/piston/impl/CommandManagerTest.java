@@ -20,8 +20,7 @@
 package org.enginehub.piston.impl;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.exception.ConditionFailedException;
@@ -40,7 +39,7 @@ public class CommandManagerTest {
     void parseFailsOnRootConditionUnsatisfied() {
         CommandManager manager = new CommandManagerImpl();
         manager.register("test", cmd -> {
-            cmd.description(TextComponent.of("Test"))
+            cmd.description(Component.text("Test"))
                 .condition(Command.Condition.FALSE);
         });
 
@@ -55,11 +54,11 @@ public class CommandManagerTest {
         CommandManager manager = new CommandManagerImpl();
         manager.register("test", cmd -> {
             Command sub = manager.newCommand("sub")
-                .description(TextComponent.of("Sub"))
+                .description(Component.text("Sub"))
                 .condition(Command.Condition.FALSE)
                 .build();
-            cmd.description(TextComponent.of("Test"))
-                .addPart(SubCommandPart.builder(TranslatableComponent.of("actions"), TextComponent.of("Sub-actions"))
+            cmd.description(Component.text("Test"))
+                .addPart(SubCommandPart.builder(Component.translatable("actions"), Component.text("Sub-actions"))
                     .required()
                     .withCommands(ImmutableList.of(sub))
                     .build());

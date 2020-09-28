@@ -94,7 +94,7 @@ public class ColorConfig extends Config<TextColor> {
     }
 
     public Component wrap(String text) {
-        return wrap(ImmutableList.of(TextComponent.of(text)));
+        return wrap(ImmutableList.of(Component.text(text)));
     }
 
     public Component wrap(Component... args) {
@@ -117,7 +117,7 @@ public class ColorConfig extends Config<TextColor> {
         TextColor color = getValue();
         switch (args.size()) {
             case 0:
-                return TextComponent.builder("", color);
+                return Component.text().color(color);
             case 1:
                 Component only = args.get(0);
                 if (only instanceof TextComponent) {
@@ -125,7 +125,7 @@ public class ColorConfig extends Config<TextColor> {
                 }
                 // fall-through
             default:
-                return TextComponent.builder()
+                return Component.text()
                     .color(color)
                     .append(args);
         }

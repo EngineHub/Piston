@@ -76,7 +76,7 @@ public abstract class Config<T> {
     }
 
     protected Component wrapInternal(List<Component> args) {
-        return TranslatableComponent.of(key, args);
+        return Component.translatable(key, args);
     }
 
     protected abstract Component apply(TranslatableComponent placeholder);
