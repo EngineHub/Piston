@@ -66,6 +66,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
+import static net.kyori.adventure.text.Component.text;
 
 class CommandParser {
 
@@ -168,11 +169,11 @@ class CommandParser {
     }
 
     private UsageException notEnoughArgumentsException() {
-        return usageException(TextComponent.of("Not enough arguments."));
+        return usageException(text("Not enough arguments."));
     }
 
     private UsageException tooManyArgumentsException() {
-        return usageException(TextComponent.of("Too many arguments."));
+        return usageException(text("Too many arguments."));
     }
 
     private ConversionFailedException conversionFailedException(ArgAcceptingCommandPart nextArg, String token) {
@@ -302,14 +303,15 @@ class CommandParser {
             if (requiredIter.hasNext()) {
                 ArgConsumingCommandPart missing = requiredIter.next();
                 if (missing instanceof CommandArgument) {
-                    throw usageException(TextComponent.builder("Missing argument for ")
+                    throw usageException(text()
+                        .content("Missing argument for ")
                         .append(missing.getTextRepresentation())
-                        .append(TextComponent.of("."))
+                        .append(text("."))
                         .build());
                 } else {
                     checkState(missing instanceof SubCommandPart,
                         "Unknown part interface: %s", missing.getClass());
-                    throw usageException(TextComponent.of("No sub-command provided. Options: "
+                    throw usageException(text("No sub-command provided. Options: "
                         + ((SubCommandPart) missing).getCommands().stream()
                         .distinct()
                         .map(Command::getName)
@@ -384,17 +386,17 @@ class CommandParser {
     }
 
     private TextComponent invalidSubCommandMessage(String token, ImmutableMap<String, Command> subCommands) {
-        return TextComponent.builder()
-            .append("Invalid sub-command '")
+        return text()
+            .append(text("Invalid sub-command '"))
             .append(ColorConfig.mainText().wrap(token))
-            .append("'. Options: ")
+            .append(text("'. Options: "))
             .append(subCommands.values().stream().distinct()
                 .map(Command::getName)
                 .map(ColorConfig.mainText()::wrap)
                 .collect(ComponentHelper.joiningTexts(
-                    TextComponent.empty(),
-                    TextComponent.of(", "),
-                    TextComponent.empty()
+                    Component.empty(),
+                    text(", "),
+                    Component.empty()
                 )))
             .build();
     }
@@ -507,15 +509,16 @@ class CommandParser {
                 throw new NoSuchFlagException(getResult(), c);
             }
             if (seenFlags.contains(flag)) {
-                throw usageException(TextComponent.builder("Flag ")
+                throw usageException(Component.text()
+                    .content("Flag ")
                     .append(flag.getTextRepresentation())
-                    .append(" has already been specified.")
+                    .append(text(" has already been specified."))
                     .build());
             }
             if (flag instanceof ArgAcceptingCommandFlag) {
                 if (i + 1 < flags.length()) {
                     // Only allow argument-flags at the end of flag-combos.
-                    throw usageException(TextComponent.of("Argument-accepting flags must be " +
+                    throw usageException(text("Argument-accepting flags must be " +
                         "at the end of combined flag groups."));
                 }
                 bind(flag);

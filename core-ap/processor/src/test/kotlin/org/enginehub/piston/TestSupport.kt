@@ -21,8 +21,7 @@ package org.enginehub.piston
 
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.Component
 import org.enginehub.piston.gen.CommandRegistration
 import org.enginehub.piston.part.ArgAcceptingCommandFlag
 import org.enginehub.piston.part.CommandArgument
@@ -56,21 +55,21 @@ inline fun <reified CI> withMockedContainer(block: (CI) -> Unit) {
 
 inline fun arg(name: String, desc: String, block: CommandArgument.Builder.() -> Unit = {}): CommandArgument =
         CommandParts.arg(
-                TranslatableComponent.of(name),
-                TextComponent.of(desc)
+                Component.translatable(name),
+                Component.text(desc)
         ).also(block).build()
 
 inline fun flag(name: Char, desc: String, block: NoArgCommandFlag.Builder.() -> Unit = {}): NoArgCommandFlag =
     CommandParts.flag(
         name,
-        TextComponent.of(desc)
+        Component.text(desc)
     ).also(block).build()
 
 inline fun argFlag(name: Char, desc: String, argName: String,
                    block: ArgAcceptingCommandFlag.Builder.() -> Unit = {}): ArgAcceptingCommandFlag =
     CommandParts.flag(
         name,
-        TextComponent.of(desc)
+        Component.text(desc)
     )
         .withRequiredArg()
         .argNamed(argName)
@@ -78,8 +77,8 @@ inline fun argFlag(name: Char, desc: String, argName: String,
 
 fun subs(vararg subCommands: Command, required: Boolean = true): SubCommandPart =
         SubCommandPart.builder(
-                TranslatableComponent.of("actions"),
-                TextComponent.of("Sub-actions")
+            Component.translatable("actions"),
+            Component.text("Sub-actions")
         ).run {
             withCommands(ImmutableList.copyOf(subCommands))
 

@@ -22,7 +22,6 @@ package org.enginehub.piston.part;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.Key;
@@ -50,7 +49,7 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
         abstract Builder name(char name);
 
         public final Builder describedBy(String description) {
-            return describedBy(TextComponent.of(description));
+            return describedBy(Component.text(description));
         }
 
         public final Builder describedBy(Component description) {
@@ -72,7 +71,7 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
         abstract Builder types(Collection<Key<?>> types);
 
         public final Builder argNamed(String name) {
-            return argNamed(TranslatableComponent.of(name));
+            return argNamed(Component.translatable(name));
         }
 
         public final Builder argNamed(TranslatableComponent name) {
@@ -90,13 +89,13 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
     @Override
     public Component getTextRepresentation() {
         return ColorConfig.partWrapping().wrap(
-            TextComponent.of("["),
+            Component.text("["),
             ColorConfig.mainText().wrap("-" + getName()),
-            TextComponent.space(),
-            TextComponent.of("<"),
+            Component.space(),
+            Component.text("<"),
             ColorConfig.mainText().wrap(getArgumentName()),
-            TextComponent.of(">"),
-            TextComponent.of("]")
+            Component.text(">"),
+            Component.text("]")
         );
     }
 }
