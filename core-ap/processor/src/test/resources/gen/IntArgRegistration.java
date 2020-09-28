@@ -37,8 +37,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;
@@ -77,27 +76,27 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
 
     private ImmutableList<CommandCallListener> listeners;
 
-    private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument argPart = arg(Component.translatable("piston.argument.arg"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_Key))
         .build();
 
-    private final CommandArgument argPart2 = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument argPart2 = arg(Component.translatable("piston.argument.arg"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_injectGamma_something_to_match__Key))
         .build();
 
-    private final CommandArgument deltaPart = arg(TranslatableComponent.of("piston.argument.delta"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument deltaPart = arg(Component.translatable("piston.argument.delta"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_injectDeltaQux45$Baz32$Thq1099_Key))
         .build();
 
-    private final CommandArgument alphaPart = arg(TranslatableComponent.of("piston.argument.alpha"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument alphaPart = arg(Component.translatable("piston.argument.alpha"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_injectAlpha_Key))
         .build();
 
-    private final CommandArgument argPart3 = arg(TranslatableComponent.of("piston.argument.args"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument argPart3 = arg(Component.translatable("piston.argument.args"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_Key))
         .variable(true)
@@ -129,31 +128,31 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
     public void build() {
         commandManager.register("intArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart));
             b.action(this::cmd$intArgument);
         });
         commandManager.register("annotatedIntArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart2));
             b.action(this::cmd$annotatedIntArgument);
         });
         commandManager.register("annotatedIntArgument2", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(deltaPart));
             b.action(this::cmd$annotatedIntArgument2);
         });
         commandManager.register("annotatedIntArgument3", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(alphaPart));
             b.action(this::cmd$annotatedIntArgument3);
         });
         commandManager.register("variableIntArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart3));
             b.action(this::cmd$variableIntArgument);
         });

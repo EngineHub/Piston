@@ -20,8 +20,8 @@
 package org.enginehub.piston.util;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.ArgBinding;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandMetadata;
@@ -41,9 +41,6 @@ import org.enginehub.piston.part.SubCommandPart;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static net.kyori.text.TextComponent.newline;
-import static net.kyori.text.TextComponent.space;
 
 public class HelpGenerator {
 
@@ -83,7 +80,7 @@ public class HelpGenerator {
      * Generate a name for the set of commands as a whole.
      */
     public Component getFullName() {
-        TextComponent.Builder usage = TextComponent.builder();
+        TextComponent.Builder usage = Component.text();
 
         String name = parseResult.getExecutionPath().get(0).getName();
         CommandMetadata metadata = parseResult.getParameters().getMetadata();
@@ -92,11 +89,11 @@ public class HelpGenerator {
         }
         usage.append(ColorConfig.mainText().wrap(
             TextConfig.commandPrefixValue(),
-            TextComponent.of(name)
+            Component.text(name)
         ));
 
         for (String input : parseResult.getOriginalArguments()) {
-            usage.append(space());
+            usage.append(Component.space());
             usage.append(ColorConfig.mainText().wrap(input));
         }
 
@@ -107,7 +104,7 @@ public class HelpGenerator {
      * Generate a usage help text.
      */
     public Component getUsage() {
-        TextComponent.Builder usage = TextComponent.builder()
+        TextComponent.Builder usage = Component.text()
             .append(ColorConfig.mainText().wrap(
                 TextConfig.commandPrefixValue()
             ));
@@ -138,12 +135,12 @@ public class HelpGenerator {
             }
             // append a space before parts, if needed
             if (!reducedParts.isEmpty()) {
-                usage.append(space());
+                usage.append(Component.space());
             }
             PartHelper.appendUsage(reducedParts.stream(), usage);
             // append a space after parts/command, if needed
             if (iterator.hasNext()) {
-                usage.append(space());
+                usage.append(Component.space());
             }
         }
 
@@ -156,7 +153,7 @@ public class HelpGenerator {
 
         builder.add(primary.getDescription());
 
-        builder.add(TextComponent.of("\nUsage: "));
+        builder.add(Component.text("\nUsage: "));
 
         builder.add(getUsage());
 
@@ -164,7 +161,7 @@ public class HelpGenerator {
 
         appendFlags(builder);
 
-        primary.getFooter().ifPresent(footer -> builder.add(newline()).add(footer));
+        primary.getFooter().ifPresent(footer -> builder.add(Component.newline()).add(footer));
 
         return ColorConfig.helpText().wrap(builder.build());
     }
@@ -176,16 +173,16 @@ public class HelpGenerator {
             .map(x -> (CommandArgument) x)
             .collect(Collectors.toList());
         if (args.size() > 0) {
-            builder.add(newline());
-            builder.add(TextComponent.of("Arguments:\n"));
+            builder.add(Component.newline());
+            builder.add(Component.text("Arguments:\n"));
             for (Iterator<CommandArgument> iterator = args.iterator(); iterator.hasNext(); ) {
                 CommandArgument arg = iterator.next();
-                builder.add(TextComponent.of("  ")).add(arg.getTextRepresentation());
+                builder.add(Component.text("  ")).add(arg.getTextRepresentation());
                 addDefaultInfo(builder, arg);
-                builder.add(TextComponent.of(": "))
+                builder.add(Component.text(": "))
                     .add(arg.getDescription());
                 if (iterator.hasNext()) {
-                    builder.add(newline());
+                    builder.add(Component.newline());
                 }
             }
         }
@@ -198,8 +195,8 @@ public class HelpGenerator {
             .map(x -> (CommandFlag) x)
             .collect(Collectors.toList());
         if (flags.size() > 0) {
-            builder.add(newline());
-            builder.add(TextComponent.of("Flags:\n"));
+            builder.add(Component.newline());
+            builder.add(Component.text("Flags:\n"));
             for (Iterator<CommandFlag> iterator = flags.iterator(); iterator.hasNext(); ) {
                 CommandFlag flag = iterator.next();
                 // produces text like "-f: Some description"
@@ -207,10 +204,10 @@ public class HelpGenerator {
                 if (flag instanceof ArgAcceptingCommandFlag) {
                     addDefaultInfo(builder, (ArgAcceptingCommandFlag) flag);
                 }
-                builder.add(TextComponent.of(": "))
+                builder.add(Component.text(": "))
                     .add(flag.getDescription());
                 if (iterator.hasNext()) {
-                    builder.add(newline());
+                    builder.add(Component.newline());
                 }
             }
         }
@@ -220,7 +217,7 @@ public class HelpGenerator {
         if (arg.getDefaults().isEmpty()) {
             return;
         }
-        builder.add(TextComponent.of(" (defaults to "));
+        builder.add(Component.text(" (defaults to "));
         String value;
         if (arg.getDefaults().size() == 1) {
             value = arg.getDefaults().get(0);
@@ -232,8 +229,8 @@ public class HelpGenerator {
                 .filter(s -> s.trim().length() > 0)
                 .collect(Collectors.joining(", ", "[", "]"));
         }
-        builder.add(TextComponent.of(value));
-        builder.add(TextComponent.of(")"));
+        builder.add(Component.text(value));
+        builder.add(Component.text(")"));
     }
 
 }

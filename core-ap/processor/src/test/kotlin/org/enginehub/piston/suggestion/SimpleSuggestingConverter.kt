@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.suggestion
 
-import net.kyori.text.Component
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
 import org.enginehub.piston.converter.ArgumentConverter
 import org.enginehub.piston.converter.ConversionResult
 import org.enginehub.piston.converter.FailedConversion
@@ -37,7 +37,7 @@ class SimpleSuggestingConverter(private val suggestions: List<String>) : Argumen
     }
 
     override fun describeAcceptableArguments(): Component {
-        return TextComponent.of("Any of $suggestions")
+        return Component.text("Any of $suggestions")
     }
 
     override fun getSuggestions(input: String, context: InjectedValueAccess): List<String> =

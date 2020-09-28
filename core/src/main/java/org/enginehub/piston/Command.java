@@ -20,7 +20,7 @@
 package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.suggestion.SuggestionProvider;

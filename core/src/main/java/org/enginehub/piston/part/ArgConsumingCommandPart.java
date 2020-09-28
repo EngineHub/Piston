@@ -19,7 +19,7 @@
 
 package org.enginehub.piston.part;
 
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 
 /**
  * Marker interface for parts that consume arguments directly from the line,

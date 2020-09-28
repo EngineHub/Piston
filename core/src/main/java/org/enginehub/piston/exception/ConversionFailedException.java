@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.exception;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.CommandValue;
 import org.enginehub.piston.converter.ArgumentConverter;
@@ -36,14 +36,14 @@ public class ConversionFailedException extends UsageException {
 
     private static Component getMessage(Component conversionTarget, ArgumentConverter<?> converter,
                                         FailedConversion<?> conversion) {
-        TextComponent.Builder builder = TextComponent.builder("")
-            .append(TextComponent.of("Invalid value for "))
+        TextComponent.Builder builder = Component.text()
+            .append(Component.text("Invalid value for "))
             .append(conversionTarget);
         if (conversion.getError().getMessage() != null) {
-            builder.append(TextComponent.of(" (" + conversion.getError().getMessage() + ")"));
+            builder.append(Component.text(" (" + conversion.getError().getMessage() + ")"));
         }
         return builder
-            .append(TextComponent.of(", acceptable values are "))
+            .append(Component.text(", acceptable values are "))
             .append(converter.describeAcceptableArguments())
             .build();
     }

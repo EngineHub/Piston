@@ -34,8 +34,7 @@ import java.lang.String;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;
@@ -53,12 +52,12 @@ final class CollectionArgRegistration implements CommandRegistration<CollectionA
 
     private ImmutableList<CommandCallListener> listeners;
 
-    private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument argPart = arg(Component.translatable("piston.argument.arg"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(string_Key))
         .build();
 
-    private final CommandArgument argPart2 = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument argPart2 = arg(Component.translatable("piston.argument.arg"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(object_Key))
         .build();
@@ -89,13 +88,13 @@ final class CollectionArgRegistration implements CommandRegistration<CollectionA
     public void build() {
         commandManager.register("collectionArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart));
             b.action(this::cmd$collectionArgument);
         });
         commandManager.register("objectArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart2));
             b.action(this::cmd$objectArgument);
         });

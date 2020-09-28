@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.util;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.config.ColorConfig;
 
 import javax.annotation.Nullable;
@@ -34,9 +34,9 @@ public class ComponentHelper {
      */
     public static Collector<Component, ?, Component> joiningWithBar() {
         return joiningTexts(
-            TextComponent.empty(),
+            Component.empty(),
             ColorConfig.partWrapping().wrap("|"),
-            TextComponent.empty()
+            Component.empty()
         );
     }
 
@@ -69,7 +69,7 @@ public class ComponentHelper {
 
         private TextComponent.Builder initBuilder() {
             if (value == null) {
-                value = TextComponent.builder("");
+                value = Component.text();
             } else {
                 value.append(delimiter);
             }
@@ -94,7 +94,7 @@ public class ComponentHelper {
                 }
                 return initBuilder().append(prefix).append(suffix).build();
             }
-            return TextComponent.builder("")
+            return Component.text()
                 .append(prefix)
                 .append(value.build().children())
                 .append(suffix)

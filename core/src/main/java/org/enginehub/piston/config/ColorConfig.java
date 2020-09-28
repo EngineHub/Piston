@@ -20,11 +20,12 @@
 package org.enginehub.piston.config;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.Style;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -37,13 +38,13 @@ import java.util.Set;
 public class ColorConfig extends Config<TextColor> {
 
     private static final ColorConfig TEXT_MODIFIER =
-        new ColorConfig("piston.style.text.modifier", TextColor.YELLOW);
+        new ColorConfig("piston.style.text.modifier", NamedTextColor.YELLOW);
     private static final ColorConfig MAIN_TEXT =
-        new ColorConfig("piston.style.main.text", TextColor.GOLD);
+        new ColorConfig("piston.style.main.text", NamedTextColor.GOLD);
     private static final ColorConfig HELP_TEXT =
-        new ColorConfig("piston.style.help.text", TextColor.GRAY);
+        new ColorConfig("piston.style.help.text", NamedTextColor.GRAY);
     private static final ColorConfig PART_WRAPPING =
-        new ColorConfig("piston.style.part.wrapping", TextColor.YELLOW);
+        new ColorConfig("piston.style.part.wrapping", NamedTextColor.YELLOW);
 
     private static final Set<Style.Merge> MERGE_NO_COLOR = Style.Merge.of(
         Style.Merge.DECORATIONS, Style.Merge.INSERTION, Style.Merge.EVENTS
@@ -93,7 +94,7 @@ public class ColorConfig extends Config<TextColor> {
     }
 
     public Component wrap(String text) {
-        return wrap(ImmutableList.of(TextComponent.of(text)));
+        return wrap(ImmutableList.of(Component.text(text)));
     }
 
     public Component wrap(Component... args) {
@@ -116,7 +117,7 @@ public class ColorConfig extends Config<TextColor> {
         TextColor color = getValue();
         switch (args.size()) {
             case 0:
-                return TextComponent.builder("", color);
+                return Component.text().color(color);
             case 1:
                 Component only = args.get(0);
                 if (only instanceof TextComponent) {
@@ -124,7 +125,7 @@ public class ColorConfig extends Config<TextColor> {
                 }
                 // fall-through
             default:
-                return TextComponent.builder()
+                return Component.text()
                     .color(color)
                     .append(args);
         }

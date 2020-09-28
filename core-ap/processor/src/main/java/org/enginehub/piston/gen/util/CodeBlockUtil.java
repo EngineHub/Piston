@@ -22,8 +22,7 @@ package org.enginehub.piston.gen.util;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.internal.RegistrationUtil;
 
 import javax.annotation.Nullable;
@@ -72,11 +71,11 @@ public class CodeBlockUtil {
     }
 
     public static CodeBlock textCompOf(String text) {
-        return CodeBlock.of("$T.of($S)", TextComponent.class, text);
+        return CodeBlock.of("$T.text($S)", Component.class, text);
     }
 
     public static CodeBlock transCompOf(String text) {
-        return CodeBlock.of("$T.of($S)", TranslatableComponent.class, text);
+        return CodeBlock.of("$T.translatable($S)", Component.class, text);
     }
 
     public static Collector<CodeBlock, ?, CodeBlock> joining(String delimiter) {
