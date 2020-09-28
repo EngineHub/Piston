@@ -37,7 +37,7 @@ class SimpleSuggestingConverter(private val suggestions: List<String>) : Argumen
     }
 
     override fun describeAcceptableArguments(): Component {
-        return TextComponent.of("Any of $suggestions")
+        return Component.text("Any of $suggestions")
     }
 
     override fun getSuggestions(input: String, context: InjectedValueAccess): List<String> =

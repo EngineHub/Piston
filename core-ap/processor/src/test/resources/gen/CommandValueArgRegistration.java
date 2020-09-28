@@ -33,8 +33,8 @@ import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
+
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.CommandValue;
@@ -50,7 +50,7 @@ final class CommandValueArgRegistration implements CommandRegistration<CommandVa
 
     private ImmutableList<CommandCallListener> listeners;
 
-    private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument argPart = arg(Component.translatable("piston.argument.arg"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .build();
 
@@ -80,7 +80,7 @@ final class CommandValueArgRegistration implements CommandRegistration<CommandVa
     public void build() {
         commandManager.register("valueArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart));
             b.action(this::cmd$valueArgument);
         });

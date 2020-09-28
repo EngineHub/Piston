@@ -41,16 +41,16 @@ public class NoSuchFlagException extends UsageException {
     }
 
     private static Component getMessage(CommandParseResult parseResult, char requestedFlag) {
-        TextComponent.Builder message = TextComponent.builder("");
-        message.append(TextComponent.of("Flag '"))
+        TextComponent.Builder message = Component.text();
+        message.append(Component.text("Flag '"))
             .append(ColorConfig.mainText().wrap(String.valueOf(requestedFlag)))
-            .append(TextComponent.of("' is not a valid flag for "));
+            .append(Component.text("' is not a valid flag for "));
         message.append(HelpGenerator.create(parseResult).getFullName());
         String allFlags = getAllFlags(parseResult.getExecutionPath());
         if (allFlags.isEmpty()) {
-            message.append(TextComponent.of(", as it does not have any flags"));
+            message.append(Component.text(", as it does not have any flags"));
         } else {
-            message.append(TextComponent.of(". Options: "))
+            message.append(Component.text(". Options: "))
                 .append(ColorConfig.mainText().wrap(allFlags));
         }
         return message.build();

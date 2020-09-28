@@ -36,14 +36,14 @@ public class ConversionFailedException extends UsageException {
 
     private static Component getMessage(Component conversionTarget, ArgumentConverter<?> converter,
                                         FailedConversion<?> conversion) {
-        TextComponent.Builder builder = TextComponent.builder("")
-            .append(TextComponent.of("Invalid value for "))
+        TextComponent.Builder builder = Component.text()
+            .append(Component.text("Invalid value for "))
             .append(conversionTarget);
         if (conversion.getError().getMessage() != null) {
-            builder.append(TextComponent.of(" (" + conversion.getError().getMessage() + ")"));
+            builder.append(Component.text(" (" + conversion.getError().getMessage() + ")"));
         }
         return builder
-            .append(TextComponent.of(", acceptable values are "))
+            .append(Component.text(", acceptable values are "))
             .append(converter.describeAcceptableArguments())
             .build();
     }

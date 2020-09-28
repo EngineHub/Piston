@@ -33,8 +33,7 @@ import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;
@@ -52,18 +51,18 @@ final class FlagsRegistration implements CommandRegistration<Flags> {
 
     private ImmutableList<CommandCallListener> listeners;
 
-    private final NoArgCommandFlag flagPart = flag('f', TextComponent.of("ARG DESCRIPTION")).build();
+    private final NoArgCommandFlag flagPart = flag('f', Component.text("ARG DESCRIPTION")).build();
 
-    private final ArgAcceptingCommandFlag flagPart2 = flag('f', TextComponent.of("ARG DESCRIPTION"))
+    private final ArgAcceptingCommandFlag flagPart2 = flag('f', Component.text("ARG DESCRIPTION"))
         .withRequiredArg()
-        .argNamed(TranslatableComponent.of("piston.argument.flag"))
+        .argNamed(Component.translatable("piston.argument.flag"))
         .defaultsTo(ImmutableList.of("DEFAULT"))
         .ofTypes(ImmutableList.of(string_Key))
         .build();
 
-    private final ArgAcceptingCommandFlag flagPart3 = flag('f', TextComponent.of("ARG DESCRIPTION"))
+    private final ArgAcceptingCommandFlag flagPart3 = flag('f', Component.text("ARG DESCRIPTION"))
         .withRequiredArg()
-        .argNamed(TranslatableComponent.of("piston.argument.ARG NAME"))
+        .argNamed(Component.translatable("piston.argument.ARG NAME"))
         .defaultsTo(ImmutableList.of("DEFAULT"))
         .ofTypes(ImmutableList.of(string_Key))
         .build();
@@ -94,19 +93,19 @@ final class FlagsRegistration implements CommandRegistration<Flags> {
     public void build() {
         commandManager.register("booleanFlag", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(flagPart));
             b.action(this::cmd$booleanFlag);
         });
         commandManager.register("stringArgFlag", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(flagPart2));
             b.action(this::cmd$stringArgFlag);
         });
         commandManager.register("stringArgFlagCustom", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(flagPart3));
             b.action(this::cmd$stringArgFlagCustom);
         });

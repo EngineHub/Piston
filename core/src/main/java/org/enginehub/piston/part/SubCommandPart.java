@@ -22,7 +22,6 @@ package org.enginehub.piston.part;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.config.ColorConfig;
@@ -50,7 +49,7 @@ public abstract class SubCommandPart implements ArgConsumingCommandPart {
         abstract Builder argumentName(TranslatableComponent name);
 
         public final Builder describedBy(String description) {
-            return describedBy(TextComponent.of(description));
+            return describedBy(Component.text(description));
         }
 
         public final Builder describedBy(Component description) {
@@ -83,13 +82,13 @@ public abstract class SubCommandPart implements ArgConsumingCommandPart {
     @Override
     public Component getTextRepresentation() {
         ImmutableList.Builder<Component> builder = ImmutableList.builder();
-        builder.add(TextComponent.of(isRequired() ? "<" : "["));
+        builder.add(Component.text(isRequired() ? "<" : "["));
         builder.addAll(getCommands().stream()
             .map(Command::getName)
             .map(ColorConfig.mainText()::wrap)
             .collect(joiningWithBar())
             .children());
-        builder.add(TextComponent.of(isRequired() ? ">" : "]"));
+        builder.add(Component.text(isRequired() ? ">" : "]"));
         return ColorConfig.partWrapping().wrap(builder.build());
     }
 

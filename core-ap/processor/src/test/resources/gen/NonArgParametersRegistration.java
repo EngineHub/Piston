@@ -35,7 +35,7 @@ import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;
@@ -79,13 +79,13 @@ final class NonArgParametersRegistration implements CommandRegistration<NonArgPa
     public void build() {
         commandManager.register("nonArgCommandParameters", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of());
             b.action(this::cmd$nonArgCommandParameters);
         });
         commandManager.register("nonArgInjected", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of());
             b.action(this::cmd$nonArgInjected);
         });

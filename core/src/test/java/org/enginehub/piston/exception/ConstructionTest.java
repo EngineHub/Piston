@@ -21,7 +21,6 @@ package org.enginehub.piston.exception;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.NoInputCommandParameters;
@@ -62,7 +61,7 @@ public class ConstructionTest {
 
     @Test
     void stopExecutionException() {
-        Component message = TextComponent.of("stop");
+        Component message = Component.text("stop");
         ImmutableList<Command> commands = ImmutableList.of(mock(Command.class));
         StopExecutionException ex = new StopExecutionException(message, commands);
         assertSame(message, ex.getRichMessage());
@@ -72,7 +71,7 @@ public class ConstructionTest {
 
     @Test
     void stopExecutionExceptionNoCommands() {
-        Component message = TextComponent.of("stop");
+        Component message = Component.text("stop");
         StopExecutionException ex = new StopExecutionException(message);
         assertSame(message, ex.getRichMessage());
         assertEquals("stop", ex.getMessage());
@@ -111,7 +110,7 @@ public class ConstructionTest {
     void noSuchFlagExceptionWrongFlag() {
         CommandParseResult mock = mock(CommandParseResult.class);
         ImmutableList<Command> executionPath = mockExecutionPath(ImmutableList.of(
-            CommandParts.flag('q', TextComponent.of("q flag")).build()
+            CommandParts.flag('q', Component.text("q flag")).build()
         ));
         when(mock.getExecutionPath()).thenReturn(executionPath);
         when(mock.getParameters()).thenReturn(NoInputCommandParameters.builder().build());
@@ -131,7 +130,7 @@ public class ConstructionTest {
         UsageException ex = new UsageException(mock);
         assertSame(executionPath, ex.getCommands());
         assertSame(mock, ex.getCommandParseResult());
-        assertEquals(TextComponent.empty(), ex.getRichMessage());
+        assertEquals(Component.empty(), ex.getRichMessage());
         assertNull(ex.getMessage());
     }
 
@@ -141,7 +140,7 @@ public class ConstructionTest {
         ImmutableList<Command> executionPath = mockExecutionPath(ImmutableList.of());
         when(mock.getExecutionPath()).thenReturn(executionPath);
         when(mock.getParameters()).thenReturn(NoInputCommandParameters.builder().build());
-        Component message = TextComponent.of("message");
+        Component message = Component.text("message");
         UsageException ex = new UsageException(message, mock);
         assertSame(executionPath, ex.getCommands());
         assertSame(mock, ex.getCommandParseResult());
@@ -155,7 +154,7 @@ public class ConstructionTest {
         ImmutableList<Command> executionPath = mockExecutionPath(ImmutableList.of());
         when(mock.getExecutionPath()).thenReturn(executionPath);
         when(mock.getParameters()).thenReturn(NoInputCommandParameters.builder().build());
-        Component message = TextComponent.of("message");
+        Component message = Component.text("message");
         Throwable cause = new Throwable();
         UsageException ex = new UsageException(message, cause, mock);
         assertSame(executionPath, ex.getCommands());
@@ -175,7 +174,7 @@ public class ConstructionTest {
         UsageException ex = new UsageException(cause, mock);
         assertSame(executionPath, ex.getCommands());
         assertSame(mock, ex.getCommandParseResult());
-        assertEquals(TextComponent.empty(), ex.getRichMessage());
+        assertEquals(Component.empty(), ex.getRichMessage());
         assertEquals(cause.getClass().getName(), ex.getMessage());
         assertSame(cause, ex.getCause());
     }
