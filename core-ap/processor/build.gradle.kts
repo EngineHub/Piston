@@ -2,8 +2,8 @@ import org.gradle.internal.jvm.Jvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.72"
-    kotlin("kapt") version "1.3.72"
+    kotlin("jvm") version "1.4.31"
+    kotlin("kapt") version "1.4.31"
 }
 
 applyCoreApConfig()
@@ -45,8 +45,7 @@ dependencies {
         "testRuntimeOnly"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))
     }
     "testImplementation"(Libs.mockito)
-    "testImplementation"(Libs.logbackCore)
-    "testImplementation"(Libs.logbackClassic)
+    "testRuntimeOnly"(Libs.log4jCore)
     "testImplementation"(project(":default-impl"))
     "testCompileOnly"(Libs.autoService)
     "kaptTest"(Libs.autoService)

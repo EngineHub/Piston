@@ -28,7 +28,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.SetMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import org.enginehub.piston.annotation.Command;
@@ -42,6 +42,10 @@ import org.enginehub.piston.gen.value.CommandInfo;
 import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.RegistrationInfo;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.SupportedOptions;
@@ -54,11 +58,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
@@ -81,17 +80,17 @@ public class CommandProcessor extends BasicAnnotationProcessor {
     }
 
     @Override
-    protected Iterable<? extends ProcessingStep> initSteps() {
-        return ImmutableList.of(new ProcessingStep() {
+    protected Iterable<? extends Step> steps() {
+        return ImmutableList.of(new Step() {
             @Override
-            public Set<? extends Class<? extends Annotation>> annotations() {
-                return ImmutableSet.of(CommandContainer.class);
+            public Set<String> annotations() {
+                return ImmutableSet.of(CommandContainer.class.getCanonicalName());
             }
 
             @Override
-            public Set<Element> process(SetMultimap<Class<? extends Annotation>, Element> elementsByAnnotation) {
+            public Set<Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
                 try {
-                    return doProcess(elementsByAnnotation.get(CommandContainer.class));
+                    return doProcess(elementsByAnnotation.get(CommandContainer.class.getCanonicalName()));
                 } catch (ProcessingException e) {
                     StringBuilder message = new StringBuilder(e.getMessage());
                     if (e.getCause() != null) {
