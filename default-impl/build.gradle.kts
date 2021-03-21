@@ -2,11 +2,10 @@ applyCommonConfig()
 
 dependencies {
     "api"(project(":core"))
-    "implementation"(Libs.slf4j)
+    "implementation"(Libs.log4jApi)
     "compileOnly"(Libs.autoValueAnnotations)
     "annotationProcessor"(Libs.autoValueProcessor)
     "compileOnly"(Libs.autoService)
     "annotationProcessor"(Libs.autoService)
-    "testImplementation"(Libs.logbackCore)
-    "testImplementation"(Libs.logbackClassic)
+    "testRuntimeOnly"(Libs.log4jCore)
 }

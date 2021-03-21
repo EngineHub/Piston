@@ -24,7 +24,7 @@ import com.google.auto.common.MoreElements.getAnnotationMirror
 import com.google.common.base.Throwables
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import com.google.common.collect.SetMultimap
+import com.google.common.collect.ImmutableSetMultimap
 import com.google.testing.compile.Compilation
 import com.google.testing.compile.CompilationSubject.assertThat
 import com.squareup.javapoet.AnnotationSpec
@@ -65,15 +65,15 @@ class AnnoValueExtractionTest {
                     return SourceVersion.latestSupported()
                 }
 
-                override fun initSteps(): Iterable<ProcessingStep> {
-                    return ImmutableList.of(object : ProcessingStep {
-                        override fun annotations(): Set<Class<out Annotation>> {
-                            return ImmutableSet.of(ProcessingKey::class.java)
+                override fun steps(): Iterable<Step> {
+                    return ImmutableList.of(object : Step {
+                        override fun annotations(): Set<String> {
+                            return ImmutableSet.of(ProcessingKey::class.java.canonicalName)
                         }
 
-                        override fun process(elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>): Set<Element> {
+                        override fun process(elementsByAnnotation: ImmutableSetMultimap<String, Element>): Set<Element> {
                             try {
-                                return doProcess(elementsByAnnotation.get(ProcessingKey::class.java))
+                                return doProcess(elementsByAnnotation.get(ProcessingKey::class.java.canonicalName))
                             } catch (e: ProcessingException) {
                                 val message = StringBuilder(e.message)
                                 val cause = e.cause

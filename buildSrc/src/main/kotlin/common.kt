@@ -1,6 +1,7 @@
 import net.minecrell.gradle.licenser.LicenseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Copy
@@ -10,6 +11,7 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.external.javadoc.CoreJavadocOptions
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.delegateClosureOf
@@ -67,19 +69,15 @@ fun Project.applyCommonConfig(
         }
     }
 
-    tasks.withType<JavaCompile>().configureEach {
-        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
-        targetCompatibility = JavaVersion.VERSION_1_8.toString()
-    }
-
     tasks.named<Copy>("processTestResources") {
         from(rootProject.file("common-test-resources"))
     }
 
-    if (JavaVersion.current().isJava8Compatible) {
-        tasks.withType<Javadoc>().configureEach {
-            (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
-        }
+    configure<JavaPluginExtension> {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+    }
+    tasks.withType<Javadoc>().configureEach {
+        (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
     }
 
     dependencies {
