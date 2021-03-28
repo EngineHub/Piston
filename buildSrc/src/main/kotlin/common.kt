@@ -28,7 +28,7 @@ import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 
 fun Project.applyCommonConfig(
-        group: String = rootProject.group.toString()
+    group: String = rootProject.group.toString()
 ) {
     apply(plugin = "java-library")
     apply(plugin = "java")
@@ -50,7 +50,7 @@ fun Project.applyCommonConfig(
     }
 
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
@@ -96,18 +96,9 @@ fun Project.applyCommonConfig(
 }
 
 private fun Project.addExtraArchiveArtifacts() {
-    val sourcesJar = tasks.register<Jar>("sourcesJar") {
-        dependsOn("classes")
-        archiveClassifier.set("sources")
-        from(project.the<SourceSetContainer>().getByName("main").allSource)
-    }
-    val javadocJar = tasks.register<Jar>("javadocJar") {
-        dependsOn("javadoc")
-        archiveClassifier.set("javadoc")
-        from(tasks.getByName("javadoc"))
-    }
-    tasks.named("build") {
-        dependsOn(sourcesJar, javadocJar)
+    configure<JavaPluginExtension> {
+        withSourcesJar()
+        withJavadocJar()
     }
 }
 
@@ -119,8 +110,6 @@ private fun Project.configureMavenPublish() {
                 artifactId = project.name
                 version = project.version.toString()
 
-                artifact(tasks.getByName("sourcesJar"))
-                artifact(tasks.getByName("javadocJar"))
                 from(components["java"])
             }
         }
@@ -143,10 +132,12 @@ fun Project.configureArtifactory() {
             setPublishIvy(false)
             setPublishPom(true)
             repository(delegateClosureOf<DoubleDelegateWrapper> {
-                invokeMethod("setRepoKey", when {
-                    "SNAPSHOT" in project.version.toString() -> "libs-snapshot-local"
-                    else -> "libs-release-local"
-                })
+                invokeMethod(
+                    "setRepoKey", when {
+                        "SNAPSHOT" in project.version.toString() -> "libs-snapshot-local"
+                        else -> "libs-release-local"
+                    }
+                )
                 invokeMethod("setUsername", project.property("artifactory_user"))
                 invokeMethod("setPassword", project.property("artifactory_password"))
             })
