@@ -42,7 +42,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandMetadata;
@@ -70,7 +69,7 @@ import org.enginehub.piston.util.StreamHelper;
 
 class CommandParser {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManagerCompat.getLogger();
 
     private static final ThreadLocal<String> PARSE_ID = new ThreadLocal<>();
 
