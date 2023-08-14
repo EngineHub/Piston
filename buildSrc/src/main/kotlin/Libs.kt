@@ -18,6 +18,6 @@ object Libs {
     const val log4jApi = "org.apache.logging.log4j:log4j-api:$log4jVersion"
     const val log4jCore = "org.apache.logging.log4j:log4j-core:$log4jVersion"
     const val javaxAnnotations = "com.google.code.findbugs:jsr305:3.0.2"
-    const val compileTesting = "com.google.testing.compile:compile-testing:0.19"
+    const val compileTesting = "com.google.testing.compile:compile-testing:0.21.0"
     const val mockito = "org.mockito:mockito-core:3.8.0"
 }
