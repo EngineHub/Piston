@@ -19,7 +19,7 @@
 
 package org.enginehub.piston
 
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.Component
 import org.enginehub.piston.commands.RegressionCommands
 import org.enginehub.piston.commands.RegressionCommandsRegistration
 import org.enginehub.piston.converter.SimpleArgumentConverter
@@ -36,7 +36,6 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoInteractions
 
 @DisplayName("Regression tests")
 class RegressionTest {
@@ -94,10 +93,10 @@ class RegressionTest {
                             action(it.valueOf(arg).asString())
                             1
                         }
-                        .description(TextComponent.of("Sub-command"))
+                        .description(Component.text("Sub-command"))
                         .build()
                 cmd.run {
-                    description(TextComponent.of("Issue 9 #2"))
+                    description(Component.text("Issue 9 #2"))
                     // Optional arg prior to sub-command
                     addPart(arg)
                     addPart(subs(sub))
@@ -137,11 +136,11 @@ class RegressionTest {
                 }
                 val sub = manager.newCommand("vert")
                         .action { SUB_ACTION }
-                        .description(TextComponent.of("Sub-command"))
+                        .description(Component.text("Sub-command"))
                         .build()
                 cmd.run {
                     action { ROOT_ACTION }
-                    description(TextComponent.of("Issue 14"))
+                    description(Component.text("Issue 14"))
                     addPart(subs(sub, required = false))
                     addPart(req)
                     addPart(optAfter)
@@ -171,10 +170,10 @@ class RegressionTest {
                 val sub = manager.newCommand("world")
                         .action { SUB_ACTION }
                         .aliases(setOf("there"))
-                        .description(TextComponent.of("Sub-command"))
+                        .description(Component.text("Sub-command"))
                         .build()
                 cmd.run {
-                    description(TextComponent.of("hello"))
+                    description(Component.text("hello"))
                     addPart(subs(sub, required = true))
                 }
             }

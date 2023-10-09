@@ -20,10 +20,9 @@
 package org.enginehub.piston.config;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicNode;
@@ -54,7 +53,7 @@ public class ConfigHolderTest {
     private final ConfigHolder holder = ConfigHolder.create();
     private final Component inputWithStyles = ColorConfig.helpText()
         .wrap(TextConfig.commandPrefixValue());
-    private final TextComponent outputStyled = TextComponent.of("prefix!", TextColor.DARK_PURPLE);
+    private final TextComponent outputStyled = Component.text("prefix!", NamedTextColor.DARK_PURPLE);
 
     @BeforeEach
     void setUp() {
@@ -67,11 +66,11 @@ public class ConfigHolderTest {
     Stream<DynamicNode> test() {
         List<TestCase> testCases = ImmutableList.of(
             new TestCase("Translatable",
-                TranslatableComponent.of("test", inputWithStyles),
-                TranslatableComponent.of("test", outputStyled)),
+                Component.translatable("test", inputWithStyles),
+                Component.translatable("test", outputStyled)),
             new TestCase("Text",
-                TextComponent.of("test").append(inputWithStyles),
-                TextComponent.of("test").append(outputStyled))
+                Component.text("test").append(inputWithStyles),
+                Component.text("test").append(outputStyled))
         );
 
         return testCases.stream().map(testCase ->

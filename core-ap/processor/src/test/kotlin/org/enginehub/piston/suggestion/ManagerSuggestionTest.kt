@@ -19,7 +19,8 @@
 
 package org.enginehub.piston.suggestion
 
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
 import org.enginehub.piston.Command
 import org.enginehub.piston.CommandManager
 import org.enginehub.piston.assertEqualUnordered
@@ -57,12 +58,12 @@ class ManagerSuggestionTest {
                 }
 
                 register("notpermitted") { cmd ->
-                    cmd.description(TextComponent.of("Command with false condition"))
+                    cmd.description(Component.text("Command with false condition"))
                     cmd.condition(Command.Condition.FALSE)
                 }
 
                 register("sub") { cmd ->
-                    cmd.description(TextComponent.of("Sub-commands test command"))
+                    cmd.description(Component.text("Sub-commands test command"))
                     cmd.addPart(subs(*allCommands.toList().toTypedArray()))
                 }
             }
@@ -91,7 +92,7 @@ class ManagerSuggestionTest {
         withSuggestionManager { manager ->
             manager.registerManager(newManager().apply {
                 register("permitted") { cmd ->
-                    cmd.description(TextComponent.of("Command with true condition"))
+                    cmd.description(Component.text("Command with true condition"))
                     cmd.condition(Command.Condition.TRUE)
                 }
             })

@@ -19,7 +19,6 @@
 
 package org.enginehub.piston;
 
-import org.enginehub.piston.inject.InjectedValueAccess;
 import org.junit.jupiter.api.Test;
 
 import static org.enginehub.piston.Command.Condition.FALSE;

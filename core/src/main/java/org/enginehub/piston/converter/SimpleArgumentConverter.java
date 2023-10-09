@@ -19,8 +19,7 @@
 
 package org.enginehub.piston.converter;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.List;
 public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
 
     public static <T> SimpleArgumentConverter<T> from(Converter<T> converter, String description) {
-        return from(converter, TextComponent.of(description));
+        return from(converter, Component.text(description));
     }
 
     /**

@@ -1,12 +1,9 @@
-import net.minecrell.gradle.licenser.LicenseExtension
-import org.gradle.api.JavaVersion
+import org.cadixdev.gradle.licenser.LicenseExtension
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
@@ -32,7 +29,7 @@ fun Project.applyCommonConfig(
 ) {
     apply(plugin = "java-library")
     apply(plugin = "java")
-    apply(plugin = "net.minecrell.licenser")
+    apply(plugin = "org.cadixdev.licenser")
     apply(plugin = "maven-publish")
     apply(plugin = "com.jfrog.artifactory")
     apply(plugin = "jacoco")
@@ -40,9 +37,9 @@ fun Project.applyCommonConfig(
     project.group = group
 
     configure<LicenseExtension> {
-        header = rootProject.file("HEADER.txt")
-        exclude("**/META-INF/**")
-        exclude("**/*.properties")
+        header(rootProject.file("HEADER.txt"))
+        include("**/*.java")
+        include("**/*.kt")
     }
 
     tasks.withType<Test>().configureEach {
@@ -73,8 +70,14 @@ fun Project.applyCommonConfig(
         from(rootProject.file("common-test-resources"))
     }
 
-    configure<JavaPluginExtension> {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
+    }
+    plugins.withId("java") {
+        the<JavaPluginExtension>().toolchain {
+            languageVersion.set(JavaLanguageVersion.of(8))
+        }
     }
     tasks.withType<Javadoc>().configureEach {
         (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")

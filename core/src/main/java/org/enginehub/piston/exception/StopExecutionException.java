@@ -20,7 +20,7 @@
 package org.enginehub.piston.exception;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.Command;
 
 /**

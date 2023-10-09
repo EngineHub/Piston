@@ -20,7 +20,7 @@
 package org.enginehub.piston.converter;
 
 import com.google.common.collect.ImmutableMap;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 

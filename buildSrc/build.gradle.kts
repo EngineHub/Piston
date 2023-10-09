@@ -4,7 +4,6 @@ plugins {
 }
 
 repositories {
-    jcenter()
     gradlePluginPortal()
     maven {
         name = "EngineHub Repository"
@@ -15,7 +14,7 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation(gradleKotlinDsl())
-    implementation("org.enginehub.gradle:gradle-codecov-plugin:0.1.0-SNAPSHOT")
-    implementation("gradle.plugin.net.minecrell:licenser:0.4.1")
-    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0")
+    implementation("org.enginehub.gradle:gradle-codecov-plugin:0.1.0")
+    implementation("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
+    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0")
 }

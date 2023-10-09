@@ -4,3 +4,6 @@ build/
 libs/
 
 *.log*
+
+# Jetbrains IDE
+.idea
