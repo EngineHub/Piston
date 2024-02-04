@@ -31,14 +31,39 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
         return from(ImmutableList.of(result));
     }
 
+    public static <T> SuccessfulConversion<T> fromSingle(T result, boolean exactMatch) {
+        return from(ImmutableList.of(result), exactMatch);
+    }
+
     public static <T> SuccessfulConversion<T> from(Collection<T> result) {
-        return new SuccessfulConversion<>(result);
+        return new SuccessfulConversion<>(result, true);
+    }
+
+    public static <T> SuccessfulConversion<T> from(Collection<T> result, boolean exactMatch) {
+        return new SuccessfulConversion<>(result, exactMatch);
     }
 
     private final Collection<T> result;
+    private final boolean exactMatch;
 
-    private SuccessfulConversion(Collection<T> result) {
+    private SuccessfulConversion(Collection<T> result, boolean exactMatch) {
         this.result = result;
+        this.exactMatch = exactMatch;
+    }
+
+    /**
+     * Is this conversion an exact match for a complete input?
+     *
+     * <p>
+     * This may be {@code false} if the conversion is a partial match, or if the input was
+     * unknown and the conversion was a fallback.
+     * </p>
+     *
+     * @return {@code true} if this conversion is an exact match
+     * @since 0.5.8
+     */
+    public boolean isExactMatch() {
+        return exactMatch;
     }
 
     @Override
@@ -67,7 +92,7 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
         if (mapped == null) {
             return FailedConversion.from(new NullPointerException());
         }
-        return from(mapped);
+        return from(mapped, exactMatch);
     }
 
     @Override

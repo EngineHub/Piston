@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import net.kyori.text.Component;
 import org.enginehub.piston.config.ColorConfig;
@@ -131,14 +130,13 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
     private MultiKeyConverter(Arguments<E> arguments) {
         ImmutableSortedMap.Builder<String, E> map = ImmutableSortedMap.orderedBy(String.CASE_INSENSITIVE_ORDER);
         ImmutableSet.Builder<String> primaryKeysBuilder = ImmutableSet.builder();
-        Maps.filterKeys(asMap(arguments.items()), k -> k != arguments.unknownValue())
-            .forEach((item, keys) -> {
-                checkState(keys.size() > 0, "No lookup keys for value %s", item);
-                primaryKeysBuilder.add(keys.iterator().next());
-                for (String key : keys) {
-                    map.put(key, item);
-                }
-            });
+        asMap(arguments.items()).forEach((item, keys) -> {
+            checkState(keys.size() > 0, "No lookup keys for value %s", item);
+            primaryKeysBuilder.add(keys.iterator().next());
+            for (String key : keys) {
+                map.put(key, item);
+            }
+        });
         this.primaryKeys = primaryKeysBuilder.build();
         this.choices = primaryKeys.stream()
             .map(ColorConfig.mainText()::wrap)
@@ -160,9 +158,13 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
 
     @Override
     public ConversionResult<E> convert(String argument, InjectedValueAccess context) {
-        E result = map.getOrDefault(argument, unknownValue);
-        return result == null
-            ? FailedConversion.from(new IllegalArgumentException(errorMessage.apply(argument)))
-            : SuccessfulConversion.fromSingle(result);
+        E result = map.get(argument);
+        if (result == null) {
+            if (unknownValue != null) {
+                return SuccessfulConversion.fromSingle(unknownValue, false);
+            }
+            return FailedConversion.from(new IllegalArgumentException(errorMessage.apply(argument)));
+        }
+        return SuccessfulConversion.fromSingle(result);
     }
 }

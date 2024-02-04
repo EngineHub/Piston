@@ -20,11 +20,12 @@
 package org.enginehub.piston.impl;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.enginehub.piston.ArgBinding;
 import org.enginehub.piston.part.CommandPart;
 
-import java.util.Collection;
+import java.util.Map;
 
 @AutoValue
 abstract class ArgBindingImpl implements ArgBinding {
@@ -38,7 +39,7 @@ abstract class ArgBindingImpl implements ArgBinding {
 
         Builder input(String name);
 
-        Builder parts(Collection<CommandPart> args);
+        Builder partsMap(Map<CommandPart, Boolean> parts);
 
         ArgBindingImpl build();
     }
@@ -49,7 +50,20 @@ abstract class ArgBindingImpl implements ArgBinding {
     @Override
     public abstract String getInput();
 
+    abstract ImmutableMap<CommandPart, Boolean> getPartsMap();
+
     @Override
-    public abstract ImmutableSet<CommandPart> getParts();
+    public boolean isExactMatch(CommandPart part) {
+        Boolean result = getPartsMap().get(part);
+        if (result == null) {
+            throw new IllegalArgumentException("Part " + part + " is not in the parts map");
+        }
+        return result;
+    }
+
+    @Override
+    public final ImmutableSet<CommandPart> getParts() {
+        return getPartsMap().keySet();
+    }
 
 }

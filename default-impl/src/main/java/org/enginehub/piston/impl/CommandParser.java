@@ -49,7 +49,9 @@ import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.converter.ArgumentConverter;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
+import org.enginehub.piston.converter.ConversionResult;
 import org.enginehub.piston.converter.FailedConversion;
+import org.enginehub.piston.converter.SuccessfulConversion;
 import org.enginehub.piston.exception.ConditionFailedException;
 import org.enginehub.piston.exception.ConversionFailedException;
 import org.enginehub.piston.exception.NoSuchFlagException;
@@ -123,7 +125,7 @@ class CommandParser {
     private final ListIterator<String> argIter;
     private final InjectedValueAccess context;
     private final Set<CommandFlag> seenFlags = new HashSet<>();
-    private ImmutableSet.Builder<CommandPart> argBindings = ImmutableSet.builder();
+    private ImmutableMap.Builder<CommandPart, Boolean> argBindings = ImmutableMap.builder();
     @Nullable
     private PerCommandDetails perCommandDetails;
     @Nullable
@@ -223,17 +225,17 @@ class CommandParser {
         }
         justUnconsumed = false;
         String next = argIter.next();
-        argBindings = ImmutableSet.builder();
+        argBindings = ImmutableMap.builder();
         return next;
     }
 
     private void bindArgument() {
-        ImmutableSet<CommandPart> binding = argBindings.build();
+        ImmutableMap<CommandPart, Boolean> binding = argBindings.build();
         checkState(!binding.isEmpty() || currentArgument().equals("--"),
             "Argument never bound: %s", currentArgument());
         parseResult.addArgument(ArgBindingImpl.builder()
             .input(currentArgument())
-            .parts(binding)
+            .partsMap(binding)
             .build());
     }
 
@@ -270,8 +272,8 @@ class CommandParser {
         partIter.previous();
     }
 
-    private void bind(CommandPart part) {
-        argBindings.add(part);
+    private void bind(CommandPart part, boolean exact) {
+        argBindings.put(part, exact);
     }
 
     private void switchToCommand(Command subCommand) {
@@ -375,7 +377,7 @@ class CommandParser {
         if (sub == null) {
             return false;
         }
-        bind(part);
+        bind(part, true);
         if (part.isRequired()) {
             perCommandDetails().remainingRequiredParts--;
         }
@@ -426,11 +428,14 @@ class CommandParser {
             CommandArgument argPart = (CommandArgument) nextArg;
             if (nextArg.isRequired()) {
                 // good, we can just satisfy it
-                if (!isAcceptedByTypeParsers(argPart, token)) {
+                AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(argPart, token);
+                if (!acceptInfo.isAccepted()) {
                     throw conversionFailedException(argPart, token);
                 }
                 details.remainingRequiredParts--;
-                addValueFull(nextArg, v -> v.values(consumeArguments(argPart, token)));
+                addValueFull(nextArg, v -> v.values(consumeArguments(
+                    argPart, token, acceptInfo == AcceptInfo.ACCEPTED_EXACT
+                )));
                 return true;
             } else {
                 if (details.commandInfo.subCommandTable.isEmpty()) {
@@ -445,9 +450,12 @@ class CommandParser {
                     }
                     // may fill this if it matches, fall to below
                 }
-                if (isAcceptedByTypeParsers(argPart, token)) {
+                AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(argPart, token);
+                if (acceptInfo.isAccepted()) {
                     details.defaultsNeeded.remove(nextArg);
-                    addValueFull(nextArg, v -> v.values(consumeArguments(argPart, token)));
+                    addValueFull(nextArg, v -> v.values(consumeArguments(
+                        argPart, token, acceptInfo == AcceptInfo.ACCEPTED_EXACT
+                    )));
                     return true;
                 }
                 // store it in case no required arguments match
@@ -458,15 +466,16 @@ class CommandParser {
         return false;
     }
 
-    private ImmutableList<String> consumeArguments(CommandArgument nextArg, String first) {
+    private ImmutableList<String> consumeArguments(CommandArgument nextArg, String first, boolean exact) {
         ImmutableList.Builder<String> result = ImmutableList.builder();
-        bind(nextArg);
+        bind(nextArg, exact);
         result.add(first);
         if (nextArg.isVariable()) {
             while (hasNextArgument()) {
                 String next = nextArgument();
-                if (isAcceptedByTypeParsers(nextArg, next)) {
-                    bind(nextArg);
+                AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(nextArg, next);
+                if (acceptInfo.isAccepted()) {
+                    bind(nextArg, acceptInfo == AcceptInfo.ACCEPTED_EXACT);
                     result.add(next);
                 } else {
                     unconsumeArgument();
@@ -477,25 +486,45 @@ class CommandParser {
         return result.build();
     }
 
+    private enum AcceptInfo {
+        REJECTED,
+        ACCEPTED_INEXACT,
+        ACCEPTED_EXACT,
+        ;
+
+        boolean isAccepted() {
+            return this != REJECTED;
+        }
+    }
+
     /**
      * Check if {@code part} has type converters attached, and if so, return
      * {@code true} iff any of them will convert {@code next}. If there are no
      * type converters, also return {@code true}.
      */
-    private boolean isAcceptedByTypeParsers(ArgAcceptingCommandPart part,
+    private AcceptInfo getAcceptInfoFromTypeParsers(ArgAcceptingCommandPart part,
                                             String next) {
         ImmutableSet<Key<?>> types = part.getTypes();
         if (types.isEmpty()) {
-            return true;
+            return AcceptInfo.ACCEPTED_EXACT;
         }
 
-        return types.stream().anyMatch(type -> {
+        boolean acceptedInexact = false;
+        for (Key<?> type : types) {
             Optional<? extends ArgumentConverter<?>> argumentConverter = converters.getConverter(type);
             if (!argumentConverter.isPresent()) {
                 throw new IllegalStateException("No argument converter for " + type);
             }
-            return argumentConverter.get().convert(next, context).isSuccessful();
-        });
+            ConversionResult<?> result = argumentConverter.get().convert(next, context);
+            if (result.isSuccessful()) {
+                if (((SuccessfulConversion<?>) result).isExactMatch()) {
+                    return AcceptInfo.ACCEPTED_EXACT;
+                } else {
+                    acceptedInexact = true;
+                }
+            }
+        }
+        return acceptedInexact ? AcceptInfo.ACCEPTED_INEXACT : AcceptInfo.REJECTED;
     }
 
     private void parseFlags(String flags) {
@@ -518,23 +547,24 @@ class CommandParser {
                     throw usageException(TextComponent.of("Argument-accepting flags must be " +
                         "at the end of combined flag groups."));
                 }
-                bind(flag);
+                bind(flag, true);
                 ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
                 if (!hasNextArgument()) {
                     throw notEnoughArgumentsException();
                 }
                 String nextToken = nextArgument();
-                if (!isAcceptedByTypeParsers(argPart, nextToken)) {
+                AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(argPart, nextToken);
+                if (!acceptInfo.isAccepted()) {
                     throw conversionFailedException(argPart, nextToken);
                 }
                 addValueFull(flag, v -> v.value(nextToken));
-                bind(flag);
+                bind(flag, acceptInfo == AcceptInfo.ACCEPTED_EXACT);
                 perCommandDetails().defaultsNeeded.remove(flag);
                 perCommandDetails().argFlagsNeeded.remove(flag);
             } else {
                 // Sanity-check. Real check is in `CommandInfo.from`.
                 checkState(flag instanceof NoArgCommandFlag);
-                bind(flag);
+                bind(flag, true);
                 parameters.addPresentPart(flag);
             }
             seenFlags.add(flag);
