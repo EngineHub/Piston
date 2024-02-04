@@ -13,6 +13,7 @@ repositories {
 release {
     tagTemplate = "v\${version}"
     buildTasks = listOf<String>()
+    git.requireBranch = "master"
 }
 
 val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
