@@ -42,11 +42,6 @@ import javax.tools.Diagnostic
 @DisplayName("AnnoValueExtraction")
 class AnnoValueExtractionTest {
 
-    annotation class ProcessingKey(
-        val value: String,
-        val many: Array<String>
-    )
-
     private val value = "test-value"
     private val value2 = "tester-value"
     private val annoCode = TypeSpec.classBuilder("AnnoContainer")
