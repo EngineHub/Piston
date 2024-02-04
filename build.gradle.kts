@@ -1,5 +1,5 @@
 plugins {
-    id("net.researchgate.release") version "2.8.1"
+    id("net.researchgate.release") version "3.0.2"
     id("org.enginehub.codecov")
     jacoco
 }
@@ -7,7 +7,7 @@ plugins {
 configureArtifactory()
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 release {
@@ -19,13 +19,13 @@ val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
     subprojects.forEach { proj ->
         proj.plugins.withId("java") {
             executionData(
-                fileTree(proj.buildDir.absolutePath).include("**/jacoco/*.exec")
+                fileTree(proj.layout.buildDirectory.get().asFile.absolutePath).include("**/jacoco/*.exec")
             )
-            sourceSets(proj.the<JavaPluginConvention>().sourceSets["main"])
+            sourceSets(proj.the<JavaPluginExtension>().sourceSets["main"])
             reports {
-                xml.isEnabled = true
-                xml.destination = rootProject.buildDir.resolve("reports/jacoco/report.xml")
-                html.isEnabled = true
+                xml.required = true
+                xml.outputLocation = rootProject.layout.buildDirectory.file("reports/jacoco/report.xml")
+                html.required = true
             }
             dependsOn(proj.tasks.named("test"))
         }
