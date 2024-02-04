@@ -22,6 +22,7 @@ package org.enginehub.piston.suggestion;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import org.enginehub.piston.ArgBinding;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandParseResult;
 import org.enginehub.piston.converter.ArgumentConverterAccess;
@@ -85,8 +86,8 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
                     .map(asSuggestion(args.size() - 1));
             }
         }
-        if (args.size() == parseResult.getBoundArguments().size()) {
-            // all provided arguments are valid
+        if (args.size() == parseResult.getBoundArguments().size() && isLastExactMatch(parseResult.getBoundArguments())) {
+            // all provided arguments are valid exact matches
             // suggest on empty for next argument
             return suggestUnmatchedArguments("", parseResult)
                 .map(asSuggestion(args.size()));
@@ -105,6 +106,19 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
         }
         return suggestUnmatchedArguments(last, parseResult)
             .map(asSuggestion(args.size() - 1));
+    }
+
+    private boolean isLastExactMatch(ImmutableList<ArgBinding> argBindings) {
+        if (argBindings.isEmpty()) {
+            return true;
+        }
+        ArgBinding last = Iterables.getLast(argBindings);
+        for (CommandPart commandPart : last.getParts()) {
+            if (!last.isExactMatch(commandPart)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Optional<Stream<String>> maybeSuggestArgFlag(String flags, String input, CommandParseResult parseResult) {
@@ -131,15 +145,15 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
 
     private Stream<String> suggestUnmatchedArguments(String input, CommandParseResult parseResult) {
         ImmutableList.Builder<CommandPart> parts = ImmutableList.builder();
-        ImmutableSet<CommandPart> usedParts = ImmutableSet.copyOf(
+        ImmutableSet<CommandPart> usedExactParts = ImmutableSet.copyOf(
             parseResult.getBoundArguments().stream()
-                .flatMap(a -> a.getParts().stream())
+                .flatMap(a -> a.getParts().stream().filter(a::isExactMatch))
                 .iterator());
         for (CommandPart part : parseResult.getPrimaryCommand().getParts()) {
             if (part instanceof CommandFlag) {
                 continue;
             }
-            if (usedParts.contains(part)) {
+            if (usedExactParts.contains(part)) {
                 // also reset parts, we won't match prior to this either
                 parts = ImmutableList.builder();
                 continue;
