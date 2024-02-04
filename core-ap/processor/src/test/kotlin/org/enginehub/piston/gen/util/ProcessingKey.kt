@@ -17,32 +17,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.gen;
+package org.enginehub.piston.gen.util
 
-import org.enginehub.piston.CommandManager;
-
-import java.util.Collection;
-
-/**
- * Common interface for generated command registration builders.
- *
- * <p>
- * This interfaces allows easy initialization of common registration dependencies.
- * </p>
- *
- * @param <CI> container instance type
- */
-public interface CommandRegistration<CI> {
-
-    CommandRegistration<CI> commandManager(CommandManager manager);
-
-    CommandRegistration<CI> containerInstance(CI containerInstance);
-
-    CommandRegistration<CI> listeners(Collection<CommandCallListener> listeners);
-
-    /**
-     * Build &amp; register the associated commands.
-     */
-    void build();
-
-}
+annotation class ProcessingKey(
+    val value: String,
+    val many: Array<String>
+)

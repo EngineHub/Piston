@@ -2,8 +2,8 @@ import org.gradle.internal.jvm.Jvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.31"
-    kotlin("kapt") version "1.4.31"
+    kotlin("jvm") version "1.9.22"
+    kotlin("kapt") version "1.9.22"
 }
 
 applyCoreApConfig()
@@ -12,6 +12,15 @@ kapt.includeCompileClasspath = false
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.test {
+    // Crack open the compiler for compile testing
+    jvmArgs(
+        "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+    )
 }
 
 dependencies {
@@ -40,10 +49,6 @@ dependencies {
         }
     }
 
-    if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
-        // Needs tools.jar on JDK 8 or less
-        "testRuntimeOnly"(files(Jvm.current().toolsJar ?: throw IllegalStateException("No tools.jar is present. Please ensure you are using JDK 8.")))
-    }
     "testImplementation"(Libs.mockito)
     "testRuntimeOnly"(Libs.log4jCore)
     "testImplementation"(project(":default-impl"))

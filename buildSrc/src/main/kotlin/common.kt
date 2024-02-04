@@ -1,4 +1,4 @@
-import net.minecrell.gradle.licenser.LicenseExtension
+import org.cadixdev.gradle.licenser.LicenseExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
@@ -23,7 +23,6 @@ import org.gradle.kotlin.dsl.repositories
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
-import org.jfrog.gradle.plugin.artifactory.dsl.DoubleDelegateWrapper
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask
 
@@ -32,7 +31,7 @@ fun Project.applyCommonConfig(
 ) {
     apply(plugin = "java-library")
     apply(plugin = "java")
-    apply(plugin = "net.minecrell.licenser")
+    apply(plugin = "org.cadixdev.licenser")
     apply(plugin = "maven-publish")
     apply(plugin = "com.jfrog.artifactory")
     apply(plugin = "jacoco")
@@ -40,7 +39,7 @@ fun Project.applyCommonConfig(
     project.group = group
 
     configure<LicenseExtension> {
-        header = rootProject.file("HEADER.txt")
+        setHeader(rootProject.file("HEADER.txt"))
         exclude("**/META-INF/**")
         exclude("**/*.properties")
     }
@@ -74,7 +73,15 @@ fun Project.applyCommonConfig(
     }
 
     configure<JavaPluginExtension> {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    }
+    tasks.named<JavaCompile>("compileJava") {
+        options.encoding = "UTF-8"
+        options.release.set(8)
+    }
+    tasks.named<JavaCompile>("compileTestJava") {
+        options.encoding = "UTF-8"
+        options.release.set(8)
     }
     tasks.withType<Javadoc>().configureEach {
         (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
@@ -127,25 +134,21 @@ fun Project.configureArtifactory() {
     if (!project.hasProperty("artifactory_password"))
         ext["artifactory_password"] = ""
     configure<ArtifactoryPluginConvention> {
-        publish(delegateClosureOf<PublisherConfig> {
-            setContextUrl(project.property("artifactory_contextUrl"))
-            setPublishIvy(false)
-            setPublishPom(true)
-            repository(delegateClosureOf<DoubleDelegateWrapper> {
-                invokeMethod(
-                    "setRepoKey", when {
-                        "SNAPSHOT" in project.version.toString() -> "libs-snapshot-local"
-                        else -> "libs-release-local"
-                    }
-                )
-                invokeMethod("setUsername", project.property("artifactory_user"))
-                invokeMethod("setPassword", project.property("artifactory_password"))
-            })
-            defaults(delegateClosureOf<ArtifactoryTask> {
+        publish {
+            contextUrl = project.property("artifactory_contextUrl").toString()
+            repository {
+                repoKey = when {
+                    "SNAPSHOT" in project.version.toString() -> "libs-snapshot-local"
+                    else -> "libs-release-local"
+                }
+                username = project.property("artifactory_user").toString()
+                password = project.property("artifactory_password").toString()
+            }
+            defaults {
                 publications("maven")
                 setPublishArtifacts(true)
-            })
-        })
+            }
+        }
     }
     tasks.named<ArtifactoryTask>("artifactoryPublish") {
         skip = true
