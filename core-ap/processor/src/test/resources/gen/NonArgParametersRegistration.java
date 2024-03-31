@@ -30,6 +30,7 @@ import static org.enginehub.piston.part.CommandParts.flag;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import java.lang.Object;
+import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -41,6 +42,7 @@ import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.inject.Key;
 
+@SuppressWarnings({"deprecation", "removal"})
 final class NonArgParametersRegistration implements CommandRegistration<NonArgParameters> {
     private static final Key<Callable<Object>> callable$Object_Key = Key.of(new TypeToken<Callable<Object>>() {
     });

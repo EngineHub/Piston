@@ -31,6 +31,7 @@ import static org.enginehub.piston.part.CommandParts.flag;
 import com.google.common.collect.ImmutableList;
 import java.lang.Object;
 import java.lang.String;
+import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -43,6 +44,7 @@ import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
 
+@SuppressWarnings({"deprecation", "removal"})
 final class CollectionArgRegistration implements CommandRegistration<CollectionArg> {
     private static final Key<String> string_Key = Key.of(String.class);
     private static final Key<Object> object_Key = Key.of(Object.class);

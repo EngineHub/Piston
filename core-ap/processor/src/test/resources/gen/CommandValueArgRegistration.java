@@ -29,6 +29,7 @@ import static org.enginehub.piston.part.CommandParts.arg;
 import static org.enginehub.piston.part.CommandParts.flag;
 
 import com.google.common.collect.ImmutableList;
+import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -41,6 +42,7 @@ import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.part.CommandArgument;
 
+@SuppressWarnings({"deprecation", "removal"})
 final class CommandValueArgRegistration implements CommandRegistration<CommandValueArg> {
     private CommandManager commandManager;
 

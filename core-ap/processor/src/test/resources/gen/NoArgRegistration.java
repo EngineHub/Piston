@@ -29,6 +29,7 @@ import static org.enginehub.piston.part.CommandParts.flag;
 
 import com.google.common.collect.ImmutableList;
 import java.lang.Exception;
+import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import org.enginehub.piston.gen.AlwaysTrueConditionGenerator;
 import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
 
+@SuppressWarnings({"deprecation", "removal"})
 final class NoArgRegistration implements CommandRegistration<NoArg> {
     private CommandManager commandManager;
 
