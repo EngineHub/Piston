@@ -1,6 +1,3 @@
-import org.gradle.internal.jvm.Jvm
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "1.9.22"
     kotlin("kapt") version "1.9.22"
@@ -9,10 +6,6 @@ plugins {
 applyCoreApConfig()
 
 kapt.includeCompileClasspath = false
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}
 
 tasks.test {
     // Crack open the compiler for compile testing
@@ -41,13 +34,7 @@ dependencies {
         exclude("junit", "junit")
     }
 
-    "testImplementation"("com.google.guava:guava") {
-        version {
-            prefer("27.1-jre")
-            reject("21.0")
-            because("Compile Testing & Truth won't work with 21.0")
-        }
-    }
+    "testImplementation"(Libs.guava)
 
     "testImplementation"(Libs.mockito)
     "testRuntimeOnly"(Libs.log4jCore)

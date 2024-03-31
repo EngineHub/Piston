@@ -1,9 +1,9 @@
 object Libs {
-    private const val junitVersion = "5.10.1"
+    private const val junitVersion = "5.10.2"
     const val junitApi = "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:$junitVersion"
-    const val guava = "com.google.guava:guava"
+    const val guava = "com.google.guava:guava:32.1.3-jre"
     private const val kyoriTextVersion = "3.0.4"
     const val kyoriText = "net.kyori:text-api:$kyoriTextVersion"
     const val kyoriTextPlain = "net.kyori:text-serializer-plain:$kyoriTextVersion"
@@ -14,10 +14,10 @@ object Libs {
     const val autoService = "com.google.auto.service:auto-service:1.1.1"
     const val javapoet = "com.squareup:javapoet:1.13.0"
     // Sync with Mojang's Log4j
-    private const val log4jVersion = "2.8.1"
+    private const val log4jVersion = "2.19.0"
     const val log4jApi = "org.apache.logging.log4j:log4j-api:$log4jVersion"
     const val log4jCore = "org.apache.logging.log4j:log4j-core:$log4jVersion"
     const val javaxAnnotations = "com.google.code.findbugs:jsr305:3.0.2"
     const val compileTesting = "com.google.testing.compile:compile-testing:0.21.0"
-    const val mockito = "org.mockito:mockito-core:5.10.0"
+    const val mockito = "org.mockito:mockito-core:5.11.0"
 }

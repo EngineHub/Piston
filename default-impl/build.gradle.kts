@@ -5,7 +5,7 @@ dependencies {
     "implementation"(Libs.log4jApi)
     "compileOnly"(Libs.autoValueAnnotations)
     "annotationProcessor"(Libs.autoValueProcessor)
-    "compileOnly"(Libs.autoService)
+    "compileOnlyApi"(Libs.autoService)
     "annotationProcessor"(Libs.autoService)
     "testRuntimeOnly"(Libs.log4jCore)
 }

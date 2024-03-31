@@ -19,27 +19,18 @@
 
 package org.enginehub.piston.impl;
 
-import com.google.common.base.Throwables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.List;
 
 /**
  * Internal use only.
  */
 public class LogManagerCompat {
 
-    public static Logger getLogger() {
-        return LogManager.getLogger(getCallerCallerClassName());
-    }
+    private static final StackWalker WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
-    private static String getCallerCallerClassName() {
-        List<StackTraceElement> lazyStack = Throwables.lazyStackTrace(new Throwable());
-        // 0 - this method
-        // 1 - caller
-        // 2 - caller caller
-        return lazyStack.get(2).getClassName();
+    public static Logger getLogger() {
+        return LogManager.getLogger(WALKER.getCallerClass());
     }
 
     private LogManagerCompat() {

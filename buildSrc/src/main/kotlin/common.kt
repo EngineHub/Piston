@@ -52,22 +52,6 @@ fun Project.applyCommonConfig(
         mavenCentral()
     }
 
-    dependencies {
-        constraints {
-            for (configuration in listOf("implementation", "api")) {
-                configuration(Libs.guava) {
-                    version {
-                        // This isn't perfect -- I need some way to communicate that we should only build
-                        // Against 21.0, but also that the tests NEED to use 27.1 to be compatible
-                        // with google's truth library
-                        require("21.0")
-                        because("Minecraft uses Guava 21.0")
-                    }
-                }
-            }
-        }
-    }
-
     tasks.named<Copy>("processTestResources") {
         from(rootProject.file("common-test-resources"))
     }
@@ -77,11 +61,9 @@ fun Project.applyCommonConfig(
     }
     tasks.named<JavaCompile>("compileJava") {
         options.encoding = "UTF-8"
-        options.release.set(8)
     }
     tasks.named<JavaCompile>("compileTestJava") {
         options.encoding = "UTF-8"
-        options.release.set(8)
     }
     tasks.withType<Javadoc>().configureEach {
         (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")

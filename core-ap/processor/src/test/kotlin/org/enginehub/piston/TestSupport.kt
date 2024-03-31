@@ -35,15 +35,13 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 
 fun newManager(): CommandManager = DefaultCommandManagerService.getInstance().newCommandManager()
 
-fun <CI> CommandManager.installCommands(containerInstance: CI,
-                                        containerRegistration: CommandRegistration<CI>) {
+fun <CI : Any> CommandManager.installCommands(containerInstance: CI,
+                                              containerRegistration: CommandRegistration<CI>) {
     containerRegistration
-            .commandManager(this)
-            .containerInstance(containerInstance)
-            .build()
+        .commandManager(this)
+        .containerInstance(containerInstance)
+        .build()
 }
-
-inline fun <reified M> mock() = mock(M::class.java)!!
 
 inline fun <reified CI> withMockedContainer(block: (CI) -> Unit) {
     val mock = mock<CI>()
@@ -55,10 +53,10 @@ inline fun <reified CI> withMockedContainer(block: (CI) -> Unit) {
 }
 
 inline fun arg(name: String, desc: String, block: CommandArgument.Builder.() -> Unit = {}): CommandArgument =
-        CommandParts.arg(
-                TranslatableComponent.of(name),
-                TextComponent.of(desc)
-        ).also(block).build()
+    CommandParts.arg(
+        TranslatableComponent.of(name),
+        TextComponent.of(desc)
+    ).also(block).build()
 
 inline fun flag(name: Char, desc: String, block: NoArgCommandFlag.Builder.() -> Unit = {}): NoArgCommandFlag =
     CommandParts.flag(
@@ -77,16 +75,16 @@ inline fun argFlag(name: Char, desc: String, argName: String,
         .also(block).build()
 
 fun subs(vararg subCommands: Command, required: Boolean = true): SubCommandPart =
-        SubCommandPart.builder(
-                TranslatableComponent.of("actions"),
-                TextComponent.of("Sub-actions")
-        ).run {
-            withCommands(ImmutableList.copyOf(subCommands))
+    SubCommandPart.builder(
+        TranslatableComponent.of("actions"),
+        TextComponent.of("Sub-actions")
+    ).run {
+        withCommands(ImmutableList.copyOf(subCommands))
 
-            if (required) required() else optional()
+        if (required) required() else optional()
 
-            build()
-        }
+        build()
+    }
 
 class TestParseResult(
     private val executionPath: ImmutableList<Command>,
@@ -106,7 +104,7 @@ class TestArgBinding(
 ) : ArgBinding {
     override fun getInput() = input
 
-    override fun getParts() = ImmutableSet.of(commandPart)!!
+    override fun getParts() = ImmutableSet.of(commandPart)
 }
 
 fun CommandPart.bind(input: String) = TestArgBinding(input, this)
