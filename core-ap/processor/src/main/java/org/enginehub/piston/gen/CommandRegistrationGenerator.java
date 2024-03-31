@@ -20,6 +20,7 @@
 package org.enginehub.piston.gen;
 
 import com.google.common.collect.ImmutableList;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -148,6 +149,10 @@ class CommandRegistrationGenerator {
     void generate(Element originalElement, String pkgName, Filer filer) throws IOException {
         TypeSpec.Builder spec = TypeSpec.classBuilder(info.getName())
             .addOriginatingElement(originalElement)
+            .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                .addMember("value", "$S", "deprecation")
+                .addMember("value", "$S", "removal")
+                .build())
             .addModifiers(FINAL)
             .addModifiers(getApiVisibilityModifiers())
             .addSuperinterface(ParameterizedTypeName.get(
