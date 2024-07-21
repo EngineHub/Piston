@@ -1,5 +1,5 @@
 object Libs {
-    private const val junitVersion = "5.10.2"
+    private const val junitVersion = "5.10.3"
     const val junitApi = "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:$junitVersion"
@@ -8,7 +8,7 @@ object Libs {
     const val kyoriText = "net.kyori:text-api:$kyoriTextVersion"
     const val kyoriTextPlain = "net.kyori:text-serializer-plain:$kyoriTextVersion"
     const val autoCommon = "com.google.auto:auto-common:1.2.2"
-    private const val autoValueVersion = "1.10.4"
+    private const val autoValueVersion = "1.11.0"
     const val autoValueAnnotations = "com.google.auto.value:auto-value-annotations:$autoValueVersion"
     const val autoValueProcessor = "com.google.auto.value:auto-value:$autoValueVersion"
     const val autoService = "com.google.auto.service:auto-service:1.1.1"
@@ -19,5 +19,5 @@ object Libs {
     const val log4jCore = "org.apache.logging.log4j:log4j-core:$log4jVersion"
     const val javaxAnnotations = "com.google.code.findbugs:jsr305:3.0.2"
     const val compileTesting = "com.google.testing.compile:compile-testing:0.21.0"
-    const val mockito = "org.mockito:mockito-core:5.11.0"
+    const val mockito = "org.mockito:mockito-core:5.12.0"
 }
