@@ -24,8 +24,10 @@ import com.google.testing.compile.JavaFileObjects
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.WildcardTypeName
 import org.enginehub.piston.CommandParameters
 import org.enginehub.piston.CommandValue
 import org.enginehub.piston.annotation.Command
@@ -36,6 +38,8 @@ import org.enginehub.piston.annotation.param.Switch
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
+import java.util.function.Consumer
+import java.util.function.Function
 import javax.lang.model.element.Modifier
 
 
@@ -143,6 +147,36 @@ class GenerationTest {
         assertThat(compilation)
             .generatedSourceFile("$PACKAGE.CommandValueArgRegistration")
             .hasSourceEquivalentTo(JavaFileObjects.forResource("gen/CommandValueArgRegistration.java"))
+    }
+
+    @DisplayName("a one argument (wildcard) command")
+    @Test
+    fun generatesOneWildcardArg() {
+        val commands = commands("WildcardArg", listOf(
+            MethodSpec.methodBuilder("valueArg")
+                .addAnnotation(AnnotationSpec.builder(Command::class.java)
+                    .addMember("name", "\$S", "wildcardArgument")
+                    .addMember("desc", "\$S", "DESCRIPTION")
+                    .build())
+                .returns(Void.TYPE)
+                .addParameter(
+                    ParameterSpec.builder(ParameterizedTypeName.get(
+                        className<Consumer<*>>(),
+                        WildcardTypeName.subtypeOf(TypeName.OBJECT)
+                    ), "arg")
+                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
+                            .addMember("desc", "\$S", "ARG DESCRIPTION")
+                            .build())
+                        .build()
+                )
+                .build()
+        ))
+        val compilation = compiler().compile(commands)
+        assertThat(compilation)
+            .succeededWithoutWarnings()
+        assertThat(compilation)
+            .generatedSourceFile("$PACKAGE.WildcardArgRegistration")
+            .hasSourceEquivalentTo(JavaFileObjects.forResource("gen/WildcardArgRegistration.java"))
     }
 
     @DisplayName("a one argument (Collection) command")
