@@ -21,8 +21,8 @@ package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.TypeName;
 
 import java.util.Collection;
 

@@ -21,8 +21,8 @@ package org.enginehub.piston.gen.util
 
 import com.google.common.primitives.Primitives
 import com.google.common.truth.Truth
-import com.squareup.javapoet.ArrayTypeName
-import com.squareup.javapoet.TypeName
+import com.palantir.javapoet.ArrayTypeName
+import com.palantir.javapoet.TypeName
 import org.enginehub.piston.gen.className
 import org.enginehub.piston.gen.parametrize
 import org.junit.jupiter.api.Assertions.assertEquals

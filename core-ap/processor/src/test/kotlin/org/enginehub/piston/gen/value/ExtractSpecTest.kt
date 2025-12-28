@@ -19,7 +19,7 @@
 
 package org.enginehub.piston.gen.value
 
-import com.squareup.javapoet.CodeBlock
+import com.palantir.javapoet.CodeBlock
 import org.enginehub.piston.gen.className
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

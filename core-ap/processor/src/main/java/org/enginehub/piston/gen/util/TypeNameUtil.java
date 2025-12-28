@@ -19,10 +19,10 @@
 
 package org.enginehub.piston.gen.util;
 
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.ArrayTypeName;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
 
 public class TypeNameUtil {
 
@@ -30,9 +30,9 @@ public class TypeNameUtil {
         if (typeName instanceof ClassName) {
             return typeName;
         } else if (typeName instanceof ArrayTypeName) {
-            return ArrayTypeName.of(rawType(((ArrayTypeName) typeName).componentType));
+            return ArrayTypeName.of(rawType(((ArrayTypeName) typeName).componentType()));
         } else if (typeName instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) typeName).rawType;
+            return ((ParameterizedTypeName) typeName).rawType();
         } else if (typeName.isPrimitive()) {
             return typeName;
         }
@@ -42,9 +42,9 @@ public class TypeNameUtil {
 
     public static TypeName firstTypeArg(TypeName typeName) {
         if (typeName instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) typeName).typeArguments.get(0);
+            return ((ParameterizedTypeName) typeName).typeArguments().get(0);
         }
-        return TypeName.OBJECT;
+        return ClassName.OBJECT;
     }
 
     private TypeNameUtil() {

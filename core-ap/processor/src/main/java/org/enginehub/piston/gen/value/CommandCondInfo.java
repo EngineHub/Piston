@@ -20,7 +20,7 @@
 package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
-import com.squareup.javapoet.CodeBlock;
+import com.palantir.javapoet.CodeBlock;
 
 /**
  * Information that can be used to supply the condition for a

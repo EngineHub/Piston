@@ -21,12 +21,12 @@ package org.enginehub.piston.gen
 
 import com.google.testing.compile.Compiler
 import com.google.testing.compile.JavaFileObjects
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.JavaFile
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
+import com.palantir.javapoet.ClassName
+import com.palantir.javapoet.JavaFile
+import com.palantir.javapoet.MethodSpec
+import com.palantir.javapoet.ParameterizedTypeName
+import com.palantir.javapoet.TypeName
+import com.palantir.javapoet.TypeSpec
 import org.enginehub.piston.annotation.CommandContainer
 import javax.tools.JavaFileObject
 
@@ -48,7 +48,7 @@ fun commands(name: String, specs: List<MethodSpec>): JavaFileObject {
 fun TypeSpec.toFileInPackage(pkg: String = PACKAGE): JavaFileObject {
     val source = JavaFile.builder(pkg, this).build().toString()
     return JavaFileObjects.forSourceString(
-        "$pkg.$name", source
+        "$pkg.${name()}", source
     )
 }
 

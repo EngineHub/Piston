@@ -19,9 +19,9 @@
 
 package org.enginehub.piston.gen;
 
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.TypeName;
 import org.enginehub.piston.gen.value.KeyInfo;
 import org.enginehub.piston.gen.value.RegistrationInfo;
 import org.enginehub.piston.gen.value.RequiredVariable;

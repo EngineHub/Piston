@@ -19,10 +19,10 @@
 
 package org.enginehub.piston.gen.util;
 
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.ArrayTypeName;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
 import org.enginehub.piston.util.CaseHelper;
 
 /**
@@ -63,17 +63,17 @@ public class SafeName {
         } else if (typeName instanceof ParameterizedTypeName) {
             // append the type parameters
             ParameterizedTypeName pt = (ParameterizedTypeName) typeName;
-            ClassName raw = pt.rawType;
+            ClassName raw = pt.rawType();
             StringBuilder result = new StringBuilder(
                 getNameAsIdentifierRaw(raw)
             );
-            for (TypeName typeArgument : pt.typeArguments) {
+            for (TypeName typeArgument : pt.typeArguments()) {
                 result.append('$').append(getNameAsIdentifierRaw(typeArgument));
             }
             return result;
         } else if (typeName instanceof ArrayTypeName) {
             // append Array to the name
-            CharSequence base = getNameAsIdentifierRaw(((ArrayTypeName) typeName).componentType);
+            CharSequence base = getNameAsIdentifierRaw(((ArrayTypeName) typeName).componentType());
             return new StringBuilder(base).append("$Array");
         }
         // just use toString() as a last resort

@@ -22,7 +22,7 @@ package org.enginehub.piston.gen.value;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.squareup.javapoet.ClassName;
+import com.palantir.javapoet.ClassName;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;

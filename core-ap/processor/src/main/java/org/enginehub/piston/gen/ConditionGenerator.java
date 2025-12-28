@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.gen;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.TypeName;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.gen.util.CodeBlockUtil;
 import org.enginehub.piston.gen.util.ProcessingException;

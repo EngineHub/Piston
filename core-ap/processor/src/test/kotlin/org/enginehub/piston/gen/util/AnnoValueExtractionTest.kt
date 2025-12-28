@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
 import com.google.testing.compile.Compilation
 import com.google.testing.compile.CompilationSubject.assertThat
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.TypeSpec
+import com.palantir.javapoet.AnnotationSpec
+import com.palantir.javapoet.TypeSpec
 import org.enginehub.piston.gen.className
 import org.enginehub.piston.gen.compiler
 import org.enginehub.piston.gen.toFileInPackage

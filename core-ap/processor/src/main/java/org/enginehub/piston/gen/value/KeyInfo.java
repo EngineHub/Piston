@@ -21,14 +21,14 @@ package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.reflect.TypeToken;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import org.enginehub.piston.gen.util.CodeBlockUtil;
 import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.inject.Key;
@@ -73,9 +73,9 @@ public abstract class KeyInfo {
 
     private String getSpecName(AnnotationSpec spec) {
         StringBuilder name = new StringBuilder();
-        name.append(SafeName.getNameAsIdentifier(spec.type));
+        name.append(SafeName.getNameAsIdentifier(spec.type()));
         for (Iterator<Map.Entry<String, List<CodeBlock>>> iterator
-             = spec.members.entrySet().iterator();
+             = spec.members().entrySet().iterator();
              iterator.hasNext(); ) {
             Map.Entry<String, List<CodeBlock>> entry = iterator.next();
             if (!entry.getKey().equals("value")) {
@@ -122,8 +122,8 @@ public abstract class KeyInfo {
         if (spec == null) {
             return null;
         }
-        if (spec.members.isEmpty()) {
-            return CodeBlock.of("$T.class", spec.type);
+        if (spec.members().isEmpty()) {
+            return CodeBlock.of("$T.class", spec.type());
         }
         return runtimeAnnotationExtractor(spec);
     }

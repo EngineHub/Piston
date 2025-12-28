@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Sets;
-import com.squareup.javapoet.ClassName;
+import com.palantir.javapoet.ClassName;
 import org.enginehub.piston.annotation.Command;
 import org.enginehub.piston.annotation.CommandCondition;
 import org.enginehub.piston.annotation.CommandContainer;

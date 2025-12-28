@@ -21,9 +21,9 @@ package org.enginehub.piston.gen
 
 import com.google.testing.compile.CompilationSubject.assertThat
 import com.google.testing.compile.JavaFileObjects
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeSpec
+import com.palantir.javapoet.AnnotationSpec
+import com.palantir.javapoet.MethodSpec
+import com.palantir.javapoet.TypeSpec
 import org.enginehub.piston.annotation.Command
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

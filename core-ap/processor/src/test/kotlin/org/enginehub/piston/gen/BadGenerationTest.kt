@@ -20,9 +20,9 @@
 package org.enginehub.piston.gen
 
 import com.google.testing.compile.CompilationSubject.assertThat
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterSpec
+import com.palantir.javapoet.AnnotationSpec
+import com.palantir.javapoet.MethodSpec
+import com.palantir.javapoet.ParameterSpec
 import org.enginehub.piston.CommandValue
 import org.enginehub.piston.annotation.Command
 import org.enginehub.piston.annotation.param.Arg

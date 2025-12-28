@@ -20,8 +20,8 @@
 package org.enginehub.piston.gen.util;
 
 import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.TypeName;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.internal.RegistrationUtil;

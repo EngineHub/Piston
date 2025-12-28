@@ -21,13 +21,14 @@ package org.enginehub.piston.gen
 
 import com.google.testing.compile.CompilationSubject.assertThat
 import com.google.testing.compile.JavaFileObjects
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
-import com.squareup.javapoet.WildcardTypeName
+import com.palantir.javapoet.AnnotationSpec
+import com.palantir.javapoet.ClassName
+import com.palantir.javapoet.MethodSpec
+import com.palantir.javapoet.ParameterSpec
+import com.palantir.javapoet.ParameterizedTypeName
+import com.palantir.javapoet.TypeName
+import com.palantir.javapoet.TypeSpec
+import com.palantir.javapoet.WildcardTypeName
 import org.enginehub.piston.CommandParameters
 import org.enginehub.piston.CommandValue
 import org.enginehub.piston.annotation.Command
@@ -162,7 +163,7 @@ class GenerationTest {
                 .addParameter(
                     ParameterSpec.builder(ParameterizedTypeName.get(
                         className<Consumer<*>>(),
-                        WildcardTypeName.subtypeOf(TypeName.OBJECT)
+                        WildcardTypeName.subtypeOf(ClassName.OBJECT)
                     ), "arg")
                         .addAnnotation(AnnotationSpec.builder(Arg::class.java)
                             .addMember("desc", "\$S", "ARG DESCRIPTION")

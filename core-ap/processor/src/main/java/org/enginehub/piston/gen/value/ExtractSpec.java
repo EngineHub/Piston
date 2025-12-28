@@ -21,8 +21,8 @@ package org.enginehub.piston.gen.value;
 
 import com.google.auto.value.AutoValue;
 import com.google.auto.value.extension.memoized.Memoized;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
