@@ -196,4 +196,7 @@ Checks based on Google Checks, modified for EngineHub.
         <property name="format" value="(?s:(\r\n|\r).*)"/>
         <property name="message" value="CRLF and CR line endings are prohibited, but this file uses them."/>
     </module>
+    <module name="SuppressionFilter">
+        <property name="file" value="${config_loc}/checkstyle-suppression.xml"/>
+    </module>
 </module>

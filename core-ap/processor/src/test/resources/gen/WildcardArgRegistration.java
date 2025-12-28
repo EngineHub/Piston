@@ -19,8 +19,21 @@
 
 package eh;
 
+import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
+import static org.enginehub.piston.internal.RegistrationUtil.requireOptional;
+import static org.enginehub.piston.part.CommandParts.arg;
+import static org.enginehub.piston.part.CommandParts.flag;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import java.lang.SuppressWarnings;
+import java.lang.Throwable;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.function.Consumer;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -30,27 +43,24 @@ import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.function.Consumer;
-
-import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
-import static org.enginehub.piston.part.CommandParts.arg;
-
-@SuppressWarnings({"deprecation", "removal"})
+@SuppressWarnings({
+    "deprecation",
+    "removal"
+})
 final class WildcardArgRegistration implements CommandRegistration<WildcardArg> {
     private static final Key<Consumer<?>> consumer$__Key = Key.of(new TypeToken<Consumer<?>>() {
     });
+
+    private CommandManager commandManager;
+
+    private WildcardArg containerInstance;
+
+    private ImmutableList<CommandCallListener> listeners;
+
     private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(consumer$__Key))
         .build();
-    private CommandManager commandManager;
-    private WildcardArg containerInstance;
-    private ImmutableList<CommandCallListener> listeners;
 
     private WildcardArgRegistration() {
         this.listeners = ImmutableList.of();
