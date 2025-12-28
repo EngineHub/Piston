@@ -26,10 +26,10 @@ import net.kyori.text.TranslatableComponent;
 import net.kyori.text.format.Style;
 import net.kyori.text.format.TextColor;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  * Color configuration.

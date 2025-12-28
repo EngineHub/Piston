@@ -26,9 +26,9 @@ import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.suggestion.SuggestionProvider;
 import org.enginehub.piston.util.HelpGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Represents a command. Commands can be modified using {@code with/add} functions,

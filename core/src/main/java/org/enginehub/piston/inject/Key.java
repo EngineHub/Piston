@@ -23,13 +23,13 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

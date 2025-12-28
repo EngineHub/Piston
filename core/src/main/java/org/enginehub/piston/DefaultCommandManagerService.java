@@ -19,10 +19,10 @@
 
 package org.enginehub.piston;
 
-import javax.annotation.Nullable;
 import java.util.ServiceLoader;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Streams.stream;

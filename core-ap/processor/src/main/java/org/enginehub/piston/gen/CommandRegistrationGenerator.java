@@ -43,12 +43,6 @@ import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.internal.RegistrationUtil;
 import org.enginehub.piston.part.CommandParts;
 
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -56,6 +50,12 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import javax.annotation.processing.Filer;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;

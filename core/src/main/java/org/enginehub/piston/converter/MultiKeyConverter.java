@@ -29,12 +29,12 @@ import net.kyori.text.Component;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Multimaps.asMap;

@@ -23,12 +23,12 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.text.Component;
 import net.kyori.text.TranslatableComponent;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import javax.annotation.Nullable;
 
 public abstract class Config<T> {
 

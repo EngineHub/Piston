@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.util;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Provides a value, given a context argument.

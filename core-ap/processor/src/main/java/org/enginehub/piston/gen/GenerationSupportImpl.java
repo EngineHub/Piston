@@ -26,10 +26,9 @@ import org.enginehub.piston.gen.value.KeyInfo;
 import org.enginehub.piston.gen.value.RegistrationInfo;
 import org.enginehub.piston.gen.value.RequiredVariable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import javax.annotation.Nullable;
 
 class GenerationSupportImpl implements GenerationSupport {
 

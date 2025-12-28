@@ -24,8 +24,8 @@ import com.google.auto.value.extension.memoized.Memoized;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.TypeName;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
  * Specification for extracting a value.

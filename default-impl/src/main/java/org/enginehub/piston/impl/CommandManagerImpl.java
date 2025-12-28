@@ -36,7 +36,6 @@ import org.enginehub.piston.inject.MemoizingValueAccess;
 import org.enginehub.piston.part.SubCommandPart;
 import org.enginehub.piston.suggestion.Suggestion;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +46,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.enginehub.piston.converter.SuggestionHelper.byPrefix;

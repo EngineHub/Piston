@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.inject;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import javax.annotation.Nullable;
 
 final class NullAnnotationWrapper implements AnnotationWrapper {
     private static final NullAnnotationWrapper INSTANCE = new NullAnnotationWrapper();

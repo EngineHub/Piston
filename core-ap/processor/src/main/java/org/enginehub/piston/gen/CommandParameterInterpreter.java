@@ -43,6 +43,10 @@ import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandParts;
 import org.enginehub.piston.part.NoArgCommandFlag;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -50,10 +54,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;

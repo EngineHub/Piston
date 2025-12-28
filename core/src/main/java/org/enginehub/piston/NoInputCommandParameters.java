@@ -26,9 +26,9 @@ import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
 
-import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * An implementation of {@link CommandParameters} for situations where it is needed,

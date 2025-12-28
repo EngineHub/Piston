@@ -21,9 +21,9 @@ package org.enginehub.piston.inject;
 
 import com.google.auto.value.AutoValue;
 
+import java.lang.annotation.Annotation;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.annotation.Annotation;
 
 @AutoValue
 abstract class TypeAnnotationWrapper implements AnnotationWrapper {

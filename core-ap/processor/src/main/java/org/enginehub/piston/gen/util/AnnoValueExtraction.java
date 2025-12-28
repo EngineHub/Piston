@@ -22,15 +22,15 @@ package org.enginehub.piston.gen.util;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 

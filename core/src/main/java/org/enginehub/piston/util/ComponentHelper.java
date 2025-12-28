@@ -23,8 +23,8 @@ import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.config.ColorConfig;
 
-import javax.annotation.Nullable;
 import java.util.stream.Collector;
+import javax.annotation.Nullable;
 
 public class ComponentHelper {
 

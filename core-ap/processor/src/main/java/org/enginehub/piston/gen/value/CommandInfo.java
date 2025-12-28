@@ -22,10 +22,10 @@ package org.enginehub.piston.gen.value;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 
-import javax.annotation.Nullable;
-import javax.lang.model.element.ExecutableElement;
 import java.util.Collection;
 import java.util.Optional;
+import javax.annotation.Nullable;
+import javax.lang.model.element.ExecutableElement;
 
 @AutoValue
 public abstract class CommandInfo {

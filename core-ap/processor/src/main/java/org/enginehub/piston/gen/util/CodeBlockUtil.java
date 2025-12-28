@@ -26,12 +26,12 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.internal.RegistrationUtil;
 
-import javax.annotation.Nullable;
-import javax.lang.model.element.ExecutableElement;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
+import javax.lang.model.element.ExecutableElement;
 
 import static java.util.Objects.requireNonNull;
 import static org.enginehub.piston.gen.util.TypeNameUtil.rawType;

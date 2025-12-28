@@ -34,13 +34,13 @@ import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.util.CaseHelper;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 @AutoValue
 public abstract class KeyInfo {
