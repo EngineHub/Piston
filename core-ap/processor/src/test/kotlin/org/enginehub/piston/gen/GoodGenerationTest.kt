@@ -237,7 +237,7 @@ class GenerationTest {
                     )
                     .returns(Void.TYPE)
                     .addParameter(
-                        ParameterSpec.builder(Object::class.java, "arg")
+                        ParameterSpec.builder(Any::class.java, "arg") // Changed from [Object] to [Any] per compiler warnings
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
                                     .addMember("desc", "\$S", "ARG DESCRIPTION")
