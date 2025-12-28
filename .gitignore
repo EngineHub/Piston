@@ -1,6 +1,50 @@
-# gradle
 .gradle/
+.kotlin/
 build/
-libs/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-*.log*
+### IntelliJ IDEA ###
+.fleet/
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+nbproject/
+nbbuild/
+nbdist/
+dist/
+!**/src/main/**/dist/
+!**/src/test/**/dist/
+.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Vim ###
+.*.sw[a-p]
+
+### Mac OS ###
+.DS_Store
+.DS_Store/
+
+### Linux ###
+*~
