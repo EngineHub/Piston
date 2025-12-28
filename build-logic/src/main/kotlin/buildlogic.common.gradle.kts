@@ -7,6 +7,7 @@ plugins {
     id("eclipse")
     id("idea")
     id("net.octyl.level-headered")
+    id("checkstyle")
     id("java-library")
     id("maven-publish")
 }
@@ -58,6 +59,11 @@ dependencies {
 
 configure<LevelHeaderedExtension> {
     headerTemplate(rootProject.file("HEADER.txt"))
+}
+
+configure<CheckstyleExtension> {
+    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+    toolVersion = "10.16.0"
 }
 
 configure<JavaPluginExtension> {
@@ -118,5 +124,9 @@ tasks {
 
     named<ProcessResources>("processTestResources") {
         from(rootProject.file("common-test-resources"))
+    }
+
+    named("check").configure {
+        dependsOn("checkstyleMain", "checkstyleTest")
     }
 }
