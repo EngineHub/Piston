@@ -170,7 +170,7 @@ class CommandRegistrationGenerator {
                 spec.addSuperinterface(TypeName.get(superType.asType()));
             } else {
                 throw new IllegalStateException("Not a possible super-type: "
-                    + superType.getKind() + " " + superType.getQualifiedName().toString());
+                    + superType.getKind() + " " + superType.getQualifiedName());
             }
         }
 

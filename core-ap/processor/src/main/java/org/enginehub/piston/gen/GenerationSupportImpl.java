@@ -33,31 +33,22 @@ import java.util.Objects;
 
 class GenerationSupportImpl implements GenerationSupport {
 
-    private static final class ShareKey {
-        private final TypeName type;
-        private final String name;
-        private final Object shareKey;
-
-        ShareKey(TypeName type, String name, Object shareKey) {
-            this.type = type;
-            this.name = name;
-            this.shareKey = shareKey;
-        }
+    private record ShareKey(TypeName type, String name, Object shareKey) {
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ShareKey shareKey1 = (ShareKey) o;
-            return type.equals(shareKey1.type) &&
-                name.equals(shareKey1.name) &&
-                shareKey.equals(shareKey1.shareKey);
-        }
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;
+                }
+                ShareKey shareKey1 = (ShareKey) o;
+                return type.equals(shareKey1.type) &&
+                    name.equals(shareKey1.name) &&
+                    shareKey.equals(shareKey1.shareKey);
+            }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(type, name, shareKey);
-        }
     }
 
     private final IdentifierTracker identifierTracker;

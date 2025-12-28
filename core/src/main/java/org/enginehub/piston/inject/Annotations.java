@@ -39,39 +39,36 @@ import static java.util.stream.Collectors.toMap;
 
 class Annotations {
 
-    private static final class MethodKey {
-        static MethodKey from(Method method) {
-            return of(method.getReturnType(), method.getName(), method.getParameterTypes());
-        }
+    private record MethodKey(String name, ImmutableList<Class<?>> signature) {
+            static MethodKey from(Method method) {
+                return of(method.getReturnType(), method.getName(), method.getParameterTypes());
+            }
 
-        static MethodKey of(Class<?> rtype, String name, Class<?>... ptypes) {
-            return new MethodKey(name, ImmutableList.<Class<?>>builder()
-                .add(rtype)
-                .add(ptypes)
-                .build());
-        }
+            static MethodKey of(Class<?> rtype, String name, Class<?>... ptypes) {
+                return new MethodKey(name, ImmutableList.<Class<?>>builder()
+                    .add(rtype)
+                    .add(ptypes)
+                    .build());
+            }
 
-        private final String name;
-        private final ImmutableList<Class<?>> signature;
+            private MethodKey(String name, List<Class<?>> signature) {
+                this.name = name;
+                this.signature = ImmutableList.copyOf(signature);
+            }
 
-        private MethodKey(String name, List<Class<?>> signature) {
-            this.name = name;
-            this.signature = ImmutableList.copyOf(signature);
-        }
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;
+                }
+                MethodKey methodKey = (MethodKey) o;
+                return name.equals(methodKey.name) &&
+                    signature.equals(methodKey.signature);
+            }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            MethodKey methodKey = (MethodKey) o;
-            return name.equals(methodKey.name) &&
-                signature.equals(methodKey.signature);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, signature);
-        }
     }
 
     @FunctionalInterface

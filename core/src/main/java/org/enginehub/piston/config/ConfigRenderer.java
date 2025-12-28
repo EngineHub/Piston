@@ -47,9 +47,8 @@ public class ConfigRenderer implements ComponentRenderer<ConfigHolder> {
     @Override
     public @NonNull Component render(@NonNull Component component, @NonNull ConfigHolder context) {
         component = replaceSubcomponents(component, context);
-        if (component instanceof TranslatableComponent) {
+        if (component instanceof TranslatableComponent tc) {
             // check if replacing
-            TranslatableComponent tc = (TranslatableComponent) component;
             Config<?> config = context.getConfigs().get(tc.key());
             if (config != null) {
                 component = config.apply(tc);
@@ -59,8 +58,7 @@ public class ConfigRenderer implements ComponentRenderer<ConfigHolder> {
     }
 
     private Component replaceSubcomponents(Component component, ConfigHolder context) {
-        if (component instanceof TranslatableComponent) {
-            TranslatableComponent tc = (TranslatableComponent) component;
+        if (component instanceof TranslatableComponent tc) {
             List<Component> originalArgs = tc.args();
             List<Component> replacementArgs = renderList(originalArgs, context);
             if (originalArgs != replacementArgs) {

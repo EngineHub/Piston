@@ -172,7 +172,7 @@ class CommandParameterInterpreter {
     private ExtractSpec getArgExtractSpec(VariableElement parameter) {
         TypeMirror parameterType = parameter.asType();
         return ExtractSpec.builder()
-            .name("extract$" + parameter.getSimpleName().toString())
+            .name("extract$" + parameter.getSimpleName())
             .type(TypeName.get(parameterType))
             .extractMethodBody(var -> {
                 CodeBlock.Builder builder = CodeBlock.builder();
@@ -221,7 +221,7 @@ class CommandParameterInterpreter {
                 "$T.flag('$L', $L).build()",
                 CommandParts.class, name, textCompOf(desc)))
             .extractSpec(ExtractSpec.builder()
-                .name("extract$" + parameter.getSimpleName().toString())
+                .name("extract$" + parameter.getSimpleName())
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> CodeBlock.builder()
                     .addStatement("return $L.in($L)",
@@ -241,7 +241,7 @@ class CommandParameterInterpreter {
     private CommandParamInfo commandParameterValue(VariableElement parameter) {
         return CommandParamInfo.builder()
             .extractSpec(ExtractSpec.builder()
-                .name("extract$" + parameter.getSimpleName().toString())
+                .name("extract$" + parameter.getSimpleName())
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var ->
                     CodeBlock.of("$[return $L;\n$]", ReservedNames.PARAMETERS))
@@ -252,7 +252,7 @@ class CommandParameterInterpreter {
     private CommandParamInfo injectableValue(VariableElement parameter) {
         return CommandParamInfo.builder()
             .extractSpec(ExtractSpec.builder()
-                .name("extract$" + parameter.getSimpleName().toString())
+                .name("extract$" + parameter.getSimpleName())
                 .type(TypeName.get(parameter.asType()))
                 .extractMethodBody(var -> {
                     CodeBlock paramKey = asKeyType(parameter);

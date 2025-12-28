@@ -38,16 +38,7 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 @DisplayName("A ConfigHolder")
 public class ConfigHolderTest {
 
-    private static final class TestCase {
-        private final String name;
-        private final Component input;
-        private final Component expected;
-
-        private TestCase(String name, Component input, Component expected) {
-            this.name = name;
-            this.input = input;
-            this.expected = expected;
-        }
+    private record TestCase(String name, Component input, Component expected) {
     }
 
     private final ConfigRenderer renderer = ConfigRenderer.getInstance();

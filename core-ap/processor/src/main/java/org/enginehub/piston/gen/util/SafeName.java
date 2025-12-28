@@ -60,9 +60,8 @@ public class SafeName {
         if (typeName instanceof ClassName) {
             // good, just the raw name works here
             return ((ClassName) typeName).simpleName();
-        } else if (typeName instanceof ParameterizedTypeName) {
+        } else if (typeName instanceof ParameterizedTypeName pt) {
             // append the type parameters
-            ParameterizedTypeName pt = (ParameterizedTypeName) typeName;
             ClassName raw = pt.rawType();
             StringBuilder result = new StringBuilder(
                 getNameAsIdentifierRaw(raw)

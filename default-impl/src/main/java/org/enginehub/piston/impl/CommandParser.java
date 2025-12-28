@@ -102,17 +102,17 @@ class CommandParser {
 
         private PerCommandDetails(CommandInfo commandInfo) {
             this.commandInfo = commandInfo;
-            this.defaultsNeeded = new HashSet<>(commandInfo.defaultProvided);
+            this.defaultsNeeded = new HashSet<>(commandInfo.defaultProvided());
             // collect argument flags that don't have default values
             // we'll provide `null` for them in this case.
             this.argFlagsNeeded = StreamHelper.cast(
-                commandInfo.flags.values().stream(),
+                commandInfo.flags().values().stream(),
                 ArgAcceptingCommandFlag.class
             )
                 .filter(arg -> !defaultsNeeded.contains(arg))
                 .collect(Collectors.toCollection(HashSet::new));
-            this.partIter = commandInfo.arguments.listIterator();
-            this.remainingRequiredParts = commandInfo.requiredParts;
+            this.partIter = commandInfo.arguments().listIterator();
+            this.remainingRequiredParts = commandInfo.requiredParts();
         }
     }
 
@@ -367,12 +367,12 @@ class CommandParser {
 
         return token.codePoints()
             .skip(1)
-            .allMatch(cp -> perCommandDetails().commandInfo.flags.containsKey((char) cp));
+            .allMatch(cp -> perCommandDetails().commandInfo.flags().containsKey((char) cp));
     }
 
     private boolean parseSubCommand(SubCommandPart part, String token) {
         CommandInfo commandInfo = perCommandDetails().commandInfo;
-        ImmutableMap<String, Command> subCommands = commandInfo.subCommandTable.row(part);
+        ImmutableMap<String, Command> subCommands = commandInfo.subCommandTable().row(part);
         Command sub = subCommands.get(token);
         if (sub == null) {
             return false;
@@ -409,8 +409,7 @@ class CommandParser {
         CommandArgument lastFailedOptionalLocal = null;
         while (hasNextPart()) {
             ArgConsumingCommandPart nextArg = nextPart();
-            if (nextArg instanceof SubCommandPart) {
-                SubCommandPart subCommandPart = (SubCommandPart) nextArg;
+            if (nextArg instanceof SubCommandPart subCommandPart) {
                 if (parseSubCommand(subCommandPart, token)) {
                     return true;
                 }
@@ -418,7 +417,7 @@ class CommandParser {
                     throw usageException(
                         invalidSubCommandMessage(
                             token,
-                            details.commandInfo.subCommandTable.row(subCommandPart)
+                            details.commandInfo.subCommandTable().row(subCommandPart)
                         ));
                 }
                 continue;
@@ -438,7 +437,7 @@ class CommandParser {
                 )));
                 return true;
             } else {
-                if (details.commandInfo.subCommandTable.isEmpty()) {
+                if (details.commandInfo.subCommandTable().isEmpty()) {
                     // No sub-commands -- we can fill optionals based on remaining argument count
                     int remainingArguments = remainingNonFlagArguments();
                     int diff = remainingArguments - details.remainingRequiredParts;
@@ -530,7 +529,7 @@ class CommandParser {
     private void parseFlags(String flags) {
         for (int i = 0; i < flags.length(); i++) {
             char c = flags.charAt(i);
-            CommandFlag flag = perCommandDetails().commandInfo.flags.get(c);
+            CommandFlag flag = perCommandDetails().commandInfo.flags().get(c);
             if (flag == null) {
                 buildParseResult();
                 throw new NoSuchFlagException(getResult(), c);
@@ -541,14 +540,13 @@ class CommandParser {
                     .append(" has already been specified.")
                     .build());
             }
-            if (flag instanceof ArgAcceptingCommandFlag) {
+            if (flag instanceof ArgAcceptingCommandFlag argPart) {
                 if (i + 1 < flags.length()) {
                     // Only allow argument-flags at the end of flag-combos.
                     throw usageException(TextComponent.of("Argument-accepting flags must be " +
                         "at the end of combined flag groups."));
                 }
                 bind(flag, true);
-                ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
                 if (!hasNextArgument()) {
                     throw notEnoughArgumentsException();
                 }

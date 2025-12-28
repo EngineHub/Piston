@@ -37,7 +37,9 @@ import java.util.stream.IntStream;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-class CommandInfo {
+record CommandInfo(ImmutableList<ArgConsumingCommandPart> arguments,
+                   ImmutableList<ArgAcceptingCommandPart> defaultProvided, ImmutableMap<Character, CommandFlag> flags,
+                   ImmutableTable<SubCommandPart, String, Command> subCommandTable, int requiredParts) {
 
     static CommandInfo from(Command command) {
         ImmutableList.Builder<ArgConsumingCommandPart> arguments = ImmutableList.builder();
@@ -62,13 +64,12 @@ class CommandInfo {
                     seenOptionalArg = true;
                 }
                 arguments.add((ArgConsumingCommandPart) part);
-            } else if (part instanceof SubCommandPart) {
+            } else if (part instanceof SubCommandPart subCommandPart) {
                 if (part.isRequired()) {
                     checkState(i + 1 >= parts.size(),
                         "Required sub-command must be last part.");
                     seenRequiredSubCommand = true;
                 }
-                SubCommandPart subCommandPart = (SubCommandPart) part;
                 for (Command cmd : subCommandPart.getCommands()) {
                     subCommandTable.put(subCommandPart, cmd.getName(), cmd);
                     for (String alias : cmd.getAliases()) {
@@ -82,8 +83,7 @@ class CommandInfo {
             if (part.isRequired()) {
                 requiredParts++;
             }
-            if (part instanceof ArgAcceptingCommandPart) {
-                ArgAcceptingCommandPart argPart = (ArgAcceptingCommandPart) part;
+            if (part instanceof ArgAcceptingCommandPart argPart) {
                 if (argPart.getDefaults().size() > 0) {
                     defaultProvided.add(argPart);
                 }
@@ -111,20 +111,4 @@ class CommandInfo {
             requiredParts);
     }
 
-    final ImmutableList<ArgConsumingCommandPart> arguments;
-    final ImmutableList<ArgAcceptingCommandPart> defaultProvided;
-    final ImmutableMap<Character, CommandFlag> flags;
-    final ImmutableTable<SubCommandPart, String, Command> subCommandTable;
-    final int requiredParts;
-
-    CommandInfo(ImmutableList<ArgConsumingCommandPart> arguments,
-                ImmutableList<ArgAcceptingCommandPart> defaultProvided,
-                ImmutableMap<Character, CommandFlag> flags,
-                ImmutableTable<SubCommandPart, String, Command> subCommandTable, int requiredParts) {
-        this.arguments = arguments;
-        this.defaultProvided = defaultProvided;
-        this.flags = flags;
-        this.subCommandTable = subCommandTable;
-        this.requiredParts = requiredParts;
-    }
 }
