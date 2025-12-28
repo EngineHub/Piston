@@ -38,8 +38,8 @@ class NestedClassTest {
                 MethodSpec.methodBuilder("noArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "noArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "noArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)

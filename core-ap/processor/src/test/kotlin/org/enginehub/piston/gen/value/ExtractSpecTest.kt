@@ -31,7 +31,7 @@ class ExtractSpecTest {
     private val extractSpec = ExtractSpec.builder()
         .name("foo")
         .type(className<String>())
-        .extractMethodBody { name -> CodeBlock.of("\$S", "My name is $name") }
+        .extractMethodBody { name -> CodeBlock.of($$"$S", "My name is $name") }
         .build()
 
     @DisplayName("is equal to itself")
@@ -66,7 +66,7 @@ class ExtractSpecTest {
     @Test
     fun isNotEqualDifferentGenerator() {
         val copy = extractSpec.toBuilder().extractMethodBody { name ->
-            CodeBlock.of("\$S", "I'm a different $name")
+            CodeBlock.of($$"$S", "I'm a different $name")
         }.build()
         assertNotEquals(extractSpec, copy)
     }

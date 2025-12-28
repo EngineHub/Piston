@@ -47,8 +47,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("noArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "noArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "noArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -57,9 +57,9 @@ class GenerationTest {
                 MethodSpec.methodBuilder("noArgFooter")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "noArgumentFooter")
-                            .addMember("desc", "\$S", "DESCRIPTION")
-                            .addMember("descFooter", "\$S", "DESC FOOTER")
+                            .addMember("name", $$"$S", "noArgumentFooter")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
+                            .addMember("descFooter", $$"$S", "DESC FOOTER")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -67,8 +67,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("noArgCondition")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "noArgumentCondition")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "noArgumentCondition")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .addAnnotation(AlwaysTrueCondition::class.java)
@@ -77,8 +77,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("noArgStatic")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "noArgumentStatic")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "noArgumentStatic")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .addModifiers(Modifier.STATIC)
@@ -102,8 +102,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("nonArgCommandParameters")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "nonArgCommandParameters")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "nonArgCommandParameters")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -112,8 +112,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("nonArgInjected")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "nonArgInjected")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "nonArgInjected")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -139,8 +139,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("valueArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "valueArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "valueArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -148,7 +148,7 @@ class GenerationTest {
                         ParameterSpec.builder(CommandValue::class.java, "arg")
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .build()
@@ -172,8 +172,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("valueArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "wildcardArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "wildcardArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -186,7 +186,7 @@ class GenerationTest {
                         )
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .build()
@@ -210,8 +210,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("collectionArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "collectionArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "collectionArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -221,7 +221,7 @@ class GenerationTest {
                         )
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .build()
@@ -231,8 +231,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("objectArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "objectArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "objectArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(Void.TYPE)
@@ -240,7 +240,7 @@ class GenerationTest {
                         ParameterSpec.builder(Any::class.java, "arg") // Changed from [Object] to [Any] per compiler warnings
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .build()
@@ -264,8 +264,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("intArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "intArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "intArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.INT)
@@ -273,7 +273,7 @@ class GenerationTest {
                         ParameterSpec.builder(TypeName.INT, "arg")
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .build()
@@ -283,8 +283,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("annotatedIntArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "annotatedIntArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "annotatedIntArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.VOID)
@@ -292,12 +292,12 @@ class GenerationTest {
                         ParameterSpec.builder(TypeName.INT, "arg")
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .addAnnotation(
                                 AnnotationSpec.builder(InjectGamma::class.java)
-                                    .addMember("value", "\$S", "something to match")
+                                    .addMember("value", $$"$S", "something to match")
                                     .build()
                             )
                             .build()
@@ -306,8 +306,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("annotatedIntArg2")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "annotatedIntArgument2")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "annotatedIntArgument2")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.VOID)
@@ -315,7 +315,7 @@ class GenerationTest {
                         ParameterSpec.builder(TypeName.INT, "delta")
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .addAnnotation(
@@ -331,8 +331,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("annotatedIntArg3")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "annotatedIntArgument3")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "annotatedIntArgument3")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.VOID)
@@ -340,7 +340,7 @@ class GenerationTest {
                         ParameterSpec.builder(TypeName.INT, "alpha")
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .addAnnotation(InjectAlpha::class.java)
@@ -350,8 +350,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("variableIntArg")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "variableIntArgument")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "variableIntArgument")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.VOID)
@@ -361,8 +361,8 @@ class GenerationTest {
                         )
                             .addAnnotation(
                                 AnnotationSpec.builder(Arg::class.java)
-                                    .addMember("name", "\$S", "args")
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("name", $$"$S", "args")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .addMember("variable", "true")
                                     .build()
                             )
@@ -387,8 +387,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("booleanFlag")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "booleanFlag")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "booleanFlag")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.VOID)
@@ -397,7 +397,7 @@ class GenerationTest {
                             .addAnnotation(
                                 AnnotationSpec.builder(Switch::class.java)
                                     .addMember("name", "'f'")
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
                                     .build()
                             )
                             .build()
@@ -406,8 +406,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("stringArgFlag")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "stringArgFlag")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "stringArgFlag")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.VOID)
@@ -416,8 +416,8 @@ class GenerationTest {
                             .addAnnotation(
                                 AnnotationSpec.builder(ArgFlag::class.java)
                                     .addMember("name", "'f'")
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
-                                    .addMember("def", "\$S", "DEFAULT")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
+                                    .addMember("def", $$"$S", "DEFAULT")
                                     .build()
                             )
                             .build()
@@ -426,8 +426,8 @@ class GenerationTest {
                 MethodSpec.methodBuilder("stringArgFlagCustom")
                     .addAnnotation(
                         AnnotationSpec.builder(Command::class.java)
-                            .addMember("name", "\$S", "stringArgFlagCustom")
-                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("name", $$"$S", "stringArgFlagCustom")
+                            .addMember("desc", $$"$S", "DESCRIPTION")
                             .build()
                     )
                     .returns(TypeName.VOID)
@@ -436,9 +436,9 @@ class GenerationTest {
                             .addAnnotation(
                                 AnnotationSpec.builder(ArgFlag::class.java)
                                     .addMember("name", "'f'")
-                                    .addMember("argName", "\$S", "ARG NAME")
-                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
-                                    .addMember("def", "\$S", "DEFAULT")
+                                    .addMember("argName", $$"$S", "ARG NAME")
+                                    .addMember("desc", $$"$S", "ARG DESCRIPTION")
+                                    .addMember("def", $$"$S", "DEFAULT")
                                     .build()
                             )
                             .build()
@@ -461,7 +461,7 @@ class GenerationTest {
             .addAnnotation(
                 AnnotationSpec.builder(className<CommandContainer>())
                     .addMember(
-                        "superTypes", "{ \$T.class, \$T.class }",
+                        "superTypes", $$"{ $T.class, $T.class }",
                         className<EmptySuperClass>(), className<EmptySuperInterface>()
                     )
                     .build()
