@@ -8,11 +8,14 @@ kapt.includeCompileClasspath = false
 
 tasks.test {
     // Crack open the compiler for compile testing
-    jvmArgs(
-        "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
-        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-        "--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
-    )
+    listOf(
+        "api",
+        "file",
+        "main",
+        "parser",
+        "tree",
+        "util"
+    ).forEach { jvmArgs("--add-exports=jdk.compiler/com.sun.tools.javac.${it}=ALL-UNNAMED") }
 }
 
 dependencies {
