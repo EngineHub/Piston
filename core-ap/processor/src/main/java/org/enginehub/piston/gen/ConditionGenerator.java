@@ -35,10 +35,10 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 
 class ConditionGenerator {
+    public static final String COMMAND_METHOD_FIELD = "commandMethod";
     private final AnnotationMirror conditionMirror;
     private final ExecutableElement method;
     private final GenerationSupport depSupport;
-    public static final String COMMAND_METHOD_FIELD = "commandMethod";
 
     ConditionGenerator(AnnotationMirror conditionMirror,
                        ExecutableElement method,
@@ -52,7 +52,8 @@ class ConditionGenerator {
         TypeName generatorClassName = getAnnotationValue(conditionMirror, "value")
             .accept(new SimpleAnnotationValueVisitor8<TypeName, Void>() {
                 @Override
-                public TypeName visitType(TypeMirror t, Void aVoid) {
+                public TypeName visitType(TypeMirror t, Void avoid) {
+                    // Checkstyle: 'ParameterName' does not permit capitalization of second letter in [aVoid]
                     return TypeName.get(t);
                 }
             }, null);

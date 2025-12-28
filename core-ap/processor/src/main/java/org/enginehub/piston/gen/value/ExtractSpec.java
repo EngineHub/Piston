@@ -33,32 +33,8 @@ import javax.annotation.Nullable;
 @AutoValue
 public abstract class ExtractSpec {
 
-    @FunctionalInterface
-    public interface ExtractMethodBody {
-
-        /**
-         * Generate extraction code, given that the parameter's part is stored in the given field.
-         *
-         * <p>{@code partFieldName} will be {@code null} if there is no field.</p>
-         */
-        CodeBlock generate(@Nullable String partFieldName);
-
-    }
-
     public static Builder builder() {
         return new AutoValue_ExtractSpec.Builder();
-    }
-
-    @AutoValue.Builder
-    public interface Builder {
-
-        Builder name(String name);
-
-        Builder type(TypeName type);
-
-        Builder extractMethodBody(ExtractMethodBody body);
-
-        ExtractSpec build();
     }
 
     /**
@@ -107,5 +83,29 @@ public abstract class ExtractSpec {
     @Override
     public final int hashCode() {
         return Objects.hash(getName(), getType(), getGeneratedMethodBody());
+    }
+
+    @FunctionalInterface
+    public interface ExtractMethodBody {
+
+        /**
+         * Generate extraction code, given that the parameter's part is stored in the given field.
+         *
+         * <p>{@code partFieldName} will be {@code null} if there is no field.</p>
+         */
+        CodeBlock generate(@Nullable String partFieldName);
+
+    }
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder name(String name);
+
+        Builder type(TypeName type);
+
+        Builder extractMethodBody(ExtractMethodBody body);
+
+        ExtractSpec build();
     }
 }

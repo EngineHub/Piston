@@ -21,9 +21,7 @@ package org.enginehub.piston.gen.value
 
 import com.palantir.javapoet.CodeBlock
 import org.enginehub.piston.gen.className
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNotSame
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 

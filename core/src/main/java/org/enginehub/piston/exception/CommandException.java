@@ -29,8 +29,8 @@ import org.enginehub.piston.util.TextHelper;
  * Parent class for all command-related exceptions.
  */
 public class CommandException extends RuntimeException {
-    private final Component message;
     protected final ImmutableList<Command> commands;
+    private final Component message;
 
     public CommandException(ImmutableList<Command> commands) {
         this.message = TextComponent.empty();

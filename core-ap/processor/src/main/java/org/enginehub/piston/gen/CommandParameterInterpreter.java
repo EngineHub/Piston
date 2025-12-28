@@ -70,25 +70,14 @@ import static org.enginehub.piston.gen.util.ProcessingEnvValues.prefixArgName;
 
 class CommandParameterInterpreter {
 
-    private interface ParamTransform {
-
-        CommandParamInfo createPartInfo(VariableElement parameter);
-
-    }
-
-    private static boolean isUnconverted(ProcessingEnvironment env, VariableElement parameter) {
-        TypeMirror commandValue = env.getElementUtils().getTypeElement(CommandValue.class.getCanonicalName()).asType();
-        return env.getTypeUtils().isAssignable(parameter.asType(), commandValue);
-    }
-
-    private final Map<Class<? extends Annotation>, ParamTransform> ANNOTATION_TRANSFORMS = ImmutableMap.of(
+    private final ExecutableElement method;
+    private final GenerationSupport generationSupport;
+    private final ProcessingEnvironment env;
+    private final Map<Class<? extends Annotation>, ParamTransform> annotationTransforms = ImmutableMap.of(
         Arg.class, this::argTransform,
         ArgFlag.class, this::argFlagTransform,
         Switch.class, this::switchTransform
     );
-    private final ExecutableElement method;
-    private final GenerationSupport generationSupport;
-    private final ProcessingEnvironment env;
 
     CommandParameterInterpreter(ExecutableElement method,
                                 GenerationSupport generationSupport,
@@ -96,6 +85,11 @@ class CommandParameterInterpreter {
         this.method = method;
         this.generationSupport = generationSupport;
         this.env = env;
+    }
+
+    private static boolean isUnconverted(ProcessingEnvironment env, VariableElement parameter) {
+        TypeMirror commandValue = env.getElementUtils().getTypeElement(CommandValue.class.getCanonicalName()).asType();
+        return env.getTypeUtils().isAssignable(parameter.asType(), commandValue);
     }
 
     private CommandParamInfo argTransform(VariableElement parameter) {
@@ -109,8 +103,10 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.arg($L, $L)\n" +
-                    ".defaultsTo($L)\n",
+            .add("""
+                    $T.arg($L, $L)
+                    .defaultsTo($L)
+                    """,
                 CommandParts.class, transCompOf(prefixArgName(env, name)), textCompOf(desc),
                 stringListForGen(defaults.stream()));
         addArgTypes(parameter, construction);
@@ -138,10 +134,12 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.flag('$L', $L)\n" +
-                    ".withRequiredArg()\n" +
-                    ".argNamed($L)\n" +
-                    ".defaultsTo($L)\n",
+            .add("""
+                    $T.flag('$L', $L)
+                    .withRequiredArg()
+                    .argNamed($L)
+                    .defaultsTo($L)
+                    """,
                 CommandParts.class, name, textCompOf(desc),
                 transCompOf(prefixArgName(env, argName)),
                 stringListForGen(defaults.stream()));
@@ -298,7 +296,7 @@ class CommandParameterInterpreter {
 
     private CommandParamInfo getParam(VariableElement parameter) {
         ImmutableList<ParamTransform> transforms =
-            ANNOTATION_TRANSFORMS.entrySet().stream()
+            annotationTransforms.entrySet().stream()
                 .filter(e -> isAnnotationPresent(parameter, e.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(toImmutableList());
@@ -309,5 +307,11 @@ class CommandParameterInterpreter {
         }
         ParamTransform transform = transforms.isEmpty() ? this::untransformedParameter : transforms.get(0);
         return transform.createPartInfo(parameter);
+    }
+
+    private interface ParamTransform {
+
+        CommandParamInfo createPartInfo(VariableElement parameter);
+
     }
 }

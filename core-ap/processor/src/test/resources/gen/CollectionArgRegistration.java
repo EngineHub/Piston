@@ -19,22 +19,7 @@
 
 package eh;
 
-
-import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
-import static org.enginehub.piston.internal.RegistrationUtil.requireOptional;
-import static org.enginehub.piston.part.CommandParts.arg;
-import static org.enginehub.piston.part.CommandParts.flag;
-
 import com.google.common.collect.ImmutableList;
-import java.lang.Object;
-import java.lang.String;
-import java.lang.SuppressWarnings;
-import java.lang.Throwable;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -44,26 +29,30 @@ import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+
+import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
+import static org.enginehub.piston.part.CommandParts.arg;
+
 @SuppressWarnings({"deprecation", "removal"})
 final class CollectionArgRegistration implements CommandRegistration<CollectionArg> {
     private static final Key<String> string_Key = Key.of(String.class);
     private static final Key<Object> object_Key = Key.of(Object.class);
-
-    private CommandManager commandManager;
-
-    private CollectionArg containerInstance;
-
-    private ImmutableList<CommandCallListener> listeners;
-
     private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(string_Key))
         .build();
-
     private final CommandArgument argPart2 = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(object_Key))
         .build();
+    private CommandManager commandManager;
+    private CollectionArg containerInstance;
+    private ImmutableList<CommandCallListener> listeners;
 
     private CollectionArgRegistration() {
         this.listeners = ImmutableList.of();

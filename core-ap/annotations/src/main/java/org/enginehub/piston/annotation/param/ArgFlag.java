@@ -33,12 +33,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface ArgFlag {
 
+    String ARG_NAME_IS_PARAMETER_NAME = "__ARG_NAME_IS_PARAMETER_NAME__";
+
     /**
      * The name of the flag.
      */
     char name();
-
-    String ARG_NAME_IS_PARAMETER_NAME = "__ARG_NAME_IS_PARAMETER_NAME__";
 
     /**
      * The name of the argument. If not specified, defaults to the name of

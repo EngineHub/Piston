@@ -20,31 +20,24 @@
 package org.enginehub.piston.suggestion
 
 import net.kyori.text.TextComponent
-import org.enginehub.piston.Command
-import org.enginehub.piston.CommandManager
-import org.enginehub.piston.assertEqualUnordered
+import org.enginehub.piston.*
 import org.enginehub.piston.inject.InjectedValueAccess
 import org.enginehub.piston.inject.Key
-import org.enginehub.piston.installCommands
-import org.enginehub.piston.newManager
-import org.enginehub.piston.subs
-import org.enginehub.piston.withMockedContainer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import kotlin.streams.toList
 
 @DisplayName("The manager's suggestion provider")
 class ManagerSuggestionTest {
 
     private val suggestionMatrix = listOf(
-            setOf("art", "buck", "chair", "axe", "barely", "carrots"),
-            setOf("123", "244", "312", "100", "213", "333"),
-            setOf("something", "anything", "really"),
-            // attempt to trigger a bug where completions go too far:
-            setOf("something_else", "anything_else", "really_not_it"),
-            setOf("something_else_entirely", "anything_else_except_this", "really_off")
+        setOf("art", "buck", "chair", "axe", "barely", "carrots"),
+        setOf("123", "244", "312", "100", "213", "333"),
+        setOf("something", "anything", "really"),
+        // attempt to trigger a bug where completions go too far:
+        setOf("something_else", "anything_else", "really_not_it"),
+        setOf("something_else_entirely", "anything_else_except_this", "really_off")
     )
 
     private fun withSuggestionManager(block: (CommandManager) -> Unit) {
@@ -52,8 +45,10 @@ class ManagerSuggestionTest {
             val manager = newManager().apply {
                 installCommands(it, SuggestingCommandRegistration.builder())
                 suggestionMatrix.forEachIndexed { index, set ->
-                    registerConverter(Key.of(String::class.java, suggest(index + 1)),
-                            SimpleSuggestingConverter(set.toList()))
+                    registerConverter(
+                        Key.of(String::class.java, suggest(index + 1)),
+                        SimpleSuggestingConverter(set.toList())
+                    )
                 }
 
                 register("notpermitted") { cmd ->
@@ -79,7 +74,8 @@ class ManagerSuggestionTest {
     fun suggestsCommandOnEmpty() {
         withSuggestionManager { manager ->
             val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY, listOf(""))
-            assertEqualUnordered(manager.allCommands.map { it.name }.filter { it != "notpermitted" }.toList(),
+            assertEqualUnordered(
+                manager.allCommands.map { it.name }.filter { it != "notpermitted" }.toList(),
                 actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 0 }, "replacement not targeted at first argument")
         }
@@ -99,7 +95,8 @@ class ManagerSuggestionTest {
             assertTrue(actualSuggestions.map { it.suggestion }.any { it == "permitted" }) {
                 "`permitted` not contained in suggestions"
             }
-            assertEqualUnordered(manager.allCommands.map { it.name }.filter { it != "notpermitted" }.toList(),
+            assertEqualUnordered(
+                manager.allCommands.map { it.name }.filter { it != "notpermitted" }.toList(),
                 actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 0 }, "replacement not targeted at first argument")
         }
@@ -111,7 +108,10 @@ class ManagerSuggestionTest {
         withSuggestionManager { manager ->
             val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY, listOf("cmd"))
             assertEqualUnordered(suggestionMatrix[0], actualSuggestions.map { it.suggestion })
-            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+            assertTrue(
+                actualSuggestions.all { it.replacedArgument == 1 },
+                "replacement not targeted at second argument"
+            )
         }
     }
 
@@ -121,9 +121,12 @@ class ManagerSuggestionTest {
         withSuggestionManager { manager ->
             val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY, listOf("cmd", "a"))
             assertEqualUnordered(
-                    suggestionMatrix[0].filter(byPrefix("a")),
-                    actualSuggestions.map { it.suggestion })
-            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+                suggestionMatrix[0].filter(byPrefix("a")),
+                actualSuggestions.map { it.suggestion })
+            assertTrue(
+                actualSuggestions.all { it.replacedArgument == 1 },
+                "replacement not targeted at second argument"
+            )
         }
     }
 
@@ -131,10 +134,13 @@ class ManagerSuggestionTest {
     @DisplayName("suggests second and third argument if command & first selected")
     fun suggestsSecondAndThird() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("cmd", suggestionMatrix[0].first()))
-            assertEqualUnordered(suggestionMatrix[1] + suggestionMatrix[2],
-                    actualSuggestions.map { it.suggestion })
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("cmd", suggestionMatrix[0].first())
+            )
+            assertEqualUnordered(
+                suggestionMatrix[1] + suggestionMatrix[2],
+                actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at third argument")
         }
     }
@@ -144,17 +150,29 @@ class ManagerSuggestionTest {
     fun suggestsSubSecondAndThird() {
         withSuggestionManager { manager ->
             assertAll({
-                val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                        listOf("cmd", suggestionMatrix[0].first(), "1"))
-                assertEqualUnordered((suggestionMatrix[1] + suggestionMatrix[2]).filter(byPrefix("1")),
-                        actualSuggestions.map { it.suggestion })
-                assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at third argument")
+                val actualSuggestions = manager.getSuggestions(
+                    InjectedValueAccess.EMPTY,
+                    listOf("cmd", suggestionMatrix[0].first(), "1")
+                )
+                assertEqualUnordered(
+                    (suggestionMatrix[1] + suggestionMatrix[2]).filter(byPrefix("1")),
+                    actualSuggestions.map { it.suggestion })
+                assertTrue(
+                    actualSuggestions.all { it.replacedArgument == 2 },
+                    "replacement not targeted at third argument"
+                )
             }, {
-                val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                        listOf("cmd", suggestionMatrix[0].first(), "someth"))
-                assertEqualUnordered((suggestionMatrix[1] + suggestionMatrix[2]).filter(byPrefix("someth")),
-                        actualSuggestions.map { it.suggestion })
-                assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at third argument")
+                val actualSuggestions = manager.getSuggestions(
+                    InjectedValueAccess.EMPTY,
+                    listOf("cmd", suggestionMatrix[0].first(), "someth")
+                )
+                assertEqualUnordered(
+                    (suggestionMatrix[1] + suggestionMatrix[2]).filter(byPrefix("someth")),
+                    actualSuggestions.map { it.suggestion })
+                assertTrue(
+                    actualSuggestions.all { it.replacedArgument == 2 },
+                    "replacement not targeted at third argument"
+                )
             })
         }
     }
@@ -163,10 +181,15 @@ class ManagerSuggestionTest {
     @DisplayName("suggests flags on `-` input")
     fun suggestsFlag() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("flags", "-"))
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("flags", "-")
+            )
             assertEqualUnordered(setOf("-1", "-2", "-3"), actualSuggestions.map { it.suggestion })
-            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+            assertTrue(
+                actualSuggestions.all { it.replacedArgument == 1 },
+                "replacement not targeted at second argument"
+            )
         }
     }
 
@@ -174,10 +197,15 @@ class ManagerSuggestionTest {
     @DisplayName("suggests only unused flags on `-1` input")
     fun suggestsOnlyUnusedFlag() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("flags", "-1"))
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("flags", "-1")
+            )
             assertEqualUnordered(setOf("-12", "-13"), actualSuggestions.map { it.suggestion })
-            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+            assertTrue(
+                actualSuggestions.all { it.replacedArgument == 1 },
+                "replacement not targeted at second argument"
+            )
         }
     }
 
@@ -185,8 +213,10 @@ class ManagerSuggestionTest {
     @DisplayName("suggests argument for argument flags")
     fun suggestsArgumentForArgumentFlags() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("flags", "-3"))
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("flags", "-3")
+            )
             assertEqualUnordered(suggestionMatrix[2], actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at third argument")
         }
@@ -196,10 +226,13 @@ class ManagerSuggestionTest {
     @DisplayName("suggests parts of arguments for argument flags")
     fun suggestsSubArgumentForArgumentFlags() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("flags", "-3", "any"))
-            assertEqualUnordered(suggestionMatrix[2].filter(byPrefix("any")),
-                    actualSuggestions.map { it.suggestion })
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("flags", "-3", "any")
+            )
+            assertEqualUnordered(
+                suggestionMatrix[2].filter(byPrefix("any")),
+                actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at third argument")
         }
     }
@@ -208,10 +241,15 @@ class ManagerSuggestionTest {
     @DisplayName("suggests sub-commands")
     fun suggestsSubCommands() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("sub"))
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("sub")
+            )
             assertEqualUnordered(setOf("cmd", "flags"), actualSuggestions.map { it.suggestion })
-            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+            assertTrue(
+                actualSuggestions.all { it.replacedArgument == 1 },
+                "replacement not targeted at second argument"
+            )
         }
     }
 
@@ -219,10 +257,15 @@ class ManagerSuggestionTest {
     @DisplayName("suggests partial sub-commands")
     fun suggestsSubSubCommands() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("sub", "c"))
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("sub", "c")
+            )
             assertEqualUnordered(setOf("cmd"), actualSuggestions.map { it.suggestion })
-            assertTrue(actualSuggestions.all { it.replacedArgument == 1 }, "replacement not targeted at second argument")
+            assertTrue(
+                actualSuggestions.all { it.replacedArgument == 1 },
+                "replacement not targeted at second argument"
+            )
         }
     }
 
@@ -230,8 +273,10 @@ class ManagerSuggestionTest {
     @DisplayName("suggests sub-command's arguments")
     fun suggestsSubCommandArguments() {
         withSuggestionManager { manager ->
-            val actualSuggestions = manager.getSuggestions(InjectedValueAccess.EMPTY,
-                    listOf("sub", "cmd"))
+            val actualSuggestions = manager.getSuggestions(
+                InjectedValueAccess.EMPTY,
+                listOf("sub", "cmd")
+            )
             assertEqualUnordered(suggestionMatrix[0], actualSuggestions.map { it.suggestion })
             assertTrue(actualSuggestions.all { it.replacedArgument == 2 }, "replacement not targeted at thrid argument")
         }

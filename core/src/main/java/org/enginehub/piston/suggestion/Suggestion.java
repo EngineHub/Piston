@@ -27,22 +27,11 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class Suggestion {
 
+    Suggestion() {
+    }
+
     public static Builder builder() {
         return new AutoValue_Suggestion.Builder();
-    }
-
-    @AutoValue.Builder
-    public interface Builder {
-
-        Builder suggestion(String suggestion);
-
-        Builder replacedArgument(int replaced);
-
-        Suggestion build();
-
-    }
-
-    Suggestion() {
     }
 
     /**
@@ -62,5 +51,16 @@ public abstract class Suggestion {
      * Convert this suggestion back to a builder.
      */
     public abstract Builder toBuilder();
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder suggestion(String suggestion);
+
+        Builder replacedArgument(int replaced);
+
+        Suggestion build();
+
+    }
 
 }

@@ -43,6 +43,32 @@ import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
 
 public class MultiKeyConverter<E> implements ArgumentConverter<E> {
 
+    private final Component choices;
+    private final ImmutableSet<String> primaryKeys;
+    private final ImmutableMap<String, E> map;
+    @Nullable
+    private final E unknownValue;
+    private final UnaryOperator<String> errorMessage;
+
+    private MultiKeyConverter(Arguments<E> arguments) {
+        ImmutableSortedMap.Builder<String, E> map = ImmutableSortedMap.orderedBy(String.CASE_INSENSITIVE_ORDER);
+        ImmutableSet.Builder<String> primaryKeysBuilder = ImmutableSet.builder();
+        asMap(arguments.items()).forEach((item, keys) -> {
+            checkState(keys.size() > 0, "No lookup keys for value %s", item);
+            primaryKeysBuilder.add(keys.iterator().next());
+            for (String key : keys) {
+                map.put(key, item);
+            }
+        });
+        this.primaryKeys = primaryKeysBuilder.build();
+        this.choices = primaryKeys.stream()
+            .map(ColorConfig.mainText()::wrap)
+            .collect(joiningWithBar());
+        this.map = map.build();
+        this.unknownValue = arguments.unknownValue();
+        this.errorMessage = arguments.errorMessage();
+    }
+
     public static <E> Builder<E> builder(SetMultimap<E, String> items) {
         return new AutoValue_MultiKeyConverter_Arguments.Builder<E>()
             .errorMessage(arg -> "Not a valid argument: " + arg)
@@ -78,6 +104,28 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
         return builder(items, lookupKeys).unknownValue(unknownValue).build();
     }
 
+    @Override
+    public Component describeAcceptableArguments() {
+        return choices;
+    }
+
+    @Override
+    public List<String> getSuggestions(String input, InjectedValueAccess context) {
+        return limitByPrefix(primaryKeys.stream(), input);
+    }
+
+    @Override
+    public ConversionResult<E> convert(String argument, InjectedValueAccess context) {
+        E result = map.get(argument);
+        if (result == null) {
+            if (unknownValue != null) {
+                return SuccessfulConversion.fromSingle(unknownValue, false);
+            }
+            return FailedConversion.from(new IllegalArgumentException(errorMessage.apply(argument)));
+        }
+        return SuccessfulConversion.fromSingle(result);
+    }
+
     public interface Builder<E> {
         Builder<E> items(SetMultimap<E, String> items);
 
@@ -90,6 +138,13 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
 
     @AutoValue
     abstract static class Arguments<E> {
+
+        abstract ImmutableSetMultimap<E, String> items();
+
+        @Nullable
+        abstract E unknownValue();
+
+        abstract UnaryOperator<String> errorMessage();
 
         @AutoValue.Builder
         interface Builder<E> extends MultiKeyConverter.Builder<E> {
@@ -111,60 +166,5 @@ public class MultiKeyConverter<E> implements ArgumentConverter<E> {
             }
         }
 
-        abstract ImmutableSetMultimap<E, String> items();
-
-        @Nullable
-        abstract E unknownValue();
-
-        abstract UnaryOperator<String> errorMessage();
-
-    }
-
-    private final Component choices;
-    private final ImmutableSet<String> primaryKeys;
-    private final ImmutableMap<String, E> map;
-    @Nullable
-    private final E unknownValue;
-    private final UnaryOperator<String> errorMessage;
-
-    private MultiKeyConverter(Arguments<E> arguments) {
-        ImmutableSortedMap.Builder<String, E> map = ImmutableSortedMap.orderedBy(String.CASE_INSENSITIVE_ORDER);
-        ImmutableSet.Builder<String> primaryKeysBuilder = ImmutableSet.builder();
-        asMap(arguments.items()).forEach((item, keys) -> {
-            checkState(keys.size() > 0, "No lookup keys for value %s", item);
-            primaryKeysBuilder.add(keys.iterator().next());
-            for (String key : keys) {
-                map.put(key, item);
-            }
-        });
-        this.primaryKeys = primaryKeysBuilder.build();
-        this.choices = primaryKeys.stream()
-            .map(ColorConfig.mainText()::wrap)
-            .collect(joiningWithBar());
-        this.map = map.build();
-        this.unknownValue = arguments.unknownValue();
-        this.errorMessage = arguments.errorMessage();
-    }
-
-    @Override
-    public Component describeAcceptableArguments() {
-        return choices;
-    }
-
-    @Override
-    public List<String> getSuggestions(String input, InjectedValueAccess context) {
-        return limitByPrefix(primaryKeys.stream(), input);
-    }
-
-    @Override
-    public ConversionResult<E> convert(String argument, InjectedValueAccess context) {
-        E result = map.get(argument);
-        if (result == null) {
-            if (unknownValue != null) {
-                return SuccessfulConversion.fromSingle(unknownValue, false);
-            }
-            return FailedConversion.from(new IllegalArgumentException(errorMessage.apply(argument)));
-        }
-        return SuccessfulConversion.fromSingle(result);
     }
 }

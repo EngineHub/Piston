@@ -22,6 +22,9 @@ package org.enginehub.piston.converter;
 import java.util.function.Supplier;
 
 public class FailedConversionMapper {
+    private FailedConversionMapper() {
+    }
+
     public static <X extends Throwable> X mapOnto(Supplier<X> newThrowable, FailedConversion<?> conversion) {
         X error = newThrowable.get();
         error.initCause(conversion.getError());
@@ -29,8 +32,5 @@ public class FailedConversionMapper {
             error.addSuppressed(f.getError())
         );
         return error;
-    }
-
-    private FailedConversionMapper() {
     }
 }

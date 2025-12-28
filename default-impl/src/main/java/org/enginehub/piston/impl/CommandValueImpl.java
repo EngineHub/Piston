@@ -42,32 +42,11 @@ import static com.google.common.base.Preconditions.checkState;
 @AutoValue
 abstract class CommandValueImpl implements CommandValue {
 
+    CommandValueImpl() {
+    }
+
     static Builder builder() {
         return new AutoValue_CommandValueImpl.Builder();
-    }
-
-    @AutoValue.Builder
-    interface Builder {
-
-        Builder manager(ArgumentConverterAccess manager);
-
-        Builder commandContextSupplier(Supplier<CommandParseResult> ctx);
-
-        Builder partContext(CommandPart ctx);
-
-        Builder injectedValues(InjectedValueAccess injectedValues);
-
-        default Builder value(String value) {
-            return values(ImmutableList.of(value));
-        }
-
-        Builder values(Collection<String> values);
-
-        CommandValueImpl build();
-
-    }
-
-    CommandValueImpl() {
     }
 
     abstract ArgumentConverterAccess manager();
@@ -109,5 +88,26 @@ abstract class CommandValueImpl implements CommandValue {
             values.addAll(convert.get());
         }
         return values.build();
+    }
+
+    @AutoValue.Builder
+    interface Builder {
+
+        Builder manager(ArgumentConverterAccess manager);
+
+        Builder commandContextSupplier(Supplier<CommandParseResult> ctx);
+
+        Builder partContext(CommandPart ctx);
+
+        Builder injectedValues(InjectedValueAccess injectedValues);
+
+        default Builder value(String value) {
+            return values(ImmutableList.of(value));
+        }
+
+        Builder values(Collection<String> values);
+
+        CommandValueImpl build();
+
     }
 }

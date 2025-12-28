@@ -28,6 +28,9 @@ import javax.annotation.Nullable;
 
 public class ComponentHelper {
 
+    private ComponentHelper() {
+    }
+
     /**
      * Join components together with a `|`, coloring the bar with {@link
      * ColorConfig#partWrapping()}.
@@ -101,8 +104,5 @@ public class ComponentHelper {
                 .build();
         }
 
-    }
-
-    private ComponentHelper() {
     }
 }

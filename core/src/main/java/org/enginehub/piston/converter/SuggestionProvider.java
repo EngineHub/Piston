@@ -32,7 +32,7 @@ public interface SuggestionProvider {
     /**
      * Given {@code input} as the current input, provide some suggestions for the user.
      *
-     * @param input the user's current input
+     * @param input   the user's current input
      * @param context the context for the current command
      * @return suggestions for the user
      */

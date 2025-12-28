@@ -47,6 +47,12 @@ import static net.kyori.text.TextComponent.space;
 
 public class HelpGenerator {
 
+    private final CommandParseResult parseResult;
+
+    private HelpGenerator(CommandParseResult parseResult) {
+        this.parseResult = parseResult;
+    }
+
     public static HelpGenerator create(Iterable<Command> commands) {
         ImmutableList<Command> executionPath = ImmutableList.copyOf(commands);
         return create(new CommandParseResult() {
@@ -71,12 +77,6 @@ public class HelpGenerator {
 
     public static HelpGenerator create(CommandParseResult parseResult) {
         return new HelpGenerator(parseResult);
-    }
-
-    private final CommandParseResult parseResult;
-
-    private HelpGenerator(CommandParseResult parseResult) {
-        this.parseResult = parseResult;
     }
 
     /**

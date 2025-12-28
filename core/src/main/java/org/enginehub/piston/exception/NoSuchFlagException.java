@@ -34,6 +34,13 @@ import static org.enginehub.piston.util.StreamHelper.cast;
 
 public class NoSuchFlagException extends UsageException {
 
+    private final char requestedFlag;
+
+    public NoSuchFlagException(CommandParseResult parseResult, char requestedFlag) {
+        super(getMessage(parseResult, requestedFlag), parseResult);
+        this.requestedFlag = requestedFlag;
+    }
+
     private static String getAllFlags(ImmutableList<Command> commands) {
         return cast(Iterables.getLast(commands).getParts().stream(), CommandFlag.class)
             .map(f -> String.valueOf(f.getName()))
@@ -54,13 +61,6 @@ public class NoSuchFlagException extends UsageException {
                 .append(ColorConfig.mainText().wrap(allFlags));
         }
         return message.build();
-    }
-
-    private final char requestedFlag;
-
-    public NoSuchFlagException(CommandParseResult parseResult, char requestedFlag) {
-        super(getMessage(parseResult, requestedFlag), parseResult);
-        this.requestedFlag = requestedFlag;
     }
 
     public char getRequestedFlag() {

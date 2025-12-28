@@ -32,7 +32,7 @@ public interface CommandCallListener {
      * Called before invoking the actual command method.
      *
      * @param commandMethod the method
-     * @param parameters the full parameters for the command
+     * @param parameters    the full parameters for the command
      */
     default void beforeCall(Method commandMethod, CommandParameters parameters) {
     }
@@ -42,7 +42,7 @@ public interface CommandCallListener {
      * if it was successful.
      *
      * @param commandMethod the method
-     * @param parameters the full parameters for the command
+     * @param parameters    the full parameters for the command
      */
     default void afterCall(Method commandMethod, CommandParameters parameters) {
     }
@@ -52,8 +52,8 @@ public interface CommandCallListener {
      * if it threw an exception.
      *
      * @param commandMethod the method
-     * @param error the exception thrown by the method
-     * @param parameters the full parameters for the command
+     * @param error         the exception thrown by the method
+     * @param parameters    the full parameters for the command
      */
     default void afterThrow(Method commandMethod, CommandParameters parameters, Throwable error) {
     }

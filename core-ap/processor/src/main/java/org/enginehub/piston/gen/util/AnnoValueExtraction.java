@@ -40,9 +40,6 @@ import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
  */
 public class AnnoValueExtraction {
 
-    private record GeneralResult(@Nullable Object good, @Nullable Object bad) {
-    }
-
     private static final AnnotationValueVisitor<GeneralResult, Predicate<Object>> GENERAL_VISITOR =
         new SimpleAnnotationValueVisitor8<GeneralResult, Predicate<Object>>() {
             @Override
@@ -97,6 +94,9 @@ public class AnnoValueExtraction {
                     return builder.build();
                 }
             }, null);
+    }
+
+    private record GeneralResult(@Nullable Object good, @Nullable Object bad) {
     }
 
 }

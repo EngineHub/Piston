@@ -32,14 +32,14 @@ public class ConfigHolder {
         TextConfig.commandPrefix();
     }
 
-    public static ConfigHolder create() {
-        return new ConfigHolder(Config.defaultInstances);
-    }
-
     private final Map<String, Config<?>> configs = new HashMap<>();
 
     private ConfigHolder(Map<String, Config<?>> configs) {
         this.configs.putAll(configs);
+    }
+
+    public static ConfigHolder create() {
+        return new ConfigHolder(Config.defaultInstances);
     }
 
     public Map<String, Config<?>> getConfigs() {

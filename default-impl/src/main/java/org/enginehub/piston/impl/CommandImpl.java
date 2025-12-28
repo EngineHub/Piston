@@ -47,6 +47,9 @@ abstract class CommandImpl implements Command {
             .suggester(DefaultSuggestionProvider.getInstance());
     }
 
+    @Override
+    public abstract Builder toBuilder();
+
     @AutoValue.Builder
     interface Builder extends Command.Builder {
 
@@ -104,8 +107,5 @@ abstract class CommandImpl implements Command {
         }
 
     }
-
-    @Override
-    public abstract Builder toBuilder();
 
 }

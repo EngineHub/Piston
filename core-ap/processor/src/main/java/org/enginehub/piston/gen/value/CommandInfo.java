@@ -30,12 +30,33 @@ import javax.lang.model.element.ExecutableElement;
 @AutoValue
 public abstract class CommandInfo {
 
+    CommandInfo() {
+    }
+
     public static Builder builder() {
         Builder builder = new AutoValue_CommandInfo.Builder();
         builder.footer(null);
         builder.params(ImmutableList.of());
         return builder;
     }
+
+    public abstract ExecutableElement getCommandMethod();
+
+    public abstract String getName();
+
+    public abstract String getGeneratedName();
+
+    public abstract ImmutableList<String> getAliases();
+
+    public abstract String getDescription();
+
+    public abstract Optional<String> getFooter();
+
+    public abstract ImmutableList<CommandParamInfo> getParams();
+
+    public abstract Optional<CommandCondInfo> getCondition();
+
+    public abstract Builder toBuilder();
 
     @AutoValue.Builder
     public interface Builder {
@@ -58,26 +79,5 @@ public abstract class CommandInfo {
 
         CommandInfo build();
     }
-
-    CommandInfo() {
-    }
-
-    public abstract ExecutableElement getCommandMethod();
-
-    public abstract String getName();
-
-    public abstract String getGeneratedName();
-
-    public abstract ImmutableList<String> getAliases();
-
-    public abstract String getDescription();
-
-    public abstract Optional<String> getFooter();
-
-    public abstract ImmutableList<CommandParamInfo> getParams();
-
-    public abstract Optional<CommandCondInfo> getCondition();
-
-    public abstract Builder toBuilder();
 
 }

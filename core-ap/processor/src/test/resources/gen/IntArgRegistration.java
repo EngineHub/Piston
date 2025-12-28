@@ -19,25 +19,7 @@
 
 package eh;
 
-import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
-import static org.enginehub.piston.internal.RegistrationUtil.requireOptional;
-import static org.enginehub.piston.part.CommandParts.arg;
-import static org.enginehub.piston.part.CommandParts.flag;
-
 import com.google.common.collect.ImmutableList;
-import java.lang.Integer;
-import java.lang.NoSuchMethodException;
-import java.lang.Object;
-import java.lang.RuntimeException;
-import java.lang.SuppressWarnings;
-import java.lang.Throwable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -49,6 +31,17 @@ import org.enginehub.piston.gen.InjectDelta;
 import org.enginehub.piston.gen.InjectGamma;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
+
+import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
+import static org.enginehub.piston.part.CommandParts.arg;
 
 @SuppressWarnings({"deprecation", "removal"})
 final class IntArgRegistration implements CommandRegistration<IntArg> {
@@ -63,7 +56,7 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
         }
     }.a(null));
     private static final Key<Integer> integer_injectDeltaQux45$Baz32$Thq1099_Key = Key.of(Integer.class, new Object() {
-        Annotation a(@InjectDelta(qux = 45, baz = 32, thq = { 10, 99 }) Object ah) {
+        Annotation a(@InjectDelta(qux = 45, baz = 32, thq = {10, 99}) Object ah) {
             try {
                 return getClass().getDeclaredMethod("a", Object.class).getParameterAnnotations()[0][0];
             } catch (NoSuchMethodException e) {
@@ -72,38 +65,30 @@ final class IntArgRegistration implements CommandRegistration<IntArg> {
         }
     }.a(null));
     private static final Key<Integer> integer_injectAlpha_Key = Key.of(Integer.class, InjectAlpha.class);
-
-    private CommandManager commandManager;
-
-    private IntArg containerInstance;
-
-    private ImmutableList<CommandCallListener> listeners;
-
     private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_Key))
         .build();
-
     private final CommandArgument argPart2 = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_injectGamma_something_to_match__Key))
         .build();
-
     private final CommandArgument deltaPart = arg(TranslatableComponent.of("piston.argument.delta"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_injectDeltaQux45$Baz32$Thq1099_Key))
         .build();
-
     private final CommandArgument alphaPart = arg(TranslatableComponent.of("piston.argument.alpha"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_injectAlpha_Key))
         .build();
-
     private final CommandArgument argPart3 = arg(TranslatableComponent.of("piston.argument.args"), TextComponent.of("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(integer_Key))
         .variable(true)
         .build();
+    private CommandManager commandManager;
+    private IntArg containerInstance;
+    private ImmutableList<CommandCallListener> listeners;
 
     private IntArgRegistration() {
         this.listeners = ImmutableList.of();

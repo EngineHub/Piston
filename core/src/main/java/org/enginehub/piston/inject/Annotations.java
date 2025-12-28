@@ -39,47 +39,7 @@ import static java.util.stream.Collectors.toMap;
 
 class Annotations {
 
-    private record MethodKey(String name, ImmutableList<Class<?>> signature) {
-            static MethodKey from(Method method) {
-                return of(method.getReturnType(), method.getName(), method.getParameterTypes());
-            }
-
-            static MethodKey of(Class<?> rtype, String name, Class<?>... ptypes) {
-                return new MethodKey(name, ImmutableList.<Class<?>>builder()
-                    .add(rtype)
-                    .add(ptypes)
-                    .build());
-            }
-
-            private MethodKey(String name, List<Class<?>> signature) {
-                this.name = name;
-                this.signature = ImmutableList.copyOf(signature);
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) {
-                    return true;
-                }
-                if (o == null || getClass() != o.getClass()) {
-                    return false;
-                }
-                MethodKey methodKey = (MethodKey) o;
-                return name.equals(methodKey.name) &&
-                    signature.equals(methodKey.signature);
-            }
-
-    }
-
-    @FunctionalInterface
-    private interface AnnoMethod {
-        Object invoke(Class<? extends Annotation> type,
-                      Map<String, Object> members,
-                      Object[] args) throws Exception;
-    }
-
     private static final Joiner.MapJoiner JOINER = Joiner.on(", ").withKeyValueSeparator("=");
-
     private static final Map<MethodKey, AnnoMethod> ANNOTATION_METHODS =
         ImmutableMap.of(
             MethodKey.of(Class.class, "annotationType"), (type, members, args) -> type,
@@ -117,6 +77,7 @@ class Annotations {
                 return output.append(')').toString();
             }
         );
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     private static String valueToString(@Nullable Object value) {
         if (value == null) {
@@ -127,8 +88,6 @@ class Annotations {
         }
         return value.toString();
     }
-
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     static Annotation allDefaultsAnnotation(Class<? extends Annotation> annotationType) {
         Map<String, Object> members = Stream.of(annotationType.getDeclaredMethods())
@@ -151,5 +110,42 @@ class Annotations {
                 throw new IllegalStateException("Unknown method on " + annotationType + ": " + method);
             }
         );
+    }
+
+    @FunctionalInterface
+    private interface AnnoMethod {
+        Object invoke(Class<? extends Annotation> type,
+                      Map<String, Object> members,
+                      Object[] args) throws Exception;
+    }
+
+    private record MethodKey(String name, ImmutableList<Class<?>> signature) {
+        private MethodKey(String name, List<Class<?>> signature) {
+            this(name, ImmutableList.copyOf(signature));
+        }
+
+        static MethodKey from(Method method) {
+            return of(method.getReturnType(), method.getName(), method.getParameterTypes());
+        }
+
+        static MethodKey of(Class<?> rtype, String name, Class<?>... ptypes) {
+            return new MethodKey(name, ImmutableList.<Class<?>>builder()
+                .add(rtype)
+                .add(ptypes)
+                .build());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            MethodKey methodKey = (MethodKey) o;
+            return name.equals(methodKey.name) && signature.equals(methodKey.signature);
+        }
+
     }
 }

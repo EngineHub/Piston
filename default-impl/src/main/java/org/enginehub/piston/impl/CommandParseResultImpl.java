@@ -29,9 +29,21 @@ import org.enginehub.piston.CommandParseResult;
 @AutoValue
 abstract class CommandParseResultImpl implements CommandParseResult {
 
+    CommandParseResultImpl() {
+    }
+
     static Builder builder() {
         return new AutoValue_CommandParseResultImpl.Builder();
     }
+
+    @Override
+    public abstract ImmutableList<Command> getExecutionPath();
+
+    @Override
+    public abstract ImmutableList<ArgBinding> getBoundArguments();
+
+    @Override
+    public abstract CommandParameters getParameters();
 
     @AutoValue.Builder
     abstract static class Builder {
@@ -56,16 +68,4 @@ abstract class CommandParseResultImpl implements CommandParseResult {
 
         public abstract CommandParseResultImpl build();
     }
-
-    CommandParseResultImpl() {
-    }
-
-    @Override
-    public abstract ImmutableList<Command> getExecutionPath();
-
-    @Override
-    public abstract ImmutableList<ArgBinding> getBoundArguments();
-
-    @Override
-    public abstract CommandParameters getParameters();
 }

@@ -27,11 +27,11 @@ import javax.annotation.Nonnull;
 @AutoValue
 abstract class InstanceAnnotationWrapper implements AnnotationWrapper {
 
-    static InstanceAnnotationWrapper from(Annotation annotationInstance) {
-        return new AutoValue_InstanceAnnotationWrapper(annotationInstance);
+    InstanceAnnotationWrapper() {
     }
 
-    InstanceAnnotationWrapper() {
+    static InstanceAnnotationWrapper from(Annotation annotationInstance) {
+        return new AutoValue_InstanceAnnotationWrapper(annotationInstance);
     }
 
     @Nonnull

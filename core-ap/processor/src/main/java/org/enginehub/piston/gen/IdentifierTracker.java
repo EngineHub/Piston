@@ -26,6 +26,9 @@ import org.enginehub.piston.gen.value.ReservedNames;
 
 public class IdentifierTracker {
 
+    private final Multiset<String> fieldNames = HashMultiset.create(ReservedNames.fieldNames());
+    private final Multiset<String> methodNames = HashMultiset.create(ReservedNames.methodNames());
+
     private static String realName(Multiset<String> memory, String name) {
         // Make the name safe first
         name = SafeName.from(name);
@@ -33,9 +36,6 @@ public class IdentifierTracker {
         int count = memory.count(name);
         return count == 1 ? name : name + count;
     }
-
-    private final Multiset<String> fieldNames = HashMultiset.create(ReservedNames.fieldNames());
-    private final Multiset<String> methodNames = HashMultiset.create(ReservedNames.methodNames());
 
     public String fieldName(String requested) {
         return realName(fieldNames, requested);

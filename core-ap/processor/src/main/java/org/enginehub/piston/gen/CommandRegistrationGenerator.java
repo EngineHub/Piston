@@ -80,8 +80,6 @@ import static org.enginehub.piston.gen.util.CodeBlockUtil.textCompOf;
  * </p>
  */
 class CommandRegistrationGenerator {
-    private static final ParameterSpec COMMAND_PARAMETERS_SPEC
-        = ParameterSpec.builder(CommandParameters.class, "parameters").build();
     public static final RequiredVariable LISTENERS_REQ_VAR = RequiredVariable.builder()
         .name(ReservedNames.LISTENERS)
         .type(ParameterizedTypeName.get(
@@ -90,16 +88,10 @@ class CommandRegistrationGenerator {
         ))
         .inherited(true)
         .build();
+    private static final ParameterSpec COMMAND_PARAMETERS_SPEC
+        = ParameterSpec.builder(CommandParameters.class, "parameters").build();
     private final RegistrationInfo info;
     private final ImmutableList<RequiredVariable> injectedVariables;
-
-    private static boolean isStaticImportable(Method method) {
-        int mods = method.getModifiers();
-        if (!java.lang.reflect.Modifier.isStatic(mods)) {
-            return false;
-        }
-        return !method.isSynthetic();
-    }
 
     CommandRegistrationGenerator(RegistrationInfo info) {
         this.info = info;
@@ -109,8 +101,12 @@ class CommandRegistrationGenerator {
         ).collect(toImmutableList());
     }
 
-    private <T> Stream<T> cmdsFlatMap(Function<CommandInfo, Stream<T>> map) {
-        return info.getCommands().stream().flatMap(map);
+    private static boolean isStaticImportable(Method method) {
+        int mods = method.getModifiers();
+        if (!java.lang.reflect.Modifier.isStatic(mods)) {
+            return false;
+        }
+        return !method.isSynthetic();
     }
 
     private static Stream<RequiredVariable> additionalVariables(RegistrationInfo info) {
@@ -128,12 +124,16 @@ class CommandRegistrationGenerator {
         return b.build();
     }
 
-    private Stream<RequiredVariable> getInjectedVariables() {
-        return injectedVariables.stream();
-    }
-
     private static boolean isCommandStatic(CommandInfo info) {
         return info.getCommandMethod().getModifiers().contains(STATIC);
+    }
+
+    private <T> Stream<T> cmdsFlatMap(Function<CommandInfo, Stream<T>> map) {
+        return info.getCommands().stream().flatMap(map);
+    }
+
+    private Stream<RequiredVariable> getInjectedVariables() {
+        return injectedVariables.stream();
     }
 
     private Modifier[] getApiVisibilityModifiers() {
@@ -287,8 +287,8 @@ class CommandRegistrationGenerator {
             .filter(p -> p.getType() != null && p.getName() != null && p.getConstruction() != null)
             .distinct()
             .map(p -> FieldSpec.builder(
-                p.getType(), p.getName(),
-                PRIVATE, FINAL)
+                    p.getType(), p.getName(),
+                    PRIVATE, FINAL)
                 .initializer(CodeBlock.of("$[$L$]", p.getConstruction()))
                 .build());
     }
@@ -374,14 +374,14 @@ class CommandRegistrationGenerator {
 
         // call afterCall
         body.addStatement("$T.listenersAfterCall(listeners, cmdMethod, $L)",
-            RegistrationUtil.class, ReservedNames.PARAMETERS)
+                RegistrationUtil.class, ReservedNames.PARAMETERS)
             .addStatement("return result");
 
         body.nextControlFlow("catch ($T t)", Throwable.class);
 
         // call afterThrow & re-throw
         body.addStatement("$T.listenersAfterThrow(listeners, cmdMethod, $L, t)",
-            RegistrationUtil.class, ReservedNames.PARAMETERS)
+                RegistrationUtil.class, ReservedNames.PARAMETERS)
             .addStatement("throw t");
 
         body.endControlFlow();

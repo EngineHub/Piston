@@ -40,6 +40,21 @@ public abstract class SubCommandPart implements ArgConsumingCommandPart {
             .describedBy(description);
     }
 
+    public abstract ImmutableList<Command> getCommands();
+
+    @Override
+    public Component getTextRepresentation() {
+        ImmutableList.Builder<Component> builder = ImmutableList.builder();
+        builder.add(TextComponent.of(isRequired() ? "<" : "["));
+        builder.addAll(getCommands().stream()
+            .map(Command::getName)
+            .map(ColorConfig.mainText()::wrap)
+            .collect(joiningWithBar())
+            .children());
+        builder.add(TextComponent.of(isRequired() ? ">" : "]"));
+        return ColorConfig.partWrapping().wrap(builder.build());
+    }
+
     @AutoValue.Builder
     public abstract static class Builder {
 
@@ -76,21 +91,6 @@ public abstract class SubCommandPart implements ArgConsumingCommandPart {
         abstract Builder required(boolean required);
 
         public abstract SubCommandPart build();
-    }
-
-    public abstract ImmutableList<Command> getCommands();
-
-    @Override
-    public Component getTextRepresentation() {
-        ImmutableList.Builder<Component> builder = ImmutableList.builder();
-        builder.add(TextComponent.of(isRequired() ? "<" : "["));
-        builder.addAll(getCommands().stream()
-            .map(Command::getName)
-            .map(ColorConfig.mainText()::wrap)
-            .collect(joiningWithBar())
-            .children());
-        builder.add(TextComponent.of(isRequired() ? ">" : "]"));
-        return ColorConfig.partWrapping().wrap(builder.build());
     }
 
 }

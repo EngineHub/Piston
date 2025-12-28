@@ -32,24 +32,6 @@ import javax.annotation.Nullable;
 
 class GenerationSupportImpl implements GenerationSupport {
 
-    private record ShareKey(TypeName type, String name, Object shareKey) {
-
-        @Override
-            public boolean equals(Object o) {
-                if (this == o) {
-                    return true;
-                }
-                if (o == null || getClass() != o.getClass()) {
-                    return false;
-                }
-                ShareKey shareKey1 = (ShareKey) o;
-                return type.equals(shareKey1.type) &&
-                    name.equals(shareKey1.name) &&
-                    shareKey.equals(shareKey1.shareKey);
-            }
-
-    }
-
     private final IdentifierTracker identifierTracker;
     private final RegistrationInfo.Builder builder;
     private final Map<ShareKey, String> sharedDepNames = new HashMap<>();
@@ -112,5 +94,23 @@ class GenerationSupportImpl implements GenerationSupport {
         KeyInfo keyInfo = KeyInfo.of(type, annotationSpec);
         builder.addKeyType(keyInfo);
         return CodeBlock.of("$L", keyInfo.getVariableName());
+    }
+
+    private record ShareKey(TypeName type, String name, Object shareKey) {
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ShareKey shareKey1 = (ShareKey) o;
+            return type.equals(shareKey1.type)
+                && name.equals(shareKey1.name)
+                && shareKey.equals(shareKey1.shareKey);
+        }
+
     }
 }

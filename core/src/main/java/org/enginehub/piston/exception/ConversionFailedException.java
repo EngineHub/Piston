@@ -34,6 +34,19 @@ import java.util.stream.Stream;
  */
 public class ConversionFailedException extends UsageException {
 
+    private final ArgumentConverter<?> converter;
+    private final FailedConversion<?> conversion;
+
+    public ConversionFailedException(CommandParseResult parseResult,
+                                     Component conversionTarget,
+                                     ArgumentConverter<?> converter,
+                                     FailedConversion<?> conversion) {
+        super(getMessage(conversionTarget, converter, conversion), parseResult);
+        this.converter = converter;
+        this.conversion = conversion;
+        FailedConversionMapper.mapOnto(() -> this, conversion);
+    }
+
     private static Component getMessage(Component conversionTarget, ArgumentConverter<?> converter,
                                         FailedConversion<?> conversion) {
         TextComponent.Builder builder = TextComponent.builder("")
@@ -46,19 +59,6 @@ public class ConversionFailedException extends UsageException {
             .append(TextComponent.of(", acceptable values are "))
             .append(converter.describeAcceptableArguments())
             .build();
-    }
-
-    private final ArgumentConverter<?> converter;
-    private final FailedConversion<?> conversion;
-
-    public ConversionFailedException(CommandParseResult parseResult,
-                                     Component conversionTarget,
-                                     ArgumentConverter<?> converter,
-                                     FailedConversion<?> conversion) {
-        super(getMessage(conversionTarget, converter, conversion), parseResult);
-        this.converter = converter;
-        this.conversion = conversion;
-        FailedConversionMapper.mapOnto(() -> this, conversion);
     }
 
     public FailedConversion<?> getConversion() {

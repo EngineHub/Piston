@@ -21,27 +21,11 @@ package org.enginehub.piston.util
 
 import com.google.common.collect.ImmutableList
 import net.kyori.text.TextComponent
-import org.enginehub.piston.TestCommandMetadata
-import org.enginehub.piston.TestCommandParameters
-import org.enginehub.piston.TestParseResult
-import org.enginehub.piston.arg
-import org.enginehub.piston.argFlag
-import org.enginehub.piston.bind
-import org.enginehub.piston.commands.NoArgCommand
-import org.enginehub.piston.commands.NoArgCommandRegistration
-import org.enginehub.piston.commands.SingleArgCommand
-import org.enginehub.piston.commands.SingleArgCommandRegistration
-import org.enginehub.piston.commands.SingleOptionalArgCommand
-import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration
-import org.enginehub.piston.flag
-import org.enginehub.piston.installCommands
-import org.enginehub.piston.newManager
-import org.enginehub.piston.subs
-import org.enginehub.piston.withMockedContainer
+import org.enginehub.piston.*
+import org.enginehub.piston.commands.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import kotlin.streams.toList
 
 @DisplayName("HelpGenerator")
 class HelpGeneratorTest {
@@ -54,10 +38,12 @@ class HelpGeneratorTest {
             }
 
             val command = manager.allCommands.toList()
-            assertEquals("""
+            assertEquals(
+                """
                 description
                 Usage: no-arg
-            """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))
+            """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp)
+            )
         }
     }
 
@@ -69,12 +55,14 @@ class HelpGeneratorTest {
             }
 
             val command = manager.allCommands.toList()
-            assertEquals("""
+            assertEquals(
+                """
                 description
                 Usage: single-arg <piston.argument.first>
                 Arguments:
                   <piston.argument.first>: First argument
-            """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))
+            """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp)
+            )
         }
     }
 
@@ -86,53 +74,62 @@ class HelpGeneratorTest {
             }
 
             val command = manager.allCommands.toList()
-            assertEquals("""
+            assertEquals(
+                """
                 description
                 Usage: single-arg-opt [piston.argument.first]
                 Arguments:
                   [piston.argument.first] (defaults to none): First argument
-            """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))
+            """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp)
+            )
         }
     }
 
     @Test
     fun singleArgOptionalNotNoneHelp() {
-        val command = listOf(newManager().newCommand("single-arg-opt")
-            .description(TextComponent.of("description"))
-            .addParts(
-                arg("piston.argument.first","First argument") {
-                    defaultsTo(ImmutableList.of("a", "b"))
-                }
-            )
-            .build())
-        assertEquals("""
+        val command = listOf(
+            newManager().newCommand("single-arg-opt")
+                .description(TextComponent.of("description"))
+                .addParts(
+                    arg("piston.argument.first", "First argument") {
+                        defaultsTo(ImmutableList.of("a", "b"))
+                    }
+                )
+                .build()
+        )
+        assertEquals(
+            """
             description
             Usage: single-arg-opt [piston.argument.first]
             Arguments:
               [piston.argument.first] (defaults to [a, b]): First argument
-        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))
+        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp)
+        )
     }
 
     @Test
     fun flagsHelp() {
-        val command = listOf(newManager().newCommand("flags")
-            .description(TextComponent.of("description"))
-            .addParts(
-                flag('f', "Flag"),
-                argFlag('q', "Quibble", "qux"),
-                argFlag('b', "Bizarre", "baz") {
-                    defaultsTo(ImmutableList.of("", "nonblank"))
-                }
-            )
-            .build())
-        assertEquals("""
+        val command = listOf(
+            newManager().newCommand("flags")
+                .description(TextComponent.of("description"))
+                .addParts(
+                    flag('f', "Flag"),
+                    argFlag('q', "Quibble", "qux"),
+                    argFlag('b', "Bizarre", "baz") {
+                        defaultsTo(ImmutableList.of("", "nonblank"))
+                    }
+                )
+                .build())
+        assertEquals(
+            """
             description
             Usage: flags [-f] [-q <qux>] [-b <baz>]
             Flags:
               -f: Flag
               -q: Quibble
               -b (defaults to [nonblank]): Bizarre
-        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))
+        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp)
+        )
     }
 
     @Test
@@ -146,38 +143,53 @@ class HelpGeneratorTest {
             .description(TextComponent.of("description"))
             .addParts(interArg, subCommands)
             .build()
-        assertEquals("""
+        assertEquals(
+            """
             description
             Usage: main <intermediate> <sub-command>
             Arguments:
               <intermediate>: inter-arg
-        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(listOf(command)).fullHelp))
-        assertEquals("""
+        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(listOf(command)).fullHelp)
+        )
+        assertEquals(
+            """
             sub-description
             Usage: main <intermediate> sub-command
-        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(listOf(command, subCommand)).fullHelp))
-        assertEquals("main inter-value sub-command", TextHelper.reduceToText(HelpGenerator.create(
-            TestParseResult(
-                ImmutableList.of(command, subCommand),
-                ImmutableList.of(
-                    interArg.bind("inter-value"),
-                    subCommands.bind("sub-command")
-                ),
-                TestCommandParameters()
+        """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(listOf(command, subCommand)).fullHelp)
+        )
+        assertEquals(
+            "main inter-value sub-command", TextHelper.reduceToText(
+                HelpGenerator.create(
+                    TestParseResult(
+                        ImmutableList.of(command, subCommand),
+                        ImmutableList.of(
+                            interArg.bind("inter-value"),
+                            subCommands.bind("sub-command")
+                        ),
+                        TestCommandParameters()
+                    )
+                ).fullName
             )
-        ).fullName))
-        assertEquals("main-alias inter-value sub-command", TextHelper.reduceToText(HelpGenerator.create(
-            TestParseResult(
-                ImmutableList.of(command, subCommand),
-                ImmutableList.of(
-                    interArg.bind("inter-value"),
-                    subCommands.bind("sub-command")
-                ),
-                TestCommandParameters(
-                    TestCommandMetadata("main-alias", ImmutableList.of("main-alias", "inter-value", "sub-command"))
-                )
+        )
+        assertEquals(
+            "main-alias inter-value sub-command", TextHelper.reduceToText(
+                HelpGenerator.create(
+                    TestParseResult(
+                        ImmutableList.of(command, subCommand),
+                        ImmutableList.of(
+                            interArg.bind("inter-value"),
+                            subCommands.bind("sub-command")
+                        ),
+                        TestCommandParameters(
+                            TestCommandMetadata(
+                                "main-alias",
+                                ImmutableList.of("main-alias", "inter-value", "sub-command")
+                            )
+                        )
+                    )
+                ).fullName
             )
-        ).fullName))
+        )
     }
 
 }

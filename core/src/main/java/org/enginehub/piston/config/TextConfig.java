@@ -35,6 +35,10 @@ public class TextConfig extends Config<String> {
 
     private static final TextConfig COMMAND_PREFIX = new TextConfig("piston.text.command.prefix");
 
+    private TextConfig(String key) {
+        super(key, "");
+    }
+
     /**
      * Output command prefix -- all commands will be output with this prefix before their name.
      */
@@ -44,10 +48,6 @@ public class TextConfig extends Config<String> {
 
     public static Component commandPrefixValue() {
         return commandPrefix().value();
-    }
-
-    private TextConfig(String key) {
-        super(key, "");
     }
 
     @Override

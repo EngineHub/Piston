@@ -26,6 +26,9 @@ import java.util.stream.Stream;
 
 public class SuggestionHelper {
 
+    private SuggestionHelper() {
+    }
+
     public static List<String> limitByPrefix(Stream<String> choices, String input) {
         return choices.filter(byPrefix(input))
             .collect(Collectors.toList());
@@ -39,8 +42,5 @@ public class SuggestionHelper {
 
     private static boolean startsWithIgnoreCase(String whole, String prefix) {
         return whole.regionMatches(true, 0, prefix, 0, prefix.length());
-    }
-
-    private SuggestionHelper() {
     }
 }

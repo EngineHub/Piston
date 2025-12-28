@@ -28,11 +28,11 @@ public class ProcessingEnvValues {
 
     public static final String ARG_NAME_KEY_PREFIX = "arg.name.key.prefix";
 
+    private ProcessingEnvValues() {
+    }
+
     public static String prefixArgName(ProcessingEnvironment env, String name) {
         String prefix = env.getOptions().getOrDefault(ARG_NAME_KEY_PREFIX, "piston.argument");
         return prefix == null || prefix.isEmpty() ? name : prefix + "." + name;
-    }
-
-    private ProcessingEnvValues() {
     }
 }

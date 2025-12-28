@@ -33,10 +33,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.Mockito.*
 
 @DisplayName("Regression tests")
 class RegressionTest {
@@ -70,8 +67,10 @@ class RegressionTest {
                 val usageEx = assertThrows<UsageException> {
                     manager.execute(InjectedValueAccess.EMPTY, listOf("i9", "5.x", "f"))
                 }
-                assertEquals("Invalid value for <piston.argument.second> (For input string: \"5.x\")," +
-                        " acceptable values are any double", usageEx.message)
+                assertEquals(
+                    "Invalid value for <piston.argument.second> (For input string: \"5.x\")," +
+                            " acceptable values are any double", usageEx.message
+                )
             }
         }
     }
@@ -90,12 +89,12 @@ class RegressionTest {
                     defaultsTo(listOf(""))
                 }
                 val sub = manager.newCommand("subcommand")
-                        .action {
-                            action(it.valueOf(arg).asString())
-                            1
-                        }
-                        .description(TextComponent.of("Sub-command"))
-                        .build()
+                    .action {
+                        action(it.valueOf(arg).asString())
+                        1
+                    }
+                    .description(TextComponent.of("Sub-command"))
+                    .build()
                 cmd.run {
                     description(TextComponent.of("Issue 9 #2"))
                     // Optional arg prior to sub-command
@@ -136,9 +135,9 @@ class RegressionTest {
                     defaultsTo(listOf("default-value"))
                 }
                 val sub = manager.newCommand("vert")
-                        .action { SUB_ACTION }
-                        .description(TextComponent.of("Sub-command"))
-                        .build()
+                    .action { SUB_ACTION }
+                    .description(TextComponent.of("Sub-command"))
+                    .build()
                 cmd.run {
                     action { ROOT_ACTION }
                     description(TextComponent.of("Issue 14"))
@@ -149,16 +148,16 @@ class RegressionTest {
             }
 
             assertEquals(
-                    SUB_ACTION,
-                    manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "vert"))
+                SUB_ACTION,
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "vert"))
             )
             assertEquals(
-                    ROOT_ACTION,
-                    manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "10"))
+                ROOT_ACTION,
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "10"))
             )
             assertEquals(
-                    ROOT_ACTION,
-                    manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "10", "north"))
+                ROOT_ACTION,
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i14", "10", "north"))
             )
         }
     }
@@ -169,10 +168,10 @@ class RegressionTest {
         withRegressionCommands { _, manager ->
             manager.register("hello") { cmd ->
                 val sub = manager.newCommand("world")
-                        .action { SUB_ACTION }
-                        .aliases(setOf("there"))
-                        .description(TextComponent.of("Sub-command"))
-                        .build()
+                    .action { SUB_ACTION }
+                    .aliases(setOf("there"))
+                    .description(TextComponent.of("Sub-command"))
+                    .build()
                 cmd.run {
                     description(TextComponent.of("hello"))
                     addPart(subs(sub, required = true))
@@ -180,12 +179,12 @@ class RegressionTest {
             }
 
             assertEquals(
-                    SUB_ACTION,
-                    manager.execute(InjectedValueAccess.EMPTY, listOf("hello", "world"))
+                SUB_ACTION,
+                manager.execute(InjectedValueAccess.EMPTY, listOf("hello", "world"))
             )
             assertEquals(
-                    SUB_ACTION,
-                    manager.execute(InjectedValueAccess.EMPTY, listOf("hello", "there")) // general kenobi
+                SUB_ACTION,
+                manager.execute(InjectedValueAccess.EMPTY, listOf("hello", "there")) // general kenobi
             )
         }
     }

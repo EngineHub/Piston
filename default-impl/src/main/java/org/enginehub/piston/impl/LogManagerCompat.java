@@ -29,10 +29,10 @@ public class LogManagerCompat {
 
     private static final StackWalker WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
-    public static Logger getLogger() {
-        return LogManager.getLogger(WALKER.getCallerClass());
+    private LogManagerCompat() {
     }
 
-    private LogManagerCompat() {
+    public static Logger getLogger() {
+        return LogManager.getLogger(WALKER.getCallerClass());
     }
 }

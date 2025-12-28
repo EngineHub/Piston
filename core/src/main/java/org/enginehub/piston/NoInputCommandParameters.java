@@ -37,25 +37,13 @@ import javax.annotation.Nullable;
 @AutoValue
 public abstract class NoInputCommandParameters implements CommandParameters {
 
+    NoInputCommandParameters() {
+    }
+
     public static Builder builder() {
         return new AutoValue_NoInputCommandParameters.Builder()
             .injectedValues(InjectedValueAccess.EMPTY)
             .converters(ArgumentConverterAccess.EMPTY);
-    }
-
-    @AutoValue.Builder
-    public interface Builder {
-
-        Builder injectedValues(InjectedValueAccess values);
-
-        Builder metadata(@Nullable CommandMetadata metadata);
-
-        Builder converters(ArgumentConverterAccess access);
-
-        NoInputCommandParameters build();
-    }
-
-    NoInputCommandParameters() {
     }
 
     abstract InjectedValueAccess injectedValues();
@@ -89,6 +77,18 @@ public abstract class NoInputCommandParameters implements CommandParameters {
     @Override
     public <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
         return injectedValues().injectedValue(key, context);
+    }
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder injectedValues(InjectedValueAccess values);
+
+        Builder metadata(@Nullable CommandMetadata metadata);
+
+        Builder converters(ArgumentConverterAccess access);
+
+        NoInputCommandParameters build();
     }
 
 }

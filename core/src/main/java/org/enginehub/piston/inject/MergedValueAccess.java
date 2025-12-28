@@ -34,18 +34,18 @@ import java.util.Optional;
  */
 public final class MergedValueAccess implements InjectedValueAccess {
 
+    private final ImmutableList<InjectedValueAccess> delegates;
+
+    private MergedValueAccess(Collection<? extends InjectedValueAccess> delegates) {
+        this.delegates = ImmutableList.copyOf(delegates);
+    }
+
     public static MergedValueAccess of(InjectedValueAccess... delegates) {
         return of(ImmutableList.copyOf(delegates));
     }
 
     public static MergedValueAccess of(Collection<? extends InjectedValueAccess> delegates) {
         return new MergedValueAccess(delegates);
-    }
-
-    private final ImmutableList<InjectedValueAccess> delegates;
-
-    private MergedValueAccess(Collection<? extends InjectedValueAccess> delegates) {
-        this.delegates = ImmutableList.copyOf(delegates);
     }
 
     @Override

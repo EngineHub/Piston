@@ -47,6 +47,62 @@ public class ArgumentConverters {
 
     private static final ArgumentConverter<String> STRING_ARGUMENT_CONVERTER =
         SimpleArgumentConverter.from((s, c) -> SuccessfulConversion.fromSingle(s), "any text");
+    private static final String CONVERTER_CONVERT = "convert";
+    private static final MethodType HANDLE_TO_CONVERTER = methodType(Converter.class, MethodHandle.class);
+    private static final MethodType CONVERTER_SIG = methodType(ConversionResult.class, String.class, InjectedValueAccess.class);
+    private static final MethodHandle HANDLE_TO_CONVERTER_CONVERTER;
+    private static final MethodHandle SUCCESSFUL_CONVERSION_FROM;
+    private static final MethodHandle FAILED_CONVERSION_FROM;
+    private static final List<ACProvider<Object>> PROVIDERS = ImmutableList.of(
+        ArgumentConverters::valueOfConverters,
+        ArgumentConverters::constructorConverters,
+        type -> {
+            if (Objects.equals(type.wrap().getRawType(), Character.class)) {
+                return Optional.of(SimpleArgumentConverter.from(
+                    (s, c) -> SuccessfulConversion.fromSingle(s.charAt(0)),
+                    "any character"
+                ));
+            }
+            return Optional.empty();
+        }
+    );
+
+    static {
+        MethodHandle handleInvoker = MethodHandles.invoker(CONVERTER_SIG);
+        try {
+            HANDLE_TO_CONVERTER_CONVERTER = LambdaMetafactory.metafactory(
+                MethodHandles.lookup(),
+                // Implementing Converter.convert
+                CONVERTER_CONVERT,
+                // Take a handle, to be converter to Converter
+                HANDLE_TO_CONVERTER,
+                // Raw signature for SAM type
+                CONVERTER_SIG,
+                // Handle to call the captured handle.
+                handleInvoker,
+                // Actual signature at invoke time
+                CONVERTER_SIG
+            ).dynamicInvoker();
+        } catch (LambdaConversionException e) {
+            throw new IllegalStateException("Failed to load ArgumentConverter MetaFactory", e);
+        }
+    }
+
+    static {
+        try {
+            SUCCESSFUL_CONVERSION_FROM = MethodHandles.lookup()
+                .findStatic(SuccessfulConversion.class, "fromSingle",
+                    methodType(SuccessfulConversion.class, Object.class));
+            FAILED_CONVERSION_FROM = MethodHandles.lookup()
+                .findStatic(FailedConversion.class, "from",
+                    methodType(FailedConversion.class, Throwable.class));
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private ArgumentConverters() {
+    }
 
     public static ArgumentConverter<String> forString() {
         return STRING_ARGUMENT_CONVERTER;
@@ -99,33 +155,6 @@ public class ArgumentConverters {
         return dropArguments(noContextHandle, 1, InjectedValueAccess.class);
     }
 
-    private static final String CONVERTER_CONVERT = "convert";
-    private static final MethodType HANDLE_TO_CONVERTER = methodType(Converter.class, MethodHandle.class);
-    private static final MethodType CONVERTER_SIG = methodType(ConversionResult.class, String.class, InjectedValueAccess.class);
-
-    private static final MethodHandle HANDLE_TO_CONVERTER_CONVERTER;
-
-    static {
-        MethodHandle handleInvoker = MethodHandles.invoker(CONVERTER_SIG);
-        try {
-            HANDLE_TO_CONVERTER_CONVERTER = LambdaMetafactory.metafactory(
-                MethodHandles.lookup(),
-                // Implementing Converter.convert
-                CONVERTER_CONVERT,
-                // Take a handle, to be converter to Converter
-                HANDLE_TO_CONVERTER,
-                // Raw signature for SAM type
-                CONVERTER_SIG,
-                // Handle to call the captured handle.
-                handleInvoker,
-                // Actual signature at invoke time
-                CONVERTER_SIG
-            ).dynamicInvoker();
-        } catch (LambdaConversionException e) {
-            throw new IllegalStateException("Failed to load ArgumentConverter MetaFactory", e);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private static <T> SimpleArgumentConverter<T> converterForHandle(MethodHandle handle, Class<?> type) {
         MethodType mType = handle.type();
@@ -149,22 +178,6 @@ public class ArgumentConverters {
         );
     }
 
-    private static final MethodHandle SUCCESSFUL_CONVERSION_FROM;
-    private static final MethodHandle FAILED_CONVERSION_FROM;
-
-    static {
-        try {
-            SUCCESSFUL_CONVERSION_FROM = MethodHandles.lookup()
-                .findStatic(SuccessfulConversion.class, "fromSingle",
-                    methodType(SuccessfulConversion.class, Object.class));
-            FAILED_CONVERSION_FROM = MethodHandles.lookup()
-                .findStatic(FailedConversion.class, "from",
-                    methodType(FailedConversion.class, Throwable.class));
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     /**
      * Wrap the handle to return the result using {@link ConversionResult}.
      */
@@ -177,24 +190,6 @@ public class ArgumentConverters {
             FAILED_CONVERSION_FROM.asType(methodType(ConversionResult.class, Throwable.class)));
         return result;
     }
-
-    private interface ACProvider<T> {
-        Optional<ArgumentConverter<T>> provideAc(TypeToken<T> type);
-    }
-
-    private static final List<ACProvider<Object>> PROVIDERS = ImmutableList.of(
-        ArgumentConverters::valueOfConverters,
-        ArgumentConverters::constructorConverters,
-        type -> {
-            if (Objects.equals(type.wrap().getRawType(), Character.class)) {
-                return Optional.of(SimpleArgumentConverter.from(
-                    (s, c) -> SuccessfulConversion.fromSingle(s.charAt(0)),
-                    "any character"
-                ));
-            }
-            return Optional.empty();
-        }
-    );
 
     public static <T> ArgumentConverter<T> get(TypeToken<T> type) {
         if (type.getRawType().equals(String.class)) {
@@ -216,7 +211,8 @@ public class ArgumentConverters {
         return result;
     }
 
-    private ArgumentConverters() {
+    private interface ACProvider<T> {
+        Optional<ArgumentConverter<T>> provideAc(TypeToken<T> type);
     }
 
 }

@@ -34,14 +34,14 @@ public class ConfigRenderer implements ComponentRenderer<ConfigHolder> {
 
     private static final ConfigRenderer INSTANCE = new ConfigRenderer();
 
+    private ConfigRenderer() {
+    }
+
     /**
      * Get an instance of the renderer.
      */
     public static ConfigRenderer getInstance() {
         return INSTANCE;
-    }
-
-    private ConfigRenderer() {
     }
 
     @Override

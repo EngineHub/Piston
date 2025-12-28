@@ -28,14 +28,6 @@ import java.util.function.Function;
 
 public final class FailedConversion<T> extends ConversionResult<T> {
 
-    public static <T> FailedConversion<T> from(Throwable error) {
-        return from(error, ImmutableSet.of());
-    }
-
-    public static <T> FailedConversion<T> from(Throwable error, Collection<FailedConversion<T>> otherFailures) {
-        return new FailedConversion<>(error, otherFailures);
-    }
-
     private final Throwable error;
     private final ImmutableSet<FailedConversion<T>> otherFailures;
 
@@ -45,6 +37,13 @@ public final class FailedConversion<T> extends ConversionResult<T> {
         this.otherFailures = ImmutableSet.copyOf(otherFailures);
     }
 
+    public static <T> FailedConversion<T> from(Throwable error) {
+        return from(error, ImmutableSet.of());
+    }
+
+    public static <T> FailedConversion<T> from(Throwable error, Collection<FailedConversion<T>> otherFailures) {
+        return new FailedConversion<>(error, otherFailures);
+    }
 
     @Override
     public boolean isSuccessful() {
@@ -88,11 +87,14 @@ public final class FailedConversion<T> extends ConversionResult<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         FailedConversion<?> that = (FailedConversion<?>) o;
-        return error.equals(that.error) &&
-            otherFailures.equals(that.otherFailures);
+        return error.equals(that.error) && otherFailures.equals(that.otherFailures);
     }
 
     @Override

@@ -91,23 +91,31 @@ class TypeNameUtilTest {
     @DisplayName("can resolve first type argument from ParameterizedTypeName")
     @Test
     fun firstTypeArgFromParameterizedTypeName() {
-        assertEquals(className<String>(), TypeNameUtil.firstTypeArg(
-            className<Collection<*>>().parametrize(className<String>())
-        ))
+        assertEquals(
+            className<String>(), TypeNameUtil.firstTypeArg(
+                className<Collection<*>>().parametrize(className<String>())
+            )
+        )
     }
 
     @DisplayName("resolves Object as first type argument if not parameterized")
     @Test
     fun firstTypeArgFromOtherTypeName() {
-        assertEquals(className<Any>(), TypeNameUtil.firstTypeArg(
-            className<String>()
-        ))
-        assertEquals(className<Any>(), TypeNameUtil.firstTypeArg(
-            TypeName.INT
-        ))
-        assertEquals(className<Any>(), TypeNameUtil.firstTypeArg(
-            TypeName.VOID
-        ))
+        assertEquals(
+            className<Any>(), TypeNameUtil.firstTypeArg(
+                className<String>()
+            )
+        )
+        assertEquals(
+            className<Any>(), TypeNameUtil.firstTypeArg(
+                TypeName.INT
+            )
+        )
+        assertEquals(
+            className<Any>(), TypeNameUtil.firstTypeArg(
+                TypeName.VOID
+            )
+        )
     }
 
 }

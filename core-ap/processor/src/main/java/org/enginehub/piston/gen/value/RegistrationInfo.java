@@ -32,6 +32,9 @@ import javax.lang.model.element.TypeElement;
 @AutoValue
 public abstract class RegistrationInfo {
 
+    RegistrationInfo() {
+    }
+
     public static Builder builder() {
         Builder builder = new AutoValue_RegistrationInfo.Builder();
         builder.injectedVariablesBuilder();
@@ -39,6 +42,23 @@ public abstract class RegistrationInfo {
         builder.keyTypesBuilder();
         return builder;
     }
+
+    public abstract String getName();
+
+    public abstract ClassName getTargetClassName();
+
+    @Nullable
+    public abstract Modifier getClassVisibility();
+
+    public abstract ImmutableList<CommandInfo> getCommands();
+
+    public abstract ImmutableList<RequiredVariable> getInjectedVariables();
+
+    public abstract ImmutableList<RequiredVariable> getDeclaredFields();
+
+    public abstract ImmutableSet<KeyInfo> getKeyTypes();
+
+    public abstract ImmutableSet<TypeElement> getSuperTypes();
 
     @AutoValue.Builder
     public interface Builder {
@@ -82,25 +102,5 @@ public abstract class RegistrationInfo {
         RegistrationInfo build();
 
     }
-
-    RegistrationInfo() {
-    }
-
-    public abstract String getName();
-
-    public abstract ClassName getTargetClassName();
-
-    @Nullable
-    public abstract Modifier getClassVisibility();
-
-    public abstract ImmutableList<CommandInfo> getCommands();
-
-    public abstract ImmutableList<RequiredVariable> getInjectedVariables();
-
-    public abstract ImmutableList<RequiredVariable> getDeclaredFields();
-
-    public abstract ImmutableSet<KeyInfo> getKeyTypes();
-
-    public abstract ImmutableSet<TypeElement> getSuperTypes();
 
 }

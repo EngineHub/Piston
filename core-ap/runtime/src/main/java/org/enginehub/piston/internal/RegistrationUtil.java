@@ -32,6 +32,10 @@ import java.util.Optional;
  */
 public class RegistrationUtil {
 
+    private RegistrationUtil() {
+        throw new RuntimeException();
+    }
+
     public static <T> T requireOptional(Key<T> type, String name, Optional<T> optional) {
         return optional.orElseThrow(() ->
             new IllegalStateException("No injected value for " + name + " (type " + type + ")")
@@ -69,10 +73,6 @@ public class RegistrationUtil {
         for (CommandCallListener listener : listeners) {
             listener.afterThrow(commandMethod, parameters, error);
         }
-    }
-
-    private RegistrationUtil() {
-        throw new RuntimeException();
     }
 
 }

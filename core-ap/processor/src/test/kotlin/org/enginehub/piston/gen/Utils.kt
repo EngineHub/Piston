@@ -21,12 +21,7 @@ package org.enginehub.piston.gen
 
 import com.google.testing.compile.Compiler
 import com.google.testing.compile.JavaFileObjects
-import com.palantir.javapoet.ClassName
-import com.palantir.javapoet.JavaFile
-import com.palantir.javapoet.MethodSpec
-import com.palantir.javapoet.ParameterizedTypeName
-import com.palantir.javapoet.TypeName
-import com.palantir.javapoet.TypeSpec
+import com.palantir.javapoet.*
 import org.enginehub.piston.annotation.CommandContainer
 import javax.tools.JavaFileObject
 

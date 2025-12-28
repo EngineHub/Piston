@@ -38,9 +38,6 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 @DisplayName("A ConfigHolder")
 public class ConfigHolderTest {
 
-    private record TestCase(String name, Component input, Component expected) {
-    }
-
     private final ConfigRenderer renderer = ConfigRenderer.getInstance();
     private final ConfigHolder holder = ConfigHolder.create();
     private final Component inputWithStyles = ColorConfig.helpText()
@@ -71,6 +68,9 @@ public class ConfigHolderTest {
                 assertEquals(testCase.expected, actual);
             })
         );
+    }
+
+    private record TestCase(String name, Component input, Component expected) {
     }
 
 }

@@ -42,6 +42,38 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
             .variable(false);
     }
 
+    /**
+     * Check if this argument a <em>variable argument</em>.
+     *
+     * <p>That is, does it accept a variable amount of inputs, rather than one?</p>
+     */
+    public abstract boolean isVariable();
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * Arguments are always required when they have no defaults.
+     * To provide a {@code null} default, use the empty string.
+     * </p>
+     */
+    @Override
+    public final boolean isRequired() {
+        return getDefaults().isEmpty();
+    }
+
+    @Override
+    public Component getTextRepresentation() {
+        ImmutableList.Builder<Component> builder = ImmutableList.builder();
+        builder.add(TextComponent.of(isRequired() ? "<" : "["));
+        builder.add(ColorConfig.mainText().wrap(getArgumentName()));
+        if (isVariable()) {
+            builder.add(ColorConfig.textModifier().wrap("..."));
+        }
+        builder.add(TextComponent.of(isRequired() ? ">" : "]"));
+        return ColorConfig.partWrapping().wrap(builder.build());
+    }
+
     @AutoValue.Builder
     public abstract static class Builder {
 
@@ -80,38 +112,6 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
         public abstract Builder variable(boolean variable);
 
         public abstract CommandArgument build();
-    }
-
-    /**
-     * Check if this argument a <em>variable argument</em>.
-     *
-     * That is, does it accept a variable amount of inputs, rather than one?
-     */
-    public abstract boolean isVariable();
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>
-     * Arguments are always required when they have no defaults.
-     * To provide a {@code null} default, use the empty string.
-     * </p>
-     */
-    @Override
-    public final boolean isRequired() {
-        return getDefaults().isEmpty();
-    }
-
-    @Override
-    public Component getTextRepresentation() {
-        ImmutableList.Builder<Component> builder = ImmutableList.builder();
-        builder.add(TextComponent.of(isRequired() ? "<" : "["));
-        builder.add(ColorConfig.mainText().wrap(getArgumentName()));
-        if (isVariable()) {
-            builder.add(ColorConfig.textModifier().wrap("..."));
-        }
-        builder.add(TextComponent.of(isRequired() ? ">" : "]"));
-        return ColorConfig.partWrapping().wrap(builder.build());
     }
 
 }

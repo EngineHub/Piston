@@ -19,14 +19,7 @@
 
 package org.enginehub.piston
 
-import org.enginehub.piston.commands.NoArgCommand
-import org.enginehub.piston.commands.NoArgCommandRegistration
-import org.enginehub.piston.commands.NoArgWithInjectedCommand
-import org.enginehub.piston.commands.NoArgWithInjectedCommandRegistration
-import org.enginehub.piston.commands.SingleArgCommand
-import org.enginehub.piston.commands.SingleArgCommandRegistration
-import org.enginehub.piston.commands.SingleOptionalArgCommand
-import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration
+import org.enginehub.piston.commands.*
 import org.enginehub.piston.exception.UsageException
 import org.enginehub.piston.inject.InjectedValueAccess
 import org.enginehub.piston.inject.Key
@@ -60,9 +53,13 @@ class BasicCommandTest {
                 installCommands(ci, NoArgWithInjectedCommandRegistration.builder())
             }
 
-            manager.execute(MapBackedValueStore.create(mapOf(
-                    Key.of(String::class.java) to ValueProvider.constant(injected)
-            )), listOf("no-arg-injected"))
+            manager.execute(
+                MapBackedValueStore.create(
+                    mapOf(
+                        Key.of(String::class.java) to ValueProvider.constant(injected)
+                    )
+                ), listOf("no-arg-injected")
+            )
 
             verify(ci).noArg(injected)
         }

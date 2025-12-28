@@ -45,11 +45,11 @@ import javax.annotation.Nullable;
 @AutoValue
 public abstract class KeyInfo {
 
-    public static KeyInfo of(TypeName typeName, @Nullable AnnotationSpec annotationSpec) {
-        return new AutoValue_KeyInfo(typeName, annotationSpec);
+    KeyInfo() {
     }
 
-    KeyInfo() {
+    public static KeyInfo of(TypeName typeName, @Nullable AnnotationSpec annotationSpec) {
+        return new AutoValue_KeyInfo(typeName, annotationSpec);
     }
 
     public abstract TypeName typeName();
@@ -63,12 +63,7 @@ public abstract class KeyInfo {
 
     public final String getVariableName() {
         AnnotationSpec spec = annotationSpec();
-        return SafeName.getNameAsIdentifier(typeName()) +
-            "_" +
-            (spec == null
-                ? ""
-                : getSpecName(spec) + "_") +
-            "Key";
+        return SafeName.getNameAsIdentifier(typeName()) + "_" + (spec == null ? "" : getSpecName(spec) + "_") + "Key";
     }
 
     private String getSpecName(AnnotationSpec spec) {
@@ -131,7 +126,8 @@ public abstract class KeyInfo {
     private CodeBlock runtimeAnnotationExtractor(AnnotationSpec annotationSpec) {
         // _technically_ the spec can only be applied to parameters
         // so we'll whip up a fake inner method with the annotation
-        // and at runtime, reflect out the instance
+        // and at runtime, reflect out the instance retrieve this method
+        // and get its first parameter's first annotation (again, only one)
         TypeSpec annoExtractor = TypeSpec.anonymousClassBuilder("")
             // `a` = "annotation", extracts the annotation from its own parameter `ah`
             .addMethod(MethodSpec.methodBuilder("a")
@@ -141,17 +137,11 @@ public abstract class KeyInfo {
                     .addAnnotation(annotationSpec)
                     .build())
                 .beginControlFlow("try")
-                .addStatement(
-                    // from this class
-                    "return getClass()" +
-                        // retrieve this method
-                        ".getDeclaredMethod(\"a\", $T.class)" +
-                        // and get its first parameter's first annotation (again, only one)
-                        ".getParameterAnnotations()[0][0]", Object.class)
+                // from this class
+                .addStatement("return getClass().getDeclaredMethod(\"a\", $T.class).getParameterAnnotations()[0][0]", Object.class)
                 .nextControlFlow("catch ($T e)", NoSuchMethodException.class)
                 .addStatement("throw new $T(e)", RuntimeException.class)
-                .endControlFlow()
-                .build())
+                .endControlFlow().build())
             .build();
         // call the method with a null parameter, since it doesn't really matter
         return CodeBlock.of("$L.a(null)", annoExtractor);

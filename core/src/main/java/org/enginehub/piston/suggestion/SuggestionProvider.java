@@ -40,7 +40,7 @@ public interface SuggestionProvider {
      * {@code args.size()} in this case, to signify it replaces outside of the list.
      * </p>
      *
-     * @param args the original arguments passed
+     * @param args        the original arguments passed
      * @param parseResult the result of parsing the arguments
      * @return the suggestions
      */

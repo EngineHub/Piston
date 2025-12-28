@@ -29,11 +29,25 @@ import java.util.Collection;
 @AutoValue
 public abstract class RequiredVariable {
 
+    RequiredVariable() {
+    }
+
     public static Builder builder() {
         return new AutoValue_RequiredVariable.Builder()
             .inherited(false)
             .annotations(ImmutableList.of());
     }
+
+    /**
+     * Check if this variable inherited from another interface.
+     */
+    public abstract boolean isInherited();
+
+    public abstract TypeName getType();
+
+    public abstract String getName();
+
+    public abstract ImmutableList<AnnotationSpec> getAnnotations();
 
     @AutoValue.Builder
     public interface Builder {
@@ -49,20 +63,6 @@ public abstract class RequiredVariable {
         RequiredVariable build();
 
     }
-
-    RequiredVariable() {
-    }
-
-    /**
-     * Is this variable inherited from another interface?
-     */
-    public abstract boolean isInherited();
-
-    public abstract TypeName getType();
-
-    public abstract String getName();
-
-    public abstract ImmutableList<AnnotationSpec> getAnnotations();
 
 
 }

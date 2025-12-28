@@ -25,7 +25,7 @@ import org.enginehub.piston.CommandParseResult;
 /**
  * Parent class for all usage-related exceptions.
  *
- * Provides a partially complete parsing result to assist in providing better help messages.
+ * <p>Provides a partially complete parsing result to assist in providing better help messages.</p>
  */
 public class UsageException extends CommandException {
     private final CommandParseResult commandParseResult;

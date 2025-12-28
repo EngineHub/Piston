@@ -37,20 +37,6 @@ public abstract class CommandParamInfo {
         return new AutoValue_CommandParamInfo.Builder();
     }
 
-    @AutoValue.Builder
-    public interface Builder {
-
-        Builder name(@Nullable String name);
-
-        Builder type(@Nullable TypeName type);
-
-        Builder construction(@Nullable CodeBlock construction);
-
-        Builder extractSpec(ExtractSpec extraction);
-
-        CommandParamInfo build();
-    }
-
     /**
      * Variable name, if used to store data.
      *
@@ -77,5 +63,19 @@ public abstract class CommandParamInfo {
     public abstract ExtractSpec getExtractSpec();
 
     public abstract Builder toBuilder();
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder name(@Nullable String name);
+
+        Builder type(@Nullable TypeName type);
+
+        Builder construction(@Nullable CodeBlock construction);
+
+        Builder extractSpec(ExtractSpec extraction);
+
+        CommandParamInfo build();
+    }
 
 }

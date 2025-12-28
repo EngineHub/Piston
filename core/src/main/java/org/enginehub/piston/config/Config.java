@@ -53,8 +53,7 @@ public abstract class Config<T> {
         return key;
     }
 
-    public @Nullable
-    T getValue() {
+    public @Nullable T getValue() {
         return value;
     }
 

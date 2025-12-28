@@ -45,10 +45,12 @@ class AnnoValueExtractionTest {
     private val value = "test-value"
     private val value2 = "tester-value"
     private val annoCode = TypeSpec.classBuilder("AnnoContainer")
-        .addAnnotation(AnnotationSpec.builder(className<ProcessingKey>())
-            .addMember("value", "\$S", value)
-            .addMember("many", "{ \$S, \$S }", value, value2)
-            .build())
+        .addAnnotation(
+            AnnotationSpec.builder(className<ProcessingKey>())
+                .addMember("value", "\$S", value)
+                .addMember("many", "{ \$S, \$S }", value, value2)
+                .build()
+        )
         .build()
         .toFileInPackage()
 

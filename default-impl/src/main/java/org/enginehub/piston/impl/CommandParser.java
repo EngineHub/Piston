@@ -73,48 +73,6 @@ class CommandParser {
     private static final Logger LOGGER = LogManagerCompat.getLogger();
 
     private static final ThreadLocal<String> PARSE_ID = new ThreadLocal<>();
-
-    private static void log(String message, Object... args) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("[" + PARSE_ID.get() + "]: " + message, args);
-        }
-    }
-
-    private static String newId() {
-        long rng = ThreadLocalRandom.current().nextLong(0, Long.MAX_VALUE);
-        return Strings.padStart(Long.toString(rng, 36), 13, '0');
-    }
-
-    private static void logParseStart() {
-        PARSE_ID.set(newId());
-        log("started parsing");
-    }
-
-    private static final class PerCommandDetails {
-
-        final CommandInfo commandInfo;
-        final Set<ArgAcceptingCommandPart> defaultsNeeded;
-        final Set<ArgAcceptingCommandFlag> argFlagsNeeded;
-        final ListIterator<ArgConsumingCommandPart> partIter;
-        boolean canMatchFlags = true;
-        int remainingRequiredParts;
-
-        private PerCommandDetails(CommandInfo commandInfo) {
-            this.commandInfo = commandInfo;
-            this.defaultsNeeded = new HashSet<>(commandInfo.defaultProvided());
-            // collect argument flags that don't have default values
-            // we'll provide `null` for them in this case.
-            this.argFlagsNeeded = StreamHelper.cast(
-                commandInfo.flags().values().stream(),
-                ArgAcceptingCommandFlag.class
-            )
-                .filter(arg -> !defaultsNeeded.contains(arg))
-                .collect(Collectors.toCollection(HashSet::new));
-            this.partIter = commandInfo.arguments().listIterator();
-            this.remainingRequiredParts = commandInfo.requiredParts();
-        }
-    }
-
     private final ArgumentConverterAccess converters;
     private final CommandMetadata metadata;
     private final CommandParseResultImpl.Builder parseResult = CommandParseResultImpl.builder();
@@ -142,6 +100,22 @@ class CommandParser {
         this.argIter = this.arguments.listIterator();
         this.context = context;
         switchToCommand(initial);
+    }
+
+    private static void log(String message, Object... args) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("[" + PARSE_ID.get() + "]: " + message, args);
+        }
+    }
+
+    private static String newId() {
+        long rng = ThreadLocalRandom.current().nextLong(0, Long.MAX_VALUE);
+        return Strings.padStart(Long.toString(rng, 36), 13, '0');
+    }
+
+    private static void logParseStart() {
+        PARSE_ID.set(newId());
+        log("started parsing");
     }
 
     private void buildParseResult() {
@@ -484,24 +458,13 @@ class CommandParser {
         return result.build();
     }
 
-    private enum AcceptInfo {
-        REJECTED,
-        ACCEPTED_INEXACT,
-        ACCEPTED_EXACT,
-        ;
-
-        boolean isAccepted() {
-            return this != REJECTED;
-        }
-    }
-
     /**
      * Check if {@code part} has type converters attached, and if so, return
      * {@code true} iff any of them will convert {@code next}. If there are no
      * type converters, also return {@code true}.
      */
     private AcceptInfo getAcceptInfoFromTypeParsers(ArgAcceptingCommandPart part,
-                                            String next) {
+                                                    String next) {
         ImmutableSet<Key<?>> types = part.getTypes();
         if (types.isEmpty()) {
             return AcceptInfo.ACCEPTED_EXACT;
@@ -542,8 +505,7 @@ class CommandParser {
             if (flag instanceof ArgAcceptingCommandFlag argPart) {
                 if (i + 1 < flags.length()) {
                     // Only allow argument-flags at the end of flag-combos.
-                    throw usageException(TextComponent.of("Argument-accepting flags must be " +
-                        "at the end of combined flag groups."));
+                    throw usageException(TextComponent.of("Argument-accepting flags must be at the end of combined flag groups."));
                 }
                 bind(flag, true);
                 if (!hasNextArgument()) {
@@ -579,6 +541,42 @@ class CommandParser {
             .injectedValues(context)
             .manager(converters)
             .build());
+    }
+
+    private enum AcceptInfo {
+        REJECTED,
+        ACCEPTED_INEXACT,
+        ACCEPTED_EXACT,
+        ;
+
+        boolean isAccepted() {
+            return this != REJECTED;
+        }
+    }
+
+    private static final class PerCommandDetails {
+
+        final CommandInfo commandInfo;
+        final Set<ArgAcceptingCommandPart> defaultsNeeded;
+        final Set<ArgAcceptingCommandFlag> argFlagsNeeded;
+        final ListIterator<ArgConsumingCommandPart> partIter;
+        boolean canMatchFlags = true;
+        int remainingRequiredParts;
+
+        private PerCommandDetails(CommandInfo commandInfo) {
+            this.commandInfo = commandInfo;
+            this.defaultsNeeded = new HashSet<>(commandInfo.defaultProvided());
+            // collect argument flags that don't have default values
+            // we'll provide `null` for them in this case.
+            this.argFlagsNeeded = StreamHelper.cast(
+                    commandInfo.flags().values().stream(),
+                    ArgAcceptingCommandFlag.class
+                )
+                .filter(arg -> !defaultsNeeded.contains(arg))
+                .collect(Collectors.toCollection(HashSet::new));
+            this.partIter = commandInfo.arguments().listIterator();
+            this.remainingRequiredParts = commandInfo.requiredParts();
+        }
     }
 
 }

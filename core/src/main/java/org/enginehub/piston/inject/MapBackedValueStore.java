@@ -30,18 +30,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class MapBackedValueStore implements InjectedValueStore {
 
+    private final Map<Key<?>, ValueProvider<InjectedValueAccess, ?>> providers;
+
+    private MapBackedValueStore(Map<Key<?>, ValueProvider<InjectedValueAccess, ?>> providers) {
+        this.providers = providers;
+    }
+
     public static MapBackedValueStore create() {
         return create(new ConcurrentHashMap<>());
     }
 
     public static MapBackedValueStore create(Map<Key<?>, ValueProvider<InjectedValueAccess, ?>> providers) {
         return new MapBackedValueStore(providers);
-    }
-
-    private final Map<Key<?>, ValueProvider<InjectedValueAccess, ?>> providers;
-
-    private MapBackedValueStore(Map<Key<?>, ValueProvider<InjectedValueAccess, ?>> providers) {
-        this.providers = providers;
     }
 
     @Override

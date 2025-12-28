@@ -31,8 +31,10 @@ private fun prefix(message: String?): String {
 
 fun <T> assertEqualUnordered(expected: Collection<T>, actual: Collection<T>, message: String? = null) {
     assertNotNull(actual, message)
-    assertEquals(expected.size, actual.size,
-            prefix(message) + "Not of equal size: expected: $expected, actual: $actual")
+    assertEquals(
+        expected.size, actual.size,
+        prefix(message) + "Not of equal size: expected: $expected, actual: $actual"
+    )
     val expectedSet = expected.toSet()
     val actualSet = actual.toSet()
     assertEquals(expectedSet, actualSet, message)

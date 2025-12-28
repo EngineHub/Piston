@@ -31,6 +31,14 @@ import java.util.List;
  */
 public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
 
+    private final Converter<T> converter;
+    private final Component description;
+
+    private SimpleArgumentConverter(Converter<T> converter, Component description) {
+        this.converter = converter;
+        this.description = description;
+    }
+
     public static <T> SimpleArgumentConverter<T> from(Converter<T> converter, String description) {
         return from(converter, TextComponent.of(description));
     }
@@ -40,21 +48,13 @@ public class SimpleArgumentConverter<T> implements ArgumentConverter<T> {
      * function, and supplies the provided description for
      * {@link ArgumentConverter#describeAcceptableArguments()}.
      *
-     * @param converter the converter function
+     * @param converter   the converter function
      * @param description the acceptable arguments description
-     * @param <T> the type of the argument
+     * @param <T>         the type of the argument
      * @return a converter using the given function and description
      */
     public static <T> SimpleArgumentConverter<T> from(Converter<T> converter, Component description) {
         return new SimpleArgumentConverter<>(converter, description);
-    }
-
-    private final Converter<T> converter;
-    private final Component description;
-
-    private SimpleArgumentConverter(Converter<T> converter, Component description) {
-        this.converter = converter;
-        this.description = description;
     }
 
     @Override

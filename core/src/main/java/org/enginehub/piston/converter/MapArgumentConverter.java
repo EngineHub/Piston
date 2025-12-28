@@ -36,6 +36,12 @@ import static org.enginehub.piston.util.ComponentHelper.joiningWithBar;
  */
 public final class MapArgumentConverter<T> implements ArgumentConverter<T> {
 
+    private final ImmutableMap<String, T> map;
+
+    private MapArgumentConverter(Map<String, T> map) {
+        this.map = ImmutableMap.copyOf(map);
+    }
+
     /**
      * Construct a converter for simple string choices from a set.
      */
@@ -47,12 +53,6 @@ public final class MapArgumentConverter<T> implements ArgumentConverter<T> {
 
     public static <T> MapArgumentConverter<T> from(Map<String, T> map) {
         return new MapArgumentConverter<>(map);
-    }
-
-    private final ImmutableMap<String, T> map;
-
-    private MapArgumentConverter(Map<String, T> map) {
-        this.map = ImmutableMap.copyOf(map);
     }
 
     @Override

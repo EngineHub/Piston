@@ -25,11 +25,11 @@ import javax.annotation.Nullable;
 final class NullAnnotationWrapper implements AnnotationWrapper {
     private static final NullAnnotationWrapper INSTANCE = new NullAnnotationWrapper();
 
-    static NullAnnotationWrapper getInstance() {
-        return INSTANCE;
+    private NullAnnotationWrapper() {
     }
 
-    private NullAnnotationWrapper() {
+    static NullAnnotationWrapper getInstance() {
+        return INSTANCE;
     }
 
     @Nullable

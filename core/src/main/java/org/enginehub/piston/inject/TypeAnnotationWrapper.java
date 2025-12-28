@@ -28,11 +28,11 @@ import javax.annotation.Nullable;
 @AutoValue
 abstract class TypeAnnotationWrapper implements AnnotationWrapper {
 
-    static TypeAnnotationWrapper from(Class<? extends Annotation> annotationType) {
-        return new AutoValue_TypeAnnotationWrapper(annotationType);
+    TypeAnnotationWrapper() {
     }
 
-    TypeAnnotationWrapper() {
+    static TypeAnnotationWrapper from(Class<? extends Annotation> annotationType) {
+        return new AutoValue_TypeAnnotationWrapper(annotationType);
     }
 
     @Nonnull

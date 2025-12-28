@@ -71,7 +71,7 @@ public abstract class ConversionResult<T> {
      * </p>
      *
      * @param mapper the function to call if successful
-     * @param <U> the new type
+     * @param <U>    the new type
      * @return the new result
      */
     public abstract <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper);

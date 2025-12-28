@@ -52,11 +52,11 @@ public class DefaultSuggestionProvider implements SuggestionProvider {
 
     private static final SuggestionProvider INSTANCE = new DefaultSuggestionProvider();
 
-    public static SuggestionProvider getInstance() {
-        return INSTANCE;
+    private DefaultSuggestionProvider() {
     }
 
-    private DefaultSuggestionProvider() {
+    public static SuggestionProvider getInstance() {
+        return INSTANCE;
     }
 
     @Override

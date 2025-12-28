@@ -41,6 +41,32 @@ import javax.annotation.Nullable;
  */
 public interface Command {
 
+    String getName();
+
+    ImmutableList<String> getAliases();
+
+    Component getDescription();
+
+    Optional<Component> getFooter();
+
+    ImmutableList<CommandPart> getParts();
+
+    Condition getCondition();
+
+    Action getAction();
+
+    SuggestionProvider getSuggester();
+
+    Builder toBuilder();
+
+    default Component getUsage() {
+        return HelpGenerator.create(ImmutableList.of(this)).getUsage();
+    }
+
+    default Component getFullHelp() {
+        return HelpGenerator.create(ImmutableList.of(this)).getFullHelp();
+    }
+
     /**
      * Represents what a command does. An action usually does one or more things,
      * and those should be counted and returned for user feedback.
@@ -101,7 +127,7 @@ public interface Command {
          * Retrieve this condition as a more specific type, if possible.
          *
          * @param type the class to cast to
-         * @param <T> the type of the output
+         * @param <T>  the type of the output
          * @return this as {@code T}, if possible
          */
         default <T extends Condition> Optional<T> as(Class<T> type) {
@@ -142,32 +168,6 @@ public interface Command {
 
         Command build();
 
-    }
-
-    String getName();
-
-    ImmutableList<String> getAliases();
-
-    Component getDescription();
-
-    Optional<Component> getFooter();
-
-    ImmutableList<CommandPart> getParts();
-
-    Condition getCondition();
-
-    Action getAction();
-
-    SuggestionProvider getSuggester();
-
-    Builder toBuilder();
-
-    default Component getUsage() {
-        return HelpGenerator.create(ImmutableList.of(this)).getUsage();
-    }
-
-    default Component getFullHelp() {
-        return HelpGenerator.create(ImmutableList.of(this)).getFullHelp();
     }
 
 }

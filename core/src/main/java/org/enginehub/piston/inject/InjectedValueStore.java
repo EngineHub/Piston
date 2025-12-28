@@ -29,9 +29,9 @@ public interface InjectedValueStore extends InjectedValueAccess {
      * Inject a value into this store. It will be provided by
      * {@link InjectedValueAccess#injectedValue(Key)}.
      *
-     * @param key the key for the value
+     * @param key      the key for the value
      * @param provider the provider of the value
-     * @param <T> the type of the value
+     * @param <T>      the type of the value
      */
     <T> void injectValue(Key<T> key, ValueProvider<InjectedValueAccess, T> provider);
 }

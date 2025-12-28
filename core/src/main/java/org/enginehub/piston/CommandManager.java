@@ -60,7 +60,7 @@ public interface CommandManager extends ArgumentConverterStore {
     /**
      * Register a command that initially has the given name, and then is configured by a function.
      *
-     * @param name the name of the command
+     * @param name                the name of the command
      * @param registrationProcess a function that will build the command
      */
     default void register(String name, Consumer<Command.Builder> registrationProcess) {
@@ -100,8 +100,7 @@ public interface CommandManager extends ArgumentConverterStore {
      * <p>Includes aliases.</p>
      *
      * @param name the name to check
-     * @return {@link Optional#of(Object)} the command if registered,
-     *     otherwise {@link Optional#empty()}
+     * @return {@link Optional#of(Object)} the command if registered, otherwise {@link Optional#empty()}
      */
     Optional<Command> getCommand(String name);
 
@@ -110,7 +109,7 @@ public interface CommandManager extends ArgumentConverterStore {
      * entire command line, so that partial parsing may occur.
      *
      * @param context the injected value context
-     * @param args the command line to suggest into
+     * @param args    the command line to suggest into
      * @return the suggestions
      */
     ImmutableSet<Suggestion> getSuggestions(InjectedValueAccess context, List<String> args);
@@ -133,7 +132,7 @@ public interface CommandManager extends ArgumentConverterStore {
      * </p>
      *
      * @param context the injected value context
-     * @param args the arguments to include
+     * @param args    the arguments to include
      * @return the parsing output
      */
     CommandParseResult parse(InjectedValueAccess context, List<String> args);
@@ -147,7 +146,7 @@ public interface CommandManager extends ArgumentConverterStore {
      * </p>
      *
      * @param context the injected value context
-     * @param args the arguments to include
+     * @param args    the arguments to include
      * @return the count from the executed command
      */
     default int execute(InjectedValueAccess context, List<String> args) {

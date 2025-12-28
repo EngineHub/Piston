@@ -30,21 +30,11 @@ import java.util.Map;
 @AutoValue
 abstract class ArgBindingImpl implements ArgBinding {
 
+    ArgBindingImpl() {
+    }
+
     static Builder builder() {
         return new AutoValue_ArgBindingImpl.Builder();
-    }
-
-    @AutoValue.Builder
-    interface Builder {
-
-        Builder input(String name);
-
-        Builder partsMap(Map<CommandPart, Boolean> parts);
-
-        ArgBindingImpl build();
-    }
-
-    ArgBindingImpl() {
     }
 
     @Override
@@ -64,6 +54,16 @@ abstract class ArgBindingImpl implements ArgBinding {
     @Override
     public final ImmutableSet<CommandPart> getParts() {
         return getPartsMap().keySet();
+    }
+
+    @AutoValue.Builder
+    interface Builder {
+
+        Builder input(String name);
+
+        Builder partsMap(Map<CommandPart, Boolean> parts);
+
+        ArgBindingImpl build();
     }
 
 }

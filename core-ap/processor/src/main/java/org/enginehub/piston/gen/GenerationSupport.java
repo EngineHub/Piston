@@ -39,10 +39,10 @@ public interface GenerationSupport {
      * for easy injection of common dependencies, shared by multiple different code generators.
      * </p>
      *
-     * @param type the type of the variable
-     * @param name the base name of the variable
+     * @param type     the type of the variable
+     * @param name     the base name of the variable
      * @param shareKey if non-null, share variables that match this key, as well as type and
-     *     name
+     *                 name
      * @return the actual name of the variable. You must use this to reference it.
      */
     String requestDependency(TypeName type, String name, @Nullable Object shareKey);
@@ -56,10 +56,10 @@ public interface GenerationSupport {
      * for easy injection of common dependencies, shared by multiple different code generators.
      * </p>
      *
-     * @param type the type of the field
-     * @param name the requested name of the field
+     * @param type     the type of the field
+     * @param name     the requested name of the field
      * @param shareKey if non-null, share variables that match this key, as well as type and
-     *     name
+     *                 name
      * @return the actual name of the field. You must use this to reference it.
      */
     String requestField(TypeName type, String name, @Nullable Object shareKey);
@@ -75,7 +75,7 @@ public interface GenerationSupport {
     /**
      * Request a {@link Key} that provides the type at runtime.
      *
-     * @param type the type to represent with a {@code Key}
+     * @param type           the type to represent with a {@code Key}
      * @param annotationSpec the annotation to include on the {@code Key}
      * @return code that represents an expression which will return the correct {@code Key}
      */

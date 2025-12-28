@@ -74,6 +74,32 @@ import static org.enginehub.piston.gen.util.ProcessingEnvValues.ARG_NAME_KEY_PRE
 @SupportedOptions(ARG_NAME_KEY_PREFIX)
 public class CommandProcessor extends BasicAnnotationProcessor {
 
+    private static final ImmutableSet<Modifier> VISIBILITY_MODIFIERS = Sets.immutableEnumSet(
+        Modifier.PUBLIC,
+        Modifier.PROTECTED,
+        Modifier.PRIVATE
+    );
+    private static final LoadingCache<TypeElement, Boolean> IS_CONDITION =
+        CacheBuilder.newBuilder()
+            .weakKeys()
+            // take 50 falses, or many more trues
+            // we value a positive result more
+            .maximumWeight(5000)
+            .<TypeElement, Boolean>weigher((k, v) -> v ? 1 : 100)
+            .build(CacheLoader.from((TypeElement element) -> {
+                if (element == null) {
+                    return false;
+                }
+                if (isExactlyConditionAnno(element)) {
+                    return true;
+                }
+                return isAnnotationPresent(element, CommandCondition.class);
+            }));
+
+    private static boolean isExactlyConditionAnno(TypeElement element) {
+        return element.getQualifiedName().contentEquals(CommandCondition.class.getCanonicalName());
+    }
+
     @Override
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
@@ -175,12 +201,6 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             identifierTracker);
     }
 
-    private static final ImmutableSet<Modifier> VISIBILITY_MODIFIERS = Sets.immutableEnumSet(
-        Modifier.PUBLIC,
-        Modifier.PROTECTED,
-        Modifier.PRIVATE
-    );
-
     @Nullable
     private Modifier visibility(Set<Modifier> modifiers) {
         return modifiers.stream()
@@ -220,27 +240,6 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             .footer(descFooter)
             .params(params)
             .build();
-    }
-
-    private final LoadingCache<TypeElement, Boolean> IS_CONDITION =
-        CacheBuilder.newBuilder()
-            .weakKeys()
-            // take 50 falses, or many more trues
-            // we value a positive result more
-            .maximumWeight(5000)
-            .<TypeElement, Boolean>weigher((k, v) -> v ? 1 : 100)
-            .build(CacheLoader.from((TypeElement element) -> {
-                if (element == null) {
-                    return false;
-                }
-                if (isExactlyConditionAnno(element)) {
-                    return true;
-                }
-                return isAnnotationPresent(element, CommandCondition.class);
-            }));
-
-    private static boolean isExactlyConditionAnno(TypeElement element) {
-        return element.getQualifiedName().contentEquals(CommandCondition.class.getCanonicalName());
     }
 
     private Optional<AnnotationMirror> findCommandCondition(ExecutableElement method) {

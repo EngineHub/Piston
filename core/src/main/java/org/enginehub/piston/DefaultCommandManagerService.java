@@ -39,6 +39,14 @@ import static com.google.common.collect.Streams.stream;
 public class DefaultCommandManagerService implements CommandManagerService {
 
     private static final DefaultCommandManagerService INSTANCE = new DefaultCommandManagerService(getDefaultService());
+    private final Lock sealLock = new ReentrantLock();
+    private CommandManagerService defaultService;
+    @Nullable
+    private CommandManagerService sealedDefaultService;
+
+    private DefaultCommandManagerService(CommandManagerService defaultService) {
+        this.defaultService = defaultService;
+    }
 
     public static DefaultCommandManagerService getInstance() {
         return INSTANCE;
@@ -54,13 +62,14 @@ public class DefaultCommandManagerService implements CommandManagerService {
             .orElseThrow(() -> new IllegalStateException("No default service available."));
     }
 
-    private final Lock sealLock = new ReentrantLock();
-    private CommandManagerService defaultService;
-    @Nullable
-    private CommandManagerService sealedDefaultService;
-
-    private DefaultCommandManagerService(CommandManagerService defaultService) {
-        this.defaultService = defaultService;
+    public void setDefaultService(CommandManagerService defaultService) {
+        sealLock.lock();
+        try {
+            checkState(sealedDefaultService == null, "Piston default service is sealed");
+            this.defaultService = defaultService;
+        } finally {
+            sealLock.unlock();
+        }
     }
 
     private CommandManagerService sealDelegate() {
@@ -80,16 +89,6 @@ public class DefaultCommandManagerService implements CommandManagerService {
         // this can be done out of the lock, since the seal already
         // makes this effectively final -- it will never be changed again
         return sealedDefaultService;
-    }
-
-    public void setDefaultService(CommandManagerService defaultService) {
-        sealLock.lock();
-        try {
-            checkState(sealedDefaultService == null, "Piston default service is sealed");
-            this.defaultService = defaultService;
-        } finally {
-            sealLock.unlock();
-        }
     }
 
     @Override

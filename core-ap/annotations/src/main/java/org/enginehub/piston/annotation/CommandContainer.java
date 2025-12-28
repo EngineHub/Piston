@@ -37,22 +37,16 @@ public @interface CommandContainer {
     /**
      * Super-types for the generated registration class to implement.
      *
-     * <p>
-     * Note that this does not force the class to implement new methods,
+     * <p>Note that this does not force the class to implement new methods,
      * but if you add an interface that matches existing methods, then
-     * those will be overriden, allowing for more generic configuration.
-     * </p>
-     * <p>
-     * For example, you could add an interface representing the addition
+     * those will be overridden, allowing for more generic configuration.</p>
+     *
+     * <p>For example, you could add an interface representing the addition
      * of a {@link CommandConditionGenerator} to the registration builder,
-     * and then you will be able to inject all builders using a single method.
-     * </p>
-     * <p>
-     * N.B.: The registration class always implements {@link CommandRegistration},
-     * regardless of the content of this array.
-     * </p>
+     * and then you will be able to inject all builders using a single method.</p>
      *
      * @return the super-types for the generated registration class
+     * @implNote The registration class always implements {@link CommandRegistration}, regardless of the content of this array.
      */
     Class<?>[] superTypes() default {};
 

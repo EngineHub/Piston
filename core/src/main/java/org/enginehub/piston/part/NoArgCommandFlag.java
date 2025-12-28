@@ -27,6 +27,9 @@ import org.enginehub.piston.config.ColorConfig;
 @AutoValue
 public abstract class NoArgCommandFlag implements CommandFlag {
 
+    NoArgCommandFlag() {
+    }
+
     public static NoArgCommandFlag.Builder builder(char name,
                                                    String description) {
         return builder(name, TextComponent.of(description));
@@ -37,6 +40,15 @@ public abstract class NoArgCommandFlag implements CommandFlag {
         return new AutoValue_NoArgCommandFlag.Builder()
             .named(name)
             .describedBy(description);
+    }
+
+    @Override
+    public Component getTextRepresentation() {
+        return ColorConfig.partWrapping().wrap(
+            TextComponent.of("["),
+            ColorConfig.mainText().wrap("-" + getName()),
+            TextComponent.of("]")
+        );
     }
 
     @AutoValue.Builder
@@ -68,17 +80,5 @@ public abstract class NoArgCommandFlag implements CommandFlag {
 
         public abstract NoArgCommandFlag build();
 
-    }
-
-    NoArgCommandFlag() {
-    }
-
-    @Override
-    public Component getTextRepresentation() {
-        return ColorConfig.partWrapping().wrap(
-            TextComponent.of("["),
-            ColorConfig.mainText().wrap("-" + getName()),
-            TextComponent.of("]")
-        );
     }
 }

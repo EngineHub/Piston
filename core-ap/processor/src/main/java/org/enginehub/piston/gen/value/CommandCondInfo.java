@@ -33,16 +33,6 @@ public abstract class CommandCondInfo {
         return new AutoValue_CommandCondInfo.Builder();
     }
 
-    @AutoValue.Builder
-    public interface Builder {
-
-        Builder condVariable(String variable);
-
-        Builder construction(CodeBlock construction);
-
-        CommandCondInfo build();
-    }
-
     /**
      * Variable name the condition is stored under.
      */
@@ -52,5 +42,15 @@ public abstract class CommandCondInfo {
      * Code for initializing the condition.
      */
     public abstract CodeBlock getConstruction();
+
+    @AutoValue.Builder
+    public interface Builder {
+
+        Builder condVariable(String variable);
+
+        Builder construction(CodeBlock construction);
+
+        CommandCondInfo build();
+    }
 
 }

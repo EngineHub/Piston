@@ -29,9 +29,9 @@ public interface ArgumentConverterStore extends ArgumentConverterAccess {
     /**
      * Register a converter for a given key.
      *
-     * @param key the key to register the converter under
+     * @param key       the key to register the converter under
      * @param converter the converter to register
-     * @param <T> the type of value returned by the converter
+     * @param <T>       the type of value returned by the converter
      */
     <T> void registerConverter(Key<T> key, ArgumentConverter<T> converter);
 

@@ -18,13 +18,13 @@
 -->
 
 <configuration>
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>[%thread/%level{5}][%logger{1}]: %msg%rEx%n</pattern>
-    </encoder>
-  </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%thread/%level{5}][%logger{1}]: %msg%rEx%n</pattern>
+        </encoder>
+    </appender>
 
-  <root level="DEBUG">
-    <appender-ref ref="STDOUT" />
-  </root>
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+    </root>
 </configuration>

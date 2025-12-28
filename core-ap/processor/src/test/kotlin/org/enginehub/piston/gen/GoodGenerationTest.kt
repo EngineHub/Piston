@@ -21,14 +21,7 @@ package org.enginehub.piston.gen
 
 import com.google.testing.compile.CompilationSubject.assertThat
 import com.google.testing.compile.JavaFileObjects
-import com.palantir.javapoet.AnnotationSpec
-import com.palantir.javapoet.ClassName
-import com.palantir.javapoet.MethodSpec
-import com.palantir.javapoet.ParameterSpec
-import com.palantir.javapoet.ParameterizedTypeName
-import com.palantir.javapoet.TypeName
-import com.palantir.javapoet.TypeSpec
-import com.palantir.javapoet.WildcardTypeName
+import com.palantir.javapoet.*
 import org.enginehub.piston.CommandParameters
 import org.enginehub.piston.CommandValue
 import org.enginehub.piston.annotation.Command
@@ -40,7 +33,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
 import java.util.function.Consumer
-import java.util.function.Function
 import javax.lang.model.element.Modifier
 
 
@@ -50,40 +42,50 @@ class GenerationTest {
     @DisplayName("some no argument commands")
     @Test
     fun generatesNoArg() {
-        val commands = commands("NoArg", listOf(
-            MethodSpec.methodBuilder("noArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "noArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(Void.TYPE)
-                .addException(Exception::class.java)
-                .build(),
-            MethodSpec.methodBuilder("noArgFooter")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "noArgumentFooter")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .addMember("descFooter", "\$S", "DESC FOOTER")
-                    .build())
-                .returns(Void.TYPE)
-                .build(),
-            MethodSpec.methodBuilder("noArgCondition")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "noArgumentCondition")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .addAnnotation(AlwaysTrueCondition::class.java)
-                .returns(Void.TYPE)
-                .build(),
-            MethodSpec.methodBuilder("noArgStatic")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "noArgumentStatic")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .addModifiers(Modifier.STATIC)
-                .returns(Void.TYPE)
-                .build()
-        ))
+        val commands = commands(
+            "NoArg", listOf(
+                MethodSpec.methodBuilder("noArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "noArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(Void.TYPE)
+                    .addException(Exception::class.java)
+                    .build(),
+                MethodSpec.methodBuilder("noArgFooter")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "noArgumentFooter")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .addMember("descFooter", "\$S", "DESC FOOTER")
+                            .build()
+                    )
+                    .returns(Void.TYPE)
+                    .build(),
+                MethodSpec.methodBuilder("noArgCondition")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "noArgumentCondition")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .addAnnotation(AlwaysTrueCondition::class.java)
+                    .returns(Void.TYPE)
+                    .build(),
+                MethodSpec.methodBuilder("noArgStatic")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "noArgumentStatic")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .addModifiers(Modifier.STATIC)
+                    .returns(Void.TYPE)
+                    .build()
+            )
+        )
         val compilation = compiler().compile(commands)
         assertThat(compilation)
             .succeededWithoutWarnings()
@@ -95,26 +97,32 @@ class GenerationTest {
     @DisplayName("some no argument commands (with non-arg parameters)")
     @Test
     fun generatesNoArgWithNonArgParameters() {
-        val commands = commands("NonArgParameters", listOf(
-            MethodSpec.methodBuilder("nonArgCommandParameters")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "nonArgCommandParameters")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(Void.TYPE)
-                .addParameter(CommandParameters::class.java, "params")
-                .build(),
-            MethodSpec.methodBuilder("nonArgInjected")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "nonArgInjected")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(Void.TYPE)
-                .addParameter(
-                    className<Callable<*>>().parametrize(className<Any>()), "injected"
-                )
-                .build()
-        ))
+        val commands = commands(
+            "NonArgParameters", listOf(
+                MethodSpec.methodBuilder("nonArgCommandParameters")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "nonArgCommandParameters")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(Void.TYPE)
+                    .addParameter(CommandParameters::class.java, "params")
+                    .build(),
+                MethodSpec.methodBuilder("nonArgInjected")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "nonArgInjected")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(Void.TYPE)
+                    .addParameter(
+                        className<Callable<*>>().parametrize(className<Any>()), "injected"
+                    )
+                    .build()
+            )
+        )
         val compilation = compiler().compile(commands)
         assertThat(compilation)
             .succeededWithoutWarnings()
@@ -126,22 +134,28 @@ class GenerationTest {
     @DisplayName("a one argument (CommandValue) command")
     @Test
     fun generatesOneCommandValueArg() {
-        val commands = commands("CommandValueArg", listOf(
-            MethodSpec.methodBuilder("valueArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "valueArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(Void.TYPE)
-                .addParameter(
-                    ParameterSpec.builder(CommandValue::class.java, "arg")
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .build()
-                )
-                .build()
-        ))
+        val commands = commands(
+            "CommandValueArg", listOf(
+                MethodSpec.methodBuilder("valueArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "valueArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(Void.TYPE)
+                    .addParameter(
+                        ParameterSpec.builder(CommandValue::class.java, "arg")
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            )
+        )
         val compilation = compiler().compile(commands)
         assertThat(compilation)
             .succeededWithoutWarnings()
@@ -153,25 +167,33 @@ class GenerationTest {
     @DisplayName("a one argument (wildcard) command")
     @Test
     fun generatesOneWildcardArg() {
-        val commands = commands("WildcardArg", listOf(
-            MethodSpec.methodBuilder("valueArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "wildcardArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(Void.TYPE)
-                .addParameter(
-                    ParameterSpec.builder(ParameterizedTypeName.get(
-                        className<Consumer<*>>(),
-                        WildcardTypeName.subtypeOf(ClassName.OBJECT)
-                    ), "arg")
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .build()
-                )
-                .build()
-        ))
+        val commands = commands(
+            "WildcardArg", listOf(
+                MethodSpec.methodBuilder("valueArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "wildcardArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(Void.TYPE)
+                    .addParameter(
+                        ParameterSpec.builder(
+                            ParameterizedTypeName.get(
+                                className<Consumer<*>>(),
+                                WildcardTypeName.subtypeOf(ClassName.OBJECT)
+                            ), "arg"
+                        )
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            )
+        )
         val compilation = compiler().compile(commands)
         assertThat(compilation)
             .succeededWithoutWarnings()
@@ -183,39 +205,49 @@ class GenerationTest {
     @DisplayName("a one argument (Collection) command")
     @Test
     fun generatesOneCollectionArg() {
-        val commands = commands("CollectionArg", listOf(
-            MethodSpec.methodBuilder("collectionArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "collectionArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(Void.TYPE)
-                .addParameter(
-                    ParameterSpec.builder(
-                        className<Collection<*>>().parametrize(className<String>()), "arg"
+        val commands = commands(
+            "CollectionArg", listOf(
+                MethodSpec.methodBuilder("collectionArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "collectionArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
                     )
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .build()
-                )
-                .build(),
-            // Validate Object not multi-compatible
-            MethodSpec.methodBuilder("objectArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "objectArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(Void.TYPE)
-                .addParameter(
-                    ParameterSpec.builder(Object::class.java, "arg")
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .build()
-                )
-                .build()
-        ))
+                    .returns(Void.TYPE)
+                    .addParameter(
+                        ParameterSpec.builder(
+                            className<Collection<*>>().parametrize(className<String>()), "arg"
+                        )
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build(),
+                // Validate Object not multi-compatible
+                MethodSpec.methodBuilder("objectArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "objectArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(Void.TYPE)
+                    .addParameter(
+                        ParameterSpec.builder(Object::class.java, "arg")
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            )
+        )
         val compilation = compiler().compile(commands)
         assertThat(compilation)
             .succeededWithoutWarnings()
@@ -227,92 +259,118 @@ class GenerationTest {
     @DisplayName("a one or more argument (int) command")
     @Test
     fun generatesOneIntArg() {
-        val commands = commands("IntArg", listOf(
-            MethodSpec.methodBuilder("intArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "intArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.INT)
-                .addParameter(
-                    ParameterSpec.builder(TypeName.INT, "arg")
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .build()
-                )
-                .addStatement("return arg")
-                .build(),
-            MethodSpec.methodBuilder("annotatedIntArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "annotatedIntArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.VOID)
-                .addParameter(
-                    ParameterSpec.builder(TypeName.INT, "arg")
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .addAnnotation(AnnotationSpec.builder(InjectGamma::class.java)
-                            .addMember("value", "\$S", "something to match")
-                            .build())
-                        .build()
-                )
-                .build(),
-            MethodSpec.methodBuilder("annotatedIntArg2")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "annotatedIntArgument2")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.VOID)
-                .addParameter(
-                    ParameterSpec.builder(TypeName.INT, "delta")
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .addAnnotation(AnnotationSpec.builder(InjectDelta::class.java)
-                            .addMember("qux", "45")
-                            .addMember("baz", "32")
-                            .addMember("thq", "{ 10, 99 }")
-                            .build())
-                        .build()
-                )
-                .build(),
-            MethodSpec.methodBuilder("annotatedIntArg3")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "annotatedIntArgument3")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.VOID)
-                .addParameter(
-                    ParameterSpec.builder(TypeName.INT, "alpha")
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .addAnnotation(InjectAlpha::class.java)
-                        .build()
-                )
-                .build(),
-            MethodSpec.methodBuilder("variableIntArg")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "variableIntArgument")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.VOID)
-                .addParameter(
-                    ParameterSpec.builder(
-                        className<List<*>>().parametrize(className<Int>()), "arg"
+        val commands = commands(
+            "IntArg", listOf(
+                MethodSpec.methodBuilder("intArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "intArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
                     )
-                        .addAnnotation(AnnotationSpec.builder(Arg::class.java)
-                            .addMember("name", "\$S", "args")
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .addMember("variable", "true")
-                            .build())
-                        .build()
-                )
-                .build()
-        ))
+                    .returns(TypeName.INT)
+                    .addParameter(
+                        ParameterSpec.builder(TypeName.INT, "arg")
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .addStatement("return arg")
+                    .build(),
+                MethodSpec.methodBuilder("annotatedIntArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "annotatedIntArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(TypeName.VOID)
+                    .addParameter(
+                        ParameterSpec.builder(TypeName.INT, "arg")
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .addAnnotation(
+                                AnnotationSpec.builder(InjectGamma::class.java)
+                                    .addMember("value", "\$S", "something to match")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build(),
+                MethodSpec.methodBuilder("annotatedIntArg2")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "annotatedIntArgument2")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(TypeName.VOID)
+                    .addParameter(
+                        ParameterSpec.builder(TypeName.INT, "delta")
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .addAnnotation(
+                                AnnotationSpec.builder(InjectDelta::class.java)
+                                    .addMember("qux", "45")
+                                    .addMember("baz", "32")
+                                    .addMember("thq", "{ 10, 99 }")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build(),
+                MethodSpec.methodBuilder("annotatedIntArg3")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "annotatedIntArgument3")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(TypeName.VOID)
+                    .addParameter(
+                        ParameterSpec.builder(TypeName.INT, "alpha")
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .addAnnotation(InjectAlpha::class.java)
+                            .build()
+                    )
+                    .build(),
+                MethodSpec.methodBuilder("variableIntArg")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "variableIntArgument")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(TypeName.VOID)
+                    .addParameter(
+                        ParameterSpec.builder(
+                            className<List<*>>().parametrize(className<Int>()), "arg"
+                        )
+                            .addAnnotation(
+                                AnnotationSpec.builder(Arg::class.java)
+                                    .addMember("name", "\$S", "args")
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("variable", "true")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            )
+        )
         val compilation = compiler().compile(commands)
         assertThat(compilation)
             .succeededWithoutWarnings()
@@ -324,56 +382,70 @@ class GenerationTest {
     @DisplayName("various flag commands")
     @Test
     fun generatesFlags() {
-        val commands = commands("Flags", listOf(
-            MethodSpec.methodBuilder("booleanFlag")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "booleanFlag")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.VOID)
-                .addParameter(
-                    ParameterSpec.builder(TypeName.BOOLEAN, "flag")
-                        .addAnnotation(AnnotationSpec.builder(Switch::class.java)
-                            .addMember("name", "'f'")
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .build())
-                        .build()
-                )
-                .build(),
-            MethodSpec.methodBuilder("stringArgFlag")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "stringArgFlag")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.VOID)
-                .addParameter(
-                    ParameterSpec.builder(String::class.java, "flag")
-                        .addAnnotation(AnnotationSpec.builder(ArgFlag::class.java)
-                            .addMember("name", "'f'")
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .addMember("def", "\$S", "DEFAULT")
-                            .build())
-                        .build()
-                )
-                .build(),
-            MethodSpec.methodBuilder("stringArgFlagCustom")
-                .addAnnotation(AnnotationSpec.builder(Command::class.java)
-                    .addMember("name", "\$S", "stringArgFlagCustom")
-                    .addMember("desc", "\$S", "DESCRIPTION")
-                    .build())
-                .returns(TypeName.VOID)
-                .addParameter(
-                    ParameterSpec.builder(String::class.java, "flag")
-                        .addAnnotation(AnnotationSpec.builder(ArgFlag::class.java)
-                            .addMember("name", "'f'")
-                            .addMember("argName", "\$S", "ARG NAME")
-                            .addMember("desc", "\$S", "ARG DESCRIPTION")
-                            .addMember("def", "\$S", "DEFAULT")
-                            .build())
-                        .build()
-                )
-                .build()
-        ))
+        val commands = commands(
+            "Flags", listOf(
+                MethodSpec.methodBuilder("booleanFlag")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "booleanFlag")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(TypeName.VOID)
+                    .addParameter(
+                        ParameterSpec.builder(TypeName.BOOLEAN, "flag")
+                            .addAnnotation(
+                                AnnotationSpec.builder(Switch::class.java)
+                                    .addMember("name", "'f'")
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build(),
+                MethodSpec.methodBuilder("stringArgFlag")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "stringArgFlag")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(TypeName.VOID)
+                    .addParameter(
+                        ParameterSpec.builder(String::class.java, "flag")
+                            .addAnnotation(
+                                AnnotationSpec.builder(ArgFlag::class.java)
+                                    .addMember("name", "'f'")
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("def", "\$S", "DEFAULT")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build(),
+                MethodSpec.methodBuilder("stringArgFlagCustom")
+                    .addAnnotation(
+                        AnnotationSpec.builder(Command::class.java)
+                            .addMember("name", "\$S", "stringArgFlagCustom")
+                            .addMember("desc", "\$S", "DESCRIPTION")
+                            .build()
+                    )
+                    .returns(TypeName.VOID)
+                    .addParameter(
+                        ParameterSpec.builder(String::class.java, "flag")
+                            .addAnnotation(
+                                AnnotationSpec.builder(ArgFlag::class.java)
+                                    .addMember("name", "'f'")
+                                    .addMember("argName", "\$S", "ARG NAME")
+                                    .addMember("desc", "\$S", "ARG DESCRIPTION")
+                                    .addMember("def", "\$S", "DEFAULT")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            )
+        )
         val compilation = compiler().compile(commands)
         assertThat(compilation)
             .succeededWithoutWarnings()
@@ -386,10 +458,14 @@ class GenerationTest {
     @Test
     fun generatesSuperTypes() {
         val commands = TypeSpec.classBuilder("SuperType")
-            .addAnnotation(AnnotationSpec.builder(className<CommandContainer>())
-                .addMember("superTypes", "{ \$T.class, \$T.class }",
-                    className<EmptySuperClass>(), className<EmptySuperInterface>())
-                .build())
+            .addAnnotation(
+                AnnotationSpec.builder(className<CommandContainer>())
+                    .addMember(
+                        "superTypes", "{ \$T.class, \$T.class }",
+                        className<EmptySuperClass>(), className<EmptySuperInterface>()
+                    )
+                    .build()
+            )
             .build()
             .toFileInPackage()
         val compilation = compiler().compile(commands)

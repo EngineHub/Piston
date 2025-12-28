@@ -49,6 +49,10 @@ public class ColorConfig extends Config<TextColor> {
         Style.Merge.DECORATIONS, Style.Merge.INSERTION, Style.Merge.EVENTS
     );
 
+    private ColorConfig(String key, @Nullable TextColor color) {
+        super(key, color);
+    }
+
     /**
      * Color for text that modifies the main text.
      */
@@ -75,10 +79,6 @@ public class ColorConfig extends Config<TextColor> {
      */
     public static ColorConfig partWrapping() {
         return PART_WRAPPING;
-    }
-
-    private ColorConfig(String key, @Nullable TextColor color) {
-        super(key, color);
     }
 
     @Override

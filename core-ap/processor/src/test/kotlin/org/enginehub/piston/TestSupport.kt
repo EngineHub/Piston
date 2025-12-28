@@ -24,19 +24,16 @@ import com.google.common.collect.ImmutableSet
 import net.kyori.text.TextComponent
 import net.kyori.text.TranslatableComponent
 import org.enginehub.piston.gen.CommandRegistration
-import org.enginehub.piston.part.ArgAcceptingCommandFlag
-import org.enginehub.piston.part.CommandArgument
-import org.enginehub.piston.part.CommandPart
-import org.enginehub.piston.part.CommandParts
-import org.enginehub.piston.part.NoArgCommandFlag
-import org.enginehub.piston.part.SubCommandPart
+import org.enginehub.piston.part.*
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
 
 fun newManager(): CommandManager = DefaultCommandManagerService.getInstance().newCommandManager()
 
-fun <CI : Any> CommandManager.installCommands(containerInstance: CI,
-                                              containerRegistration: CommandRegistration<CI>) {
+fun <CI : Any> CommandManager.installCommands(
+    containerInstance: CI,
+    containerRegistration: CommandRegistration<CI>
+) {
     containerRegistration
         .commandManager(this)
         .containerInstance(containerInstance)
@@ -64,8 +61,10 @@ inline fun flag(name: Char, desc: String, block: NoArgCommandFlag.Builder.() -> 
         TextComponent.of(desc)
     ).also(block).build()
 
-inline fun argFlag(name: Char, desc: String, argName: String,
-                   block: ArgAcceptingCommandFlag.Builder.() -> Unit = {}): ArgAcceptingCommandFlag =
+inline fun argFlag(
+    name: Char, desc: String, argName: String,
+    block: ArgAcceptingCommandFlag.Builder.() -> Unit = {}
+): ArgAcceptingCommandFlag =
     CommandParts.flag(
         name,
         TextComponent.of(desc)

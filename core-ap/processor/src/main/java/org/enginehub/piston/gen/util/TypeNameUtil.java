@@ -26,6 +26,9 @@ import com.palantir.javapoet.TypeName;
 
 public class TypeNameUtil {
 
+    private TypeNameUtil() {
+    }
+
     public static TypeName rawType(TypeName typeName) {
         if (typeName instanceof ClassName) {
             return typeName;
@@ -36,8 +39,7 @@ public class TypeNameUtil {
         } else if (typeName.isPrimitive()) {
             return typeName;
         }
-        throw new IllegalArgumentException("Not able to create a raw type from " +
-            "'" + typeName + "' ("  + typeName.getClass() + ")");
+        throw new IllegalArgumentException("Not able to create a raw type from '" + typeName + "' (" + typeName.getClass() + ")");
     }
 
     public static TypeName firstTypeArg(TypeName typeName) {
@@ -45,9 +47,6 @@ public class TypeNameUtil {
             return ((ParameterizedTypeName) typeName).typeArguments().get(0);
         }
         return ClassName.OBJECT;
-    }
-
-    private TypeNameUtil() {
     }
 
 }

@@ -19,20 +19,7 @@
 
 package eh;
 
-import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
-import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
-import static org.enginehub.piston.internal.RegistrationUtil.requireOptional;
-import static org.enginehub.piston.part.CommandParts.arg;
-import static org.enginehub.piston.part.CommandParts.flag;
-
 import com.google.common.collect.ImmutableList;
-import java.lang.String;
-import java.lang.SuppressWarnings;
-import java.lang.Throwable;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -43,30 +30,34 @@ import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.NoArgCommandFlag;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+
+import static org.enginehub.piston.internal.RegistrationUtil.getCommandMethod;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterCall;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersAfterThrow;
+import static org.enginehub.piston.internal.RegistrationUtil.listenersBeforeCall;
+import static org.enginehub.piston.part.CommandParts.flag;
+
 @SuppressWarnings({"deprecation", "removal"})
 final class FlagsRegistration implements CommandRegistration<Flags> {
     private static final Key<String> string_Key = Key.of(String.class);
-    private CommandManager commandManager;
-
-    private Flags containerInstance;
-
-    private ImmutableList<CommandCallListener> listeners;
-
     private final NoArgCommandFlag flagPart = flag('f', TextComponent.of("ARG DESCRIPTION")).build();
-
     private final ArgAcceptingCommandFlag flagPart2 = flag('f', TextComponent.of("ARG DESCRIPTION"))
         .withRequiredArg()
         .argNamed(TranslatableComponent.of("piston.argument.flag"))
         .defaultsTo(ImmutableList.of("DEFAULT"))
         .ofTypes(ImmutableList.of(string_Key))
         .build();
-
     private final ArgAcceptingCommandFlag flagPart3 = flag('f', TextComponent.of("ARG DESCRIPTION"))
         .withRequiredArg()
         .argNamed(TranslatableComponent.of("piston.argument.ARG NAME"))
         .defaultsTo(ImmutableList.of("DEFAULT"))
         .ofTypes(ImmutableList.of(string_Key))
         .build();
+    private CommandManager commandManager;
+    private Flags containerInstance;
+    private ImmutableList<CommandCallListener> listeners;
 
     private FlagsRegistration() {
         this.listeners = ImmutableList.of();

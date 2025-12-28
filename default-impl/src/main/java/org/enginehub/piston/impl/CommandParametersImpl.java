@@ -37,37 +37,11 @@ import java.util.Optional;
 @AutoValue
 abstract class CommandParametersImpl implements CommandParameters {
 
+    CommandParametersImpl() {
+    }
+
     static Builder builder() {
         return new AutoValue_CommandParametersImpl.Builder();
-    }
-
-    @AutoValue.Builder
-    interface Builder {
-
-        default Builder addPresentPart(CommandPart part) {
-            presentPartsBuilder().add(part);
-            return this;
-        }
-
-        ImmutableSet.Builder<CommandPart> presentPartsBuilder();
-
-        default Builder addValue(CommandPart part, CommandValue value) {
-            valuesBuilder().put(part, value);
-            return this;
-        }
-
-        ImmutableMap.Builder<CommandPart, CommandValue> valuesBuilder();
-
-        Builder injectedValues(InjectedValueAccess values);
-
-        Builder metadata(CommandMetadata metadata);
-
-        Builder converters(ArgumentConverterAccess converters);
-
-        CommandParametersImpl build();
-    }
-
-    CommandParametersImpl() {
     }
 
     abstract ImmutableSet<CommandPart> presentParts();
@@ -107,5 +81,31 @@ abstract class CommandParametersImpl implements CommandParameters {
     @Override
     public final <T> Optional<T> injectedValue(Key<T> key, InjectedValueAccess context) {
         return injectedValues().injectedValue(key, context);
+    }
+
+    @AutoValue.Builder
+    interface Builder {
+
+        default Builder addPresentPart(CommandPart part) {
+            presentPartsBuilder().add(part);
+            return this;
+        }
+
+        ImmutableSet.Builder<CommandPart> presentPartsBuilder();
+
+        default Builder addValue(CommandPart part, CommandValue value) {
+            valuesBuilder().put(part, value);
+            return this;
+        }
+
+        ImmutableMap.Builder<CommandPart, CommandValue> valuesBuilder();
+
+        Builder injectedValues(InjectedValueAccess values);
+
+        Builder metadata(CommandMetadata metadata);
+
+        Builder converters(ArgumentConverterAccess converters);
+
+        CommandParametersImpl build();
     }
 }

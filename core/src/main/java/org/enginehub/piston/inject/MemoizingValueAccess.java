@@ -33,19 +33,19 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class MemoizingValueAccess implements InjectedValueAccess {
 
-    public static MemoizingValueAccess wrap(InjectedValueAccess delegate) {
-        if (delegate instanceof MemoizingValueAccess) {
-            return (MemoizingValueAccess) delegate;
-        }
-        return new MemoizingValueAccess(delegate);
-    }
-
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final Map<Key<?>, Optional<?>> memory = new HashMap<>();
     private final InjectedValueAccess delegate;
 
     private MemoizingValueAccess(InjectedValueAccess delegate) {
         this.delegate = delegate;
+    }
+
+    public static MemoizingValueAccess wrap(InjectedValueAccess delegate) {
+        if (delegate instanceof MemoizingValueAccess) {
+            return (MemoizingValueAccess) delegate;
+        }
+        return new MemoizingValueAccess(delegate);
     }
 
     /**

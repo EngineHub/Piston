@@ -32,6 +32,7 @@ import java.util.List;
 
 public class TextHelper {
 
+    private static final ConfigHolder CONFIG = ConfigHolder.create();
     private static final PlainComponentSerializer PLAIN_COMPONENT_SERIALIZER = new PlainComponentSerializer(
         KeybindComponent::keybind,
         translatableComponent -> {
@@ -41,7 +42,8 @@ public class TextHelper {
         }
     );
 
-    private static final ConfigHolder CONFIG = ConfigHolder.create();
+    private TextHelper() {
+    }
 
     public static String reduceToText(Component component) {
         StringBuilder text = new StringBuilder();
@@ -68,9 +70,6 @@ public class TextHelper {
             Joiner.on(", ").appendTo(builder, args);
             builder.append(']');
         }
-    }
-
-    private TextHelper() {
     }
 
 }

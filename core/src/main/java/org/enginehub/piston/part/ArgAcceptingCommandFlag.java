@@ -32,12 +32,28 @@ import java.util.Collection;
 @AutoValue
 public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAcceptingCommandPart {
 
+    ArgAcceptingCommandFlag() {
+    }
+
     public static Builder builder(char name, Component description) {
         return new AutoValue_ArgAcceptingCommandFlag.Builder()
             .named(name)
             .describedBy(description)
             .defaultsTo(ImmutableList.of())
             .ofTypes(ImmutableList.of());
+    }
+
+    @Override
+    public Component getTextRepresentation() {
+        return ColorConfig.partWrapping().wrap(
+            TextComponent.of("["),
+            ColorConfig.mainText().wrap("-" + getName()),
+            TextComponent.space(),
+            TextComponent.of("<"),
+            ColorConfig.mainText().wrap(getArgumentName()),
+            TextComponent.of(">"),
+            TextComponent.of("]")
+        );
     }
 
     @AutoValue.Builder
@@ -82,21 +98,5 @@ public abstract class ArgAcceptingCommandFlag implements CommandFlag, ArgAccepti
         abstract Builder argumentName(TranslatableComponent name);
 
         public abstract ArgAcceptingCommandFlag build();
-    }
-
-    ArgAcceptingCommandFlag() {
-    }
-
-    @Override
-    public Component getTextRepresentation() {
-        return ColorConfig.partWrapping().wrap(
-            TextComponent.of("["),
-            ColorConfig.mainText().wrap("-" + getName()),
-            TextComponent.space(),
-            TextComponent.of("<"),
-            ColorConfig.mainText().wrap(getArgumentName()),
-            TextComponent.of(">"),
-            TextComponent.of("]")
-        );
     }
 }

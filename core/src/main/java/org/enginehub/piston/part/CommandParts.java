@@ -24,14 +24,14 @@ import net.kyori.text.TranslatableComponent;
 
 public class CommandParts {
 
+    private CommandParts() {
+    }
+
     public static NoArgCommandFlag.Builder flag(char flag, Component description) {
         return NoArgCommandFlag.builder(flag, description);
     }
 
     public static CommandArgument.Builder arg(TranslatableComponent name, Component description) {
         return CommandArgument.builder(name, description);
-    }
-
-    private CommandParts() {
     }
 }

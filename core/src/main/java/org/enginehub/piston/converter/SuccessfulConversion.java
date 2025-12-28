@@ -27,6 +27,14 @@ import java.util.function.Function;
 
 public final class SuccessfulConversion<T> extends ConversionResult<T> {
 
+    private final Collection<T> result;
+    private final boolean exactMatch;
+
+    private SuccessfulConversion(Collection<T> result, boolean exactMatch) {
+        this.result = result;
+        this.exactMatch = exactMatch;
+    }
+
     public static <T> SuccessfulConversion<T> fromSingle(T result) {
         return from(ImmutableList.of(result));
     }
@@ -43,21 +51,11 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
         return new SuccessfulConversion<>(result, exactMatch);
     }
 
-    private final Collection<T> result;
-    private final boolean exactMatch;
-
-    private SuccessfulConversion(Collection<T> result, boolean exactMatch) {
-        this.result = result;
-        this.exactMatch = exactMatch;
-    }
-
     /**
-     * Is this conversion an exact match for a complete input?
+     * Check if this conversion an exact match for a complete input.
      *
-     * <p>
-     * This may be {@code false} if the conversion is a partial match, or if the input was
-     * unknown and the conversion was a fallback.
-     * </p>
+     * <p>This may be {@code false} if the conversion is a partial match, or if the input was
+     * unknown and the conversion was a fallback.</p>
      *
      * @return {@code true} if this conversion is an exact match
      * @since 0.5.8
@@ -102,8 +100,12 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SuccessfulConversion<?> that = (SuccessfulConversion<?>) o;
         return result.equals(that.result);
     }

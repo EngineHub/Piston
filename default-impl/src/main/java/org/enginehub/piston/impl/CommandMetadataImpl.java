@@ -28,9 +28,18 @@ import java.util.Collection;
 @AutoValue
 abstract class CommandMetadataImpl implements CommandMetadata {
 
+    CommandMetadataImpl() {
+    }
+
     static Builder builder() {
         return new AutoValue_CommandMetadataImpl.Builder();
     }
+
+    @Override
+    public abstract String getCalledName();
+
+    @Override
+    public abstract ImmutableList<String> getArguments();
 
     @AutoValue.Builder
     interface Builder {
@@ -41,13 +50,4 @@ abstract class CommandMetadataImpl implements CommandMetadata {
 
         CommandMetadataImpl build();
     }
-
-    CommandMetadataImpl() {
-    }
-
-    @Override
-    public abstract String getCalledName();
-
-    @Override
-    public abstract ImmutableList<String> getArguments();
 }

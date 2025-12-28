@@ -19,7 +19,6 @@
 
 package org.enginehub.piston;
 
-import org.enginehub.piston.inject.InjectedValueAccess;
 import org.junit.jupiter.api.Test;
 
 import static org.enginehub.piston.Command.Condition.FALSE;
@@ -53,15 +52,15 @@ public class ConditionTest {
         assertTrue(TRUE.or(TRUE).satisfied(EMPTY));
     }
 
-    interface ConditionSubtype extends Command.Condition {
-
-    }
-
     @Test
     void as() {
         assertFalse(FALSE.as(ConditionSubtype.class).isPresent());
         ConditionSubtype st = ctx -> true;
         assertEquals(st, st.as(ConditionSubtype.class).orElse(null));
+    }
+
+    interface ConditionSubtype extends Command.Condition {
+
     }
 
 }

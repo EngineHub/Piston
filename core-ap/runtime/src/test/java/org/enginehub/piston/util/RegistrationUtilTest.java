@@ -43,6 +43,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @DisplayName("RegistrationUtil")
 public class RegistrationUtilTest {
 
+    private final Method fakeCommandMethod;
+    private final CommandParameters parameters = NoInputCommandParameters.builder()
+        .build();
+    private final CommandCallListener listener = mock(CommandCallListener.class);
+
+    {
+        try {
+            fakeCommandMethod = getClass().getDeclaredMethod("requireOptional");
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     @Test
     void noConstruction() throws Exception {
         Constructor<RegistrationUtil> constructor = RegistrationUtil.class.getDeclaredConstructor();
@@ -61,16 +74,6 @@ public class RegistrationUtilTest {
         assertTrue(ex.getMessage().contains(Key.of(String.class).toString()));
     }
 
-    private final Method fakeCommandMethod;
-
-    {
-        try {
-            fakeCommandMethod = getClass().getDeclaredMethod("requireOptional");
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     @Test
     void getCommandMethod() {
         assertEquals(fakeCommandMethod,
@@ -80,10 +83,6 @@ public class RegistrationUtilTest {
         assertTrue(ex.getMessage().contains("Missing command method"));
     }
 
-    private final CommandParameters parameters = NoInputCommandParameters.builder()
-        .build();
-    private final CommandCallListener listener = mock(CommandCallListener.class);
-
     @Test
     void listenersBeforeCall() {
         RegistrationUtil.listenersBeforeCall(ImmutableList.of(listener), fakeCommandMethod, parameters);
@@ -91,6 +90,7 @@ public class RegistrationUtilTest {
         verify(listener).beforeCall(fakeCommandMethod, parameters);
         verifyNoMoreInteractions(listener);
     }
+
     @Test
     void listenersAfterCall() {
         RegistrationUtil.listenersAfterCall(ImmutableList.of(listener), fakeCommandMethod, parameters);
@@ -98,6 +98,7 @@ public class RegistrationUtilTest {
         verify(listener).afterCall(fakeCommandMethod, parameters);
         verifyNoMoreInteractions(listener);
     }
+
     @Test
     void listenersAfterThrow() {
         Throwable ex = new RuntimeException();
