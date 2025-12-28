@@ -1,11 +1,11 @@
-applyCommonConfig()
+plugins {
+    id("buildlogic.common")
+}
 
 dependencies {
-    "api"(Libs.guava)
-    "api"(Libs.kyoriText)
-    "api"(Libs.javaxAnnotations)
-    "implementation"(Libs.kyoriTextPlain)
-    "compileOnly"(Libs.autoValueAnnotations)
-    "annotationProcessor"(Libs.autoValueProcessor)
-    "testImplementation"(Libs.mockito)
+    "api"(libs.guava)
+    "api"(libs.kyoriText.api)
+    "implementation"(libs.kyoriText.serializer.plain)
+    "compileOnly"(libs.autoValue.annotations)
+    "annotationProcessor"(libs.autoValue)
 }

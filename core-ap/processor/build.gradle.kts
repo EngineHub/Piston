@@ -1,9 +1,8 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
-    kotlin("kapt") version "2.0.0"
+    kotlin("jvm") version "2.3.0"
+    kotlin("kapt") version "2.3.0"
+    id("buildlogic.core-ap")
 }
-
-applyCoreApConfig()
 
 kapt.includeCompileClasspath = false
 
@@ -20,26 +19,24 @@ dependencies {
     "implementation"(project(":core"))
     "implementation"(project(":core-ap:annotations"))
     "implementation"(project(":core-ap:runtime"))
-    "implementation"(Libs.guava)
-    "implementation"(Libs.javapoet)
-    "implementation"(Libs.autoCommon)
-    "compileOnly"(Libs.autoValueAnnotations)
-    "kapt"(Libs.autoValueProcessor)
-    "compileOnly"(Libs.autoService)
-    "kapt"(Libs.autoService)
+    "implementation"(libs.guava)
+    "implementation"(libs.javapoet)
+    "implementation"(libs.autoCommon)
+    "compileOnly"(libs.autoValue.annotations)
+    "kapt"(libs.autoValue)
+    "compileOnly"(libs.autoService)
+    "kapt"(libs.autoService)
 
     "testImplementation"(kotlin("stdlib-jdk8"))
-    "testRuntimeOnly"(Libs.junitVintageEngine)
-    "testImplementation"(Libs.compileTesting) {
+    "testImplementation"(libs.compileTesting) {
         exclude("junit", "junit")
     }
 
-    "testImplementation"(Libs.guava)
+    "testImplementation"(libs.guava)
 
-    "testImplementation"(Libs.mockito)
-    "testRuntimeOnly"(Libs.log4jCore)
+    "testRuntimeOnly"(libs.log4j.core)
     "testImplementation"(project(":default-impl"))
-    "testCompileOnly"(Libs.autoService)
-    "kaptTest"(Libs.autoService)
+    "testCompileOnly"(libs.autoService)
+    "kaptTest"(libs.autoService)
     "kaptTest"(project(":core-ap:processor"))
 }

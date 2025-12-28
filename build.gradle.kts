@@ -1,47 +1,32 @@
 plugins {
-    id("net.researchgate.release") version "3.0.2"
-    id("org.enginehub.codecov")
     jacoco
-}
-
-configureArtifactory()
-
-repositories {
-    mavenCentral()
-}
-
-release {
-    tagTemplate = "v\${version}"
-    buildTasks = listOf<String>()
-    git.requireBranch = "master"
+    id("buildlogic.common")
+    id("buildlogic.artifactory")
 }
 
 val totalReport = tasks.register<JacocoReport>("jacocoTotalReport") {
-    subprojects.forEach { proj ->
-        proj.plugins.withId("java") {
-            executionData(
-                fileTree(proj.layout.buildDirectory.get().asFile.absolutePath).include("**/jacoco/*.exec")
-            )
+    for (proj in subprojects) {
+        proj.apply(plugin = "jacoco")
+        proj.plugins.withType<JavaBasePlugin> {
+            executionData(fileTree(proj.layout.buildDirectory).include("**/jacoco/*.exec"))
             sourceSets(proj.the<JavaPluginExtension>().sourceSets["main"])
             reports {
-                xml.required = true
-                xml.outputLocation = rootProject.layout.buildDirectory.file("reports/jacoco/report.xml")
-                html.required = true
+                xml.required.set(true)
+                xml.outputLocation.set(rootProject.layout.buildDirectory.file("reports/jacoco/report.xml"))
+                html.required.set(true)
             }
             dependsOn(proj.tasks.named("test"))
         }
     }
 }
+
 afterEvaluate {
     totalReport.configure {
         classDirectories.setFrom(classDirectories.files.map {
             fileTree(it).apply {
                 exclude("**/*AutoValue_*")
+                exclude("**/*Registration.*")
             }
         })
     }
-}
-
-codecov {
-    reportTask.set(totalReport)
 }

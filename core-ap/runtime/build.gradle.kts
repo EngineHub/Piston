@@ -1,7 +1,7 @@
-applyCoreApConfig()
+plugins {
+    id("buildlogic.core-ap")
+}
 
 dependencies {
     "api"(project(":core"))
-
-    "testImplementation"(Libs.mockito)
 }
