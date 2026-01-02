@@ -35,6 +35,7 @@ import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.concurrent.Callable;
+import javax.annotation.processing.Generated;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
@@ -43,6 +44,7 @@ import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.inject.Key;
 
 @SuppressWarnings({"deprecation", "removal"})
+@Generated("org.enginehub.piston.gen.CommandRegistrationGenerator")
 final class NonArgParametersRegistration implements CommandRegistration<NonArgParameters> {
     private static final Key<Callable<Object>> callable$Object_Key = Key.of(new TypeToken<Callable<Object>>() {
     });

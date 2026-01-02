@@ -31,6 +31,7 @@ import static org.enginehub.piston.part.CommandParts.flag;
 import com.google.common.collect.ImmutableList;
 import java.lang.SuppressWarnings;
 import java.util.Collection;
+import javax.annotation.processing.Generated;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
@@ -38,6 +39,7 @@ import org.enginehub.piston.gen.EmptySuperClass;
 import org.enginehub.piston.gen.EmptySuperInterface;
 
 @SuppressWarnings({"deprecation", "removal"})
+@Generated("org.enginehub.piston.gen.CommandRegistrationGenerator")
 final class SuperTypeRegistration extends EmptySuperClass implements CommandRegistration<SuperType>, EmptySuperInterface {
     private CommandManager commandManager;
 

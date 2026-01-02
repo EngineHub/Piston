@@ -33,6 +33,7 @@ import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import javax.annotation.processing.Generated;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -43,6 +44,7 @@ import org.enginehub.piston.gen.CommandRegistration;
 import org.enginehub.piston.part.CommandArgument;
 
 @SuppressWarnings({"deprecation", "removal"})
+@Generated("org.enginehub.piston.gen.CommandRegistrationGenerator")
 final class CommandValueArgRegistration implements CommandRegistration<CommandValueArg> {
     private CommandManager commandManager;
 

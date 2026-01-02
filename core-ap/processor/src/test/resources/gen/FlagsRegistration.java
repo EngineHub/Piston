@@ -33,6 +33,7 @@ import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import javax.annotation.processing.Generated;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -44,6 +45,7 @@ import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.NoArgCommandFlag;
 
 @SuppressWarnings({"deprecation", "removal"})
+@Generated("org.enginehub.piston.gen.CommandRegistrationGenerator")
 final class FlagsRegistration implements CommandRegistration<Flags> {
     private static final Key<String> string_Key = Key.of(String.class);
     private CommandManager commandManager;

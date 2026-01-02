@@ -38,6 +38,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.processing.Generated;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -51,6 +52,7 @@ import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.part.CommandArgument;
 
 @SuppressWarnings({"deprecation", "removal"})
+@Generated("org.enginehub.piston.gen.CommandRegistrationGenerator")
 final class IntArgRegistration implements CommandRegistration<IntArg> {
     private static final Key<Integer> integer_Key = Key.of(Integer.class);
     private static final Key<Integer> integer_injectGamma_something_to_match__Key = Key.of(Integer.class, new Object() {

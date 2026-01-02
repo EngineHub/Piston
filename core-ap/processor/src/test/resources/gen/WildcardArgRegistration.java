@@ -34,6 +34,7 @@ import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.function.Consumer;
+import javax.annotation.processing.Generated;
 import net.kyori.text.TextComponent;
 import net.kyori.text.TranslatableComponent;
 import org.enginehub.piston.CommandManager;
@@ -47,6 +48,7 @@ import org.enginehub.piston.part.CommandArgument;
     "deprecation",
     "removal"
 })
+@Generated("org.enginehub.piston.gen.CommandRegistrationGenerator")
 final class WildcardArgRegistration implements CommandRegistration<WildcardArg> {
     private static final Key<Consumer<?>> consumer$__Key = Key.of(new TypeToken<Consumer<?>>() {
     });

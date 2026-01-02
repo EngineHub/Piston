@@ -33,6 +33,7 @@ import java.lang.SuppressWarnings;
 import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import javax.annotation.processing.Generated;
 import net.kyori.text.TextComponent;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
@@ -40,6 +41,7 @@ import org.enginehub.piston.gen.CommandCallListener;
 import org.enginehub.piston.gen.CommandRegistration;
 
 @SuppressWarnings({"deprecation", "removal"})
+@Generated("org.enginehub.piston.gen.CommandRegistrationGenerator")
 final class Outer_BasicNestedRegistration implements CommandRegistration<Outer.BasicNested> {
     private CommandManager commandManager;
 

@@ -44,6 +44,7 @@ import org.enginehub.piston.internal.RegistrationUtil;
 import org.enginehub.piston.part.CommandParts;
 
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.Generated;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -152,6 +153,9 @@ class CommandRegistrationGenerator {
             .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "deprecation")
                 .addMember("value", "$S", "removal")
+                .build())
+            .addAnnotation(AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", getClass().getName())
                 .build())
             .addModifiers(FINAL)
             .addModifiers(getApiVisibilityModifiers())
