@@ -52,7 +52,7 @@ fun TypeSpec.toFileInPackage(pkg: String = PACKAGE): JavaFileObject {
     )
 }
 
-fun compiler() = Compiler.javac().withProcessors(CommandProcessor())!!
+fun compiler() = Compiler.javac().withProcessors(CommandProcessor())
 
 inline fun <reified T> className(): ClassName = ClassName.get(T::class.java)
 

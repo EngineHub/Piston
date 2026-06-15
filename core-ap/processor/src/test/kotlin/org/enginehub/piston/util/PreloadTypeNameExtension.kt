@@ -38,8 +38,8 @@ class PreloadTypeNameExtension : Extension, BeforeAllCallback {
 
     private val loadLock = ReentrantLock()
 
-    override fun beforeAll(context: ExtensionContext?) = loadLock.withLock {
-        TypeName.get(Object::class.java)
+    override fun beforeAll(context: ExtensionContext) = loadLock.withLock {
+        TypeName.get(Any::class.java)
         Unit
     }
 }

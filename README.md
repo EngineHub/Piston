@@ -9,4 +9,3 @@ Piston is, as indicated by the Semantic Version, experimental, and all APIs are 
 It is recommended to not use Piston in the wild.
 
 ![Build Status](https://ci.enginehub.org/app/rest/builds/buildType:Piston_Build/statusIcon)
-[![codecov](https://codecov.io/gh/EngineHub/Piston/branch/master/graph/badge.svg)](https://codecov.io/gh/EngineHub/Piston)

@@ -1,6 +1,5 @@
 plugins {
-    id("net.researchgate.release") version "3.0.2"
-    id("org.enginehub.codecov")
+    id("net.researchgate.release") version "3.1.0"
     jacoco
 }
 
@@ -40,8 +39,4 @@ afterEvaluate {
             }
         })
     }
-}
-
-codecov {
-    reportTask.set(totalReport)
 }
