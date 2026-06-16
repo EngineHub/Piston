@@ -15,7 +15,6 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation(gradleKotlinDsl())
-    implementation("org.enginehub.gradle:gradle-codecov-plugin:0.2.1-SNAPSHOT")
-    implementation("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
+    implementation("net.octyl.level-headered:plugin:0.1.2")
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:5.1.14")
 }

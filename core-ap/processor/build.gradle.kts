@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
-    kotlin("kapt") version "2.0.0"
+    kotlin("jvm") version "2.4.0"
+    kotlin("kapt") version "2.4.0"
 }
 
 applyCoreApConfig()
@@ -11,8 +11,10 @@ tasks.test {
     // Crack open the compiler for compile testing
     jvmArgs(
         "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-        "--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
     )
 }
 

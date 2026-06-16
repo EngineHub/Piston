@@ -1,4 +1,4 @@
-import org.cadixdev.gradle.licenser.LicenseExtension
+import net.octyl.levelheadered.LevelHeaderedExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
@@ -31,17 +31,15 @@ fun Project.applyCommonConfig(
 ) {
     apply(plugin = "java-library")
     apply(plugin = "java")
-    apply(plugin = "org.cadixdev.licenser")
+    apply(plugin = "net.octyl.level-headered")
     apply(plugin = "maven-publish")
     apply(plugin = "com.jfrog.artifactory")
     apply(plugin = "jacoco")
 
     project.group = group
 
-    configure<LicenseExtension> {
-        setHeader(rootProject.file("HEADER.txt"))
-        exclude("**/META-INF/**")
-        exclude("**/*.properties")
+    configure<LevelHeaderedExtension> {
+        headerTemplate(rootProject.file("HEADER.txt"))
     }
 
     tasks.withType<Test>().configureEach {
@@ -57,7 +55,7 @@ fun Project.applyCommonConfig(
     }
 
     configure<JavaPluginExtension> {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(25))
     }
     tasks.named<JavaCompile>("compileJava") {
         options.encoding = "UTF-8"
@@ -72,6 +70,7 @@ fun Project.applyCommonConfig(
     dependencies {
         "testImplementation"(Libs.junitApi)
         "testImplementation"(Libs.junitEngine)
+        "testRuntimeOnly"(Libs.junitPlatformLauncher)
     }
 
     addExtraArchiveArtifacts()

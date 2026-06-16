@@ -207,7 +207,7 @@ class GenerationTest {
                     .build())
                 .returns(Void.TYPE)
                 .addParameter(
-                    ParameterSpec.builder(Object::class.java, "arg")
+                    ParameterSpec.builder(Any::class.java, "arg")
                         .addAnnotation(AnnotationSpec.builder(Arg::class.java)
                             .addMember("desc", "\$S", "ARG DESCRIPTION")
                             .build())
