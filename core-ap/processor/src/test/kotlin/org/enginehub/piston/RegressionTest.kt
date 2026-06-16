@@ -236,4 +236,15 @@ class RegressionTest {
             assertEquals("Flag [-g] has already been specified.", usageEx.message)
         }
     }
+
+    @Test
+    @DisplayName("issue #46, regarding an empty token offered to a required argument")
+    fun issue46EmptyTokenForRequiredArgument() {
+        withRegressionCommands { _, manager ->
+            val usageEx = assertThrows<UsageException> {
+                manager.execute(InjectedValueAccess.EMPTY, listOf("i10", ""))
+            }
+            assertEquals("Not enough arguments.", usageEx.message)
+        }
+    }
 }
