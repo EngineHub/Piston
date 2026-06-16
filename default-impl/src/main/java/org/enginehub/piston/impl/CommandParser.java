@@ -177,6 +177,14 @@ class CommandParser {
         return usageException(TextComponent.of("Too many arguments."));
     }
 
+    private UsageException rejectedArgumentException(ArgAcceptingCommandPart nextArg, String token) {
+        if (token.isEmpty()) {
+            // an empty token is an absent value, not a value that failed conversion
+            return notEnoughArgumentsException();
+        }
+        return conversionFailedException(nextArg, token);
+    }
+
     private ConversionFailedException conversionFailedException(ArgAcceptingCommandPart nextArg, String token) {
         // TODO: Make this print all converters
         ArgumentConverter<?> converter = nextArg.getTypes().stream()
@@ -343,7 +351,7 @@ class CommandParser {
                 // Hit end of parts, this cannot be parsed
                 if (lastFailedOptional != null) {
                     // fail on type-conversion to this instead
-                    throw conversionFailedException(lastFailedOptional, token);
+                    throw rejectedArgumentException(lastFailedOptional, token);
                 }
                 throw tooManyArgumentsException();
             }
@@ -430,7 +438,7 @@ class CommandParser {
                 // good, we can just satisfy it
                 AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(argPart, token);
                 if (!acceptInfo.isAccepted()) {
-                    throw conversionFailedException(argPart, token);
+                    throw rejectedArgumentException(argPart, token);
                 }
                 details.remainingRequiredParts--;
                 addValueFull(nextArg, v -> v.values(consumeArguments(
@@ -508,6 +516,9 @@ class CommandParser {
         if (types.isEmpty()) {
             return AcceptInfo.ACCEPTED_EXACT;
         }
+        if (next.isEmpty()) {
+            return AcceptInfo.REJECTED;
+        }
 
         boolean acceptedInexact = false;
         for (Key<?> type : types) {
@@ -555,7 +566,7 @@ class CommandParser {
                 String nextToken = nextArgument();
                 AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(argPart, nextToken);
                 if (!acceptInfo.isAccepted()) {
-                    throw conversionFailedException(argPart, nextToken);
+                    throw rejectedArgumentException(argPart, nextToken);
                 }
                 addValueFull(flag, v -> v.value(nextToken));
                 bind(flag, acceptInfo == AcceptInfo.ACCEPTED_EXACT);

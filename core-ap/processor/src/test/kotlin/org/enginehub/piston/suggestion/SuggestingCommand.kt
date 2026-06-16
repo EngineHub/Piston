@@ -33,6 +33,14 @@ interface SuggestingCommand {
             @[Arg(desc = "Required third argument") Suggest(3)] third: String,
             @[Arg(desc = "Required fourth argument") Suggest(4)] fourth: String)
 
+    @Command(name = "optcmd", desc = "required argument followed by an optional argument")
+    fun optcmd(@[Arg(desc = "Required first argument") Suggest(6)] first: String,
+               @[Arg(desc = "Optional second argument", def = [""]) Suggest(2)] second: String)
+
+    @Command(name = "optopt", desc = "two optional arguments in a row")
+    fun optopt(@[Arg(desc = "Optional first argument", def = [""]) Suggest(1)] first: String,
+               @[Arg(desc = "Optional second argument", def = [""]) Suggest(2)] second: String)
+
     @Command(name = "flags", desc = "flag test command")
     fun flags(@[Switch(name = '1', desc = "First flag")] first: Boolean,
               @[Switch(name = '2', desc = "Second flag")] second: Boolean,
