@@ -27,12 +27,12 @@ import org.enginehub.piston.TestParseResult
 import org.enginehub.piston.arg
 import org.enginehub.piston.argFlag
 import org.enginehub.piston.bind
-import org.enginehub.piston.commands.NoArgCommand
-import org.enginehub.piston.commands.NoArgCommandRegistration
-import org.enginehub.piston.commands.SingleArgCommand
-import org.enginehub.piston.commands.SingleArgCommandRegistration
-import org.enginehub.piston.commands.SingleOptionalArgCommand
-import org.enginehub.piston.commands.SingleOptionalArgCommandRegistration
+import org.enginehub.piston.commands.help.HelpNoArgCommand
+import org.enginehub.piston.commands.help.HelpNoArgCommandRegistration
+import org.enginehub.piston.commands.help.HelpSingleArgCommand
+import org.enginehub.piston.commands.help.HelpSingleArgCommandRegistration
+import org.enginehub.piston.commands.help.HelpSingleOptionalArgCommand
+import org.enginehub.piston.commands.help.HelpSingleOptionalArgCommandRegistration
 import org.enginehub.piston.flag
 import org.enginehub.piston.installCommands
 import org.enginehub.piston.newManager
@@ -48,30 +48,30 @@ class HelpGeneratorTest {
 
     @Test
     fun noArgHelp() {
-        withMockedContainer<NoArgCommand> { ci ->
+        withMockedContainer<HelpNoArgCommand> { ci ->
             val manager = newManager().apply {
-                installCommands(ci, NoArgCommandRegistration.builder())
+                installCommands(ci, HelpNoArgCommandRegistration.builder())
             }
 
             val command = manager.allCommands.toList()
             assertEquals("""
                 description
-                Usage: no-arg
+                Usage: help-no-arg
             """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))
         }
     }
 
     @Test
     fun singleArgHelp() {
-        withMockedContainer<SingleArgCommand> { ci ->
+        withMockedContainer<HelpSingleArgCommand> { ci ->
             val manager = newManager().apply {
-                installCommands(ci, SingleArgCommandRegistration.builder())
+                installCommands(ci, HelpSingleArgCommandRegistration.builder())
             }
 
             val command = manager.allCommands.toList()
             assertEquals("""
                 description
-                Usage: single-arg <piston.argument.first>
+                Usage: help-single-arg <piston.argument.first>
                 Arguments:
                   <piston.argument.first>: First argument
             """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))
@@ -80,15 +80,15 @@ class HelpGeneratorTest {
 
     @Test
     fun singleArgOptionalHelp() {
-        withMockedContainer<SingleOptionalArgCommand> { ci ->
+        withMockedContainer<HelpSingleOptionalArgCommand> { ci ->
             val manager = newManager().apply {
-                installCommands(ci, SingleOptionalArgCommandRegistration.builder())
+                installCommands(ci, HelpSingleOptionalArgCommandRegistration.builder())
             }
 
             val command = manager.allCommands.toList()
             assertEquals("""
                 description
-                Usage: single-arg-opt [piston.argument.first]
+                Usage: help-single-arg-opt [piston.argument.first]
                 Arguments:
                   [piston.argument.first] (defaults to none): First argument
             """.trimIndent(), TextHelper.reduceToText(HelpGenerator.create(command).fullHelp))

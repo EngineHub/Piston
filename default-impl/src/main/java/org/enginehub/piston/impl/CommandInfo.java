@@ -23,13 +23,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import org.enginehub.piston.Command;
-import org.enginehub.piston.part.ArgAcceptingCommandFlag;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.ArgConsumingCommandPart;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandFlag;
 import org.enginehub.piston.part.CommandPart;
-import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
 
 import java.util.stream.IntStream;
@@ -40,10 +38,10 @@ import static com.google.common.base.Preconditions.checkState;
 class CommandInfo {
 
     static CommandInfo from(Command command) {
-        ImmutableList.Builder<ArgConsumingCommandPart> arguments = ImmutableList.builder();
-        ImmutableList.Builder<ArgAcceptingCommandPart> defaultProvided = ImmutableList.builder();
-        ImmutableMap.Builder<Character, CommandFlag> flags = ImmutableMap.builder();
-        ImmutableTable.Builder<SubCommandPart, String, Command> subCommandTable = ImmutableTable.builder();
+        var arguments = ImmutableList.<ArgConsumingCommandPart>builder();
+        var defaultProvided = ImmutableList.<ArgAcceptingCommandPart>builder();
+        var flags = ImmutableMap.<Character, CommandFlag>builder();
+        var subCommandTable = ImmutableTable.<SubCommandPart, String, Command>builder();
         boolean seenRequiredSubCommand = false;
         boolean seenOptionalArg = false;
         boolean middleOptionalArg = false;
@@ -51,24 +49,22 @@ class CommandInfo {
         int requiredParts = 0;
         for (int i = 0; i < parts.size(); i++) {
             CommandPart part = parts.get(i);
-            if (part instanceof ArgAcceptingCommandFlag || part instanceof NoArgCommandFlag) {
-                CommandFlag flag = (CommandFlag) part;
+            if (part instanceof CommandFlag flag) {
                 flags.put(flag.getName(), flag);
-            } else if (part instanceof CommandArgument) {
-                if (part.isRequired() && seenOptionalArg) {
+            } else if (part instanceof CommandArgument arg) {
+                if (arg.isRequired() && seenOptionalArg) {
                     middleOptionalArg = true;
                 }
-                if (!part.isRequired()) {
+                if (!arg.isRequired()) {
                     seenOptionalArg = true;
                 }
-                arguments.add((ArgConsumingCommandPart) part);
-            } else if (part instanceof SubCommandPart) {
-                if (part.isRequired()) {
+                arguments.add(arg);
+            } else if (part instanceof SubCommandPart subCommandPart) {
+                if (subCommandPart.isRequired()) {
                     checkState(i + 1 >= parts.size(),
                         "Required sub-command must be last part.");
                     seenRequiredSubCommand = true;
                 }
-                SubCommandPart subCommandPart = (SubCommandPart) part;
                 for (Command cmd : subCommandPart.getCommands()) {
                     subCommandTable.put(subCommandPart, cmd.getName(), cmd);
                     for (String alias : cmd.getAliases()) {
@@ -82,8 +78,7 @@ class CommandInfo {
             if (part.isRequired()) {
                 requiredParts++;
             }
-            if (part instanceof ArgAcceptingCommandPart) {
-                ArgAcceptingCommandPart argPart = (ArgAcceptingCommandPart) part;
+            if (part instanceof ArgAcceptingCommandPart argPart) {
                 if (argPart.getDefaults().size() > 0) {
                     defaultProvided.add(argPart);
                 }
@@ -94,8 +89,7 @@ class CommandInfo {
             "Cannot have middle-filled optionals and sub-commands");
         ImmutableList<ArgConsumingCommandPart> commandArguments = arguments.build();
         int[] indexes = IntStream.range(0, commandArguments.size())
-            .filter(idx -> commandArguments.get(idx) instanceof CommandArgument)
-            .filter(idx -> ((CommandArgument) commandArguments.get(idx)).isVariable())
+            .filter(idx -> commandArguments.get(idx) instanceof CommandArgument arg && arg.isVariable())
             .toArray();
         checkArgument(indexes.length <= 1, "Too many variable arguments");
         if (indexes.length > 0) {

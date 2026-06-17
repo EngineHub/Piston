@@ -114,19 +114,14 @@ public class ColorConfig extends Config<TextColor> {
 
     private TextComponent.Builder renderFromArgs(List<Component> args) {
         TextColor color = getValue();
-        switch (args.size()) {
-            case 0:
-                return TextComponent.builder("", color);
-            case 1:
-                Component only = args.get(0);
-                if (only instanceof TextComponent) {
-                    return ((TextComponent) only).toBuilder().color(color);
-                }
-                // fall-through
-            default:
-                return TextComponent.builder()
-                    .color(color)
-                    .append(args);
+        if (args.isEmpty()) {
+            return TextComponent.builder("", color);
         }
+        if (args.size() == 1 && args.get(0) instanceof TextComponent only) {
+            return only.toBuilder().color(color);
+        }
+        return TextComponent.builder()
+            .color(color)
+            .append(args);
     }
 }

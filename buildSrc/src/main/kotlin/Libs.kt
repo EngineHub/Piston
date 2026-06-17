@@ -2,7 +2,6 @@ object Libs {
     private const val junitVersion = "6.1.0"
     const val junitApi = "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    const val junitVintageEngine = "org.junit.vintage:junit-vintage-engine:$junitVersion"
     const val junitPlatformLauncher = "org.junit.platform:junit-platform-launcher:$junitVersion"
     const val guava = "com.google.guava:guava:33.6.0-jre"
     private const val kyoriTextVersion = "3.0.4"

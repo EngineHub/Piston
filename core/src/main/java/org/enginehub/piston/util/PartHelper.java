@@ -49,19 +49,19 @@ public class PartHelper {
         SubCommandPart optionalSubCommand = null;
         while (iterator.hasNext()) {
             CommandPart part = iterator.next();
-            if (part instanceof NoArgCommandFlag) {
+            if (part instanceof NoArgCommandFlag flag) {
                 // This is not a necessary restriction, but it simplified logic here
                 // If you need it, make an issue, and this can be rewritten to support it.
                 checkState(optionalSubCommand == null,
                     "All flags should come before sub-commands.");
-                flags.add(((NoArgCommandFlag) part).getName());
+                flags.add(flag.getName());
                 continue;
             }
 
-            if (part instanceof SubCommandPart) {
+            if (part instanceof SubCommandPart subCommand) {
                 // Make an optional sub-command part bind with the rest of the parts.
-                if (!part.isRequired()) {
-                    optionalSubCommand = (SubCommandPart) part;
+                if (!subCommand.isRequired()) {
+                    optionalSubCommand = subCommand;
                     continue;
                 }
             }

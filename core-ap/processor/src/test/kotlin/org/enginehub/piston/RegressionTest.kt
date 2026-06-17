@@ -194,7 +194,7 @@ class RegressionTest {
     @DisplayName("issue #23, allowing converters to add from other converters")
     fun issue23ConvertersFromOthers() {
         val converter = SimpleArgumentConverter.from({ arg, _ -> SuccessfulConversion.fromSingle(arg) }, "Tester")
-        val key = Key.of(String::class.java, suggest(1))
+        val key = Key.of(String::class.java, suggest("test"))
         val child = newManager().apply {
             registerConverter(key, converter)
         }
