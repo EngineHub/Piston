@@ -17,18 +17,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.suggestion
+package org.enginehub.piston.commands.help
 
-import com.google.auto.value.AutoAnnotation
-import org.enginehub.piston.inject.InjectAnnotation
+import org.enginehub.piston.annotation.Command
+import org.enginehub.piston.annotation.CommandContainer
 
-@MustBeDocumented
-@Target(AnnotationTarget.VALUE_PARAMETER)
-@Retention(AnnotationRetention.RUNTIME)
-@InjectAnnotation
-annotation class Suggest(val value: String)
-
-@AutoAnnotation
-fun suggest(value: String): Suggest {
-    return AutoAnnotation_SuggestKt_suggest(value)
+@CommandContainer
+interface HelpNoArgCommand {
+    @Command(name = "help-no-arg", desc = "description")
+    fun noArg()
 }

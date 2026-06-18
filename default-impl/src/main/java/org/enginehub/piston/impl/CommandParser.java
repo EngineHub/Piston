@@ -417,12 +417,11 @@ class CommandParser {
         CommandArgument lastFailedOptionalLocal = null;
         while (hasNextPart()) {
             ArgConsumingCommandPart nextArg = nextPart();
-            if (nextArg instanceof SubCommandPart) {
-                SubCommandPart subCommandPart = (SubCommandPart) nextArg;
+            if (nextArg instanceof SubCommandPart subCommandPart) {
                 if (parseSubCommand(subCommandPart, token)) {
                     return true;
                 }
-                if (nextArg.isRequired()) {
+                if (subCommandPart.isRequired()) {
                     throw usageException(
                         invalidSubCommandMessage(
                             token,
@@ -552,14 +551,13 @@ class CommandParser {
                     .append(" has already been specified.")
                     .build());
             }
-            if (flag instanceof ArgAcceptingCommandFlag) {
+            if (flag instanceof ArgAcceptingCommandFlag argPart) {
                 if (i + 1 < flags.length()) {
                     // Only allow argument-flags at the end of flag-combos.
                     throw usageException(TextComponent.of("Argument-accepting flags must be " +
                         "at the end of combined flag groups."));
                 }
                 bind(flag, true);
-                ArgAcceptingCommandFlag argPart = (ArgAcceptingCommandFlag) flag;
                 if (!hasNextArgument()) {
                     throw notEnoughArgumentsException();
                 }

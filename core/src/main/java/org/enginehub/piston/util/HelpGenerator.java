@@ -172,8 +172,8 @@ public class HelpGenerator {
     private void appendArguments(ImmutableList.Builder<Component> builder) {
         Command primary = parseResult.getPrimaryCommand();
         List<CommandArgument> args = primary.getParts().stream()
-            .filter(x -> x instanceof CommandArgument)
-            .map(x -> (CommandArgument) x)
+            .filter(CommandArgument.class::isInstance)
+            .map(CommandArgument.class::cast)
             .collect(Collectors.toList());
         if (args.size() > 0) {
             builder.add(newline());
@@ -194,8 +194,8 @@ public class HelpGenerator {
     private void appendFlags(ImmutableList.Builder<Component> builder) {
         Command primary = parseResult.getPrimaryCommand();
         List<CommandFlag> flags = primary.getParts().stream()
-            .filter(x -> x instanceof CommandFlag)
-            .map(x -> (CommandFlag) x)
+            .filter(CommandFlag.class::isInstance)
+            .map(CommandFlag.class::cast)
             .collect(Collectors.toList());
         if (flags.size() > 0) {
             builder.add(newline());
@@ -204,8 +204,8 @@ public class HelpGenerator {
                 CommandFlag flag = iterator.next();
                 // produces text like "-f: Some description"
                 builder.add(ColorConfig.mainText().wrap("  -" + flag.getName()));
-                if (flag instanceof ArgAcceptingCommandFlag) {
-                    addDefaultInfo(builder, (ArgAcceptingCommandFlag) flag);
+                if (flag instanceof ArgAcceptingCommandFlag argFlag) {
+                    addDefaultInfo(builder, argFlag);
                 }
                 builder.add(TextComponent.of(": "))
                     .add(flag.getDescription());

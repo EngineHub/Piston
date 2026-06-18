@@ -30,13 +30,10 @@ dependencies {
     "compileOnly"(Libs.autoService)
     "kapt"(Libs.autoService)
 
-    "testImplementation"(kotlin("stdlib-jdk8"))
-    "testRuntimeOnly"(Libs.junitVintageEngine)
+    "testImplementation"(kotlin("stdlib"))
     "testImplementation"(Libs.compileTesting) {
         exclude("junit", "junit")
     }
-
-    "testImplementation"(Libs.guava)
 
     "testImplementation"(Libs.mockito)
     "testRuntimeOnly"(Libs.log4jCore)

@@ -28,21 +28,21 @@ import org.enginehub.piston.annotation.param.Switch
 @CommandContainer
 interface SuggestingCommand {
     @Command(name = "cmd", desc = "description")
-    fun cmd(@[Arg(desc = "First argument") Suggest(1)] first: String,
-            @[Arg(desc = "Optional second argument", def = [""]) Suggest(2)] second: String,
-            @[Arg(desc = "Required third argument") Suggest(3)] third: String,
-            @[Arg(desc = "Required fourth argument") Suggest(4)] fourth: String)
+    fun cmd(@[Arg(desc = "First argument") Suggest("fruits")] first: String,
+            @[Arg(desc = "Optional second argument", def = [""]) Suggest("numbers")] second: String,
+            @[Arg(desc = "Required third argument") Suggest("things")] third: String,
+            @[Arg(desc = "Required fourth argument") Suggest("colors")] fourth: String)
 
     @Command(name = "optcmd", desc = "required argument followed by an optional argument")
-    fun optcmd(@[Arg(desc = "Required first argument") Suggest(6)] first: String,
-               @[Arg(desc = "Optional second argument", def = [""]) Suggest(2)] second: String)
+    fun optcmd(@[Arg(desc = "Required first argument") Suggest("fruitsOrEmpty")] first: String,
+               @[Arg(desc = "Optional second argument", def = [""]) Suggest("numbers")] second: String)
 
     @Command(name = "optopt", desc = "two optional arguments in a row")
-    fun optopt(@[Arg(desc = "Optional first argument", def = [""]) Suggest(1)] first: String,
-               @[Arg(desc = "Optional second argument", def = [""]) Suggest(2)] second: String)
+    fun optopt(@[Arg(desc = "Optional first argument", def = [""]) Suggest("fruits")] first: String,
+               @[Arg(desc = "Optional second argument", def = [""]) Suggest("numbers")] second: String)
 
     @Command(name = "flags", desc = "flag test command")
     fun flags(@[Switch(name = '1', desc = "First flag")] first: Boolean,
               @[Switch(name = '2', desc = "Second flag")] second: Boolean,
-              @[ArgFlag(name = '3', desc = "Argument-taking third flag") Suggest(3)] third: String)
+              @[ArgFlag(name = '3', desc = "Argument-taking third flag") Suggest("things")] third: String)
 }
