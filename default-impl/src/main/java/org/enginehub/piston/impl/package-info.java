@@ -25,5 +25,5 @@
  * as well as one way to hook them into the Piston core library loader.
  * </p>
  */
-@org.enginehub.piston.util.NonnullByDefault
+@org.jspecify.annotations.NullMarked
 package org.enginehub.piston.impl;

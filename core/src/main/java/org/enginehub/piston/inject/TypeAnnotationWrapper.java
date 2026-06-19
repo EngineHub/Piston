@@ -20,9 +20,8 @@
 package org.enginehub.piston.inject;
 
 import com.google.auto.value.AutoValue;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
 @AutoValue
@@ -35,7 +34,6 @@ abstract class TypeAnnotationWrapper implements AnnotationWrapper {
     TypeAnnotationWrapper() {
     }
 
-    @Nonnull
     @Override
     public abstract Class<? extends Annotation> getAnnotationType();
 

@@ -17,7 +17,7 @@ object Libs {
     private const val log4jVersion = "2.26.0"
     const val log4jApi = "org.apache.logging.log4j:log4j-api:$log4jVersion"
     const val log4jCore = "org.apache.logging.log4j:log4j-core:$log4jVersion"
-    const val javaxAnnotations = "com.google.code.findbugs:jsr305:3.0.2"
+    const val jspecify = "org.jspecify:jspecify:1.0.0"
     const val compileTesting = "com.google.testing.compile:compile-testing:0.23.0"
     const val mockito = "org.mockito:mockito-core:5.23.0"
 }

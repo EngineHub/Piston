@@ -41,12 +41,12 @@ import org.enginehub.piston.gen.util.ProcessingException;
 import org.enginehub.piston.gen.value.CommandInfo;
 import org.enginehub.piston.gen.value.CommandParamInfo;
 import org.enginehub.piston.gen.value.RegistrationInfo;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;

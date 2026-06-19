@@ -17,5 +17,5 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-@org.enginehub.piston.util.NonnullByDefault
+@org.jspecify.annotations.NullMarked
 package org.enginehub.piston.part;

@@ -22,8 +22,8 @@ package org.enginehub.piston.util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.config.ColorConfig;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.stream.Collector;
 
 public class ComponentHelper {
@@ -55,8 +55,7 @@ public class ComponentHelper {
         private final Component suffix;
         private final Component delimiter;
 
-        @Nullable
-        private TextComponent.Builder value;
+        private TextComponent.@Nullable Builder value;
 
         @Nullable
         private Component nullValue;

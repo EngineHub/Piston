@@ -33,8 +33,8 @@ import org.enginehub.piston.gen.util.CodeBlockUtil;
 import org.enginehub.piston.gen.util.SafeName;
 import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.util.CaseHelper;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
 import java.util.List;

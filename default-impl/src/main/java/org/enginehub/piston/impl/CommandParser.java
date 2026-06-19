@@ -52,8 +52,8 @@ import org.enginehub.piston.part.NoArgCommandFlag;
 import org.enginehub.piston.part.SubCommandPart;
 import org.enginehub.piston.util.ComponentHelper;
 import org.enginehub.piston.util.StreamHelper;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;

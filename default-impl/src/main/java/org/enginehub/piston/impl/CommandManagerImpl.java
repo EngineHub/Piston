@@ -35,8 +35,8 @@ import org.enginehub.piston.inject.Key;
 import org.enginehub.piston.inject.MemoizingValueAccess;
 import org.enginehub.piston.part.SubCommandPart;
 import org.enginehub.piston.suggestion.Suggestion;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

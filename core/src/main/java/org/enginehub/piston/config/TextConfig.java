@@ -22,8 +22,7 @@ package org.enginehub.piston.config;
 import com.google.common.base.Strings;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;

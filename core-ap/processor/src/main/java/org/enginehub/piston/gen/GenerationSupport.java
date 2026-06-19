@@ -23,8 +23,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import org.enginehub.piston.inject.Key;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface GenerationSupport {
 

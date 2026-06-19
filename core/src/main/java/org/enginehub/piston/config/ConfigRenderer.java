@@ -24,7 +24,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.renderer.ComponentRenderer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -46,7 +45,7 @@ public class ConfigRenderer implements ComponentRenderer<ConfigHolder> {
     }
 
     @Override
-    public @NotNull Component render(@NotNull Component component, @NotNull ConfigHolder context) {
+    public Component render(Component component, ConfigHolder context) {
         component = replaceSubcomponents(component, context);
         if (component instanceof TranslatableComponent) {
             // check if replacing

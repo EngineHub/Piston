@@ -26,8 +26,8 @@ import org.enginehub.piston.Command;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.suggestion.DefaultSuggestionProvider;
 import org.enginehub.piston.suggestion.SuggestionProvider;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkState;

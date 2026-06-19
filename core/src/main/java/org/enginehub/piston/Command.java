@@ -25,8 +25,8 @@ import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.CommandPart;
 import org.enginehub.piston.suggestion.SuggestionProvider;
 import org.enginehub.piston.util.HelpGenerator;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 
