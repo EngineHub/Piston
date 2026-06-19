@@ -35,8 +35,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.function.Consumer;
 import javax.annotation.processing.Generated;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;
@@ -59,7 +58,7 @@ final class WildcardArgRegistration implements CommandRegistration<WildcardArg> 
 
     private ImmutableList<CommandCallListener> listeners;
 
-    private final CommandArgument argPart = arg(TranslatableComponent.of("piston.argument.arg"), TextComponent.of("ARG DESCRIPTION"))
+    private final CommandArgument argPart = arg(Component.translatable("piston.argument.arg"), Component.text("ARG DESCRIPTION"))
         .defaultsTo(ImmutableList.of())
         .ofTypes(ImmutableList.of(consumer$__Key))
         .build();
@@ -90,7 +89,7 @@ final class WildcardArgRegistration implements CommandRegistration<WildcardArg> 
     public void build() {
         commandManager.register("wildcardArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of(argPart));
             b.action(this::cmd$wildcardArgument);
         });

@@ -34,7 +34,7 @@ import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import javax.annotation.processing.Generated;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.gen.CommandCallListener;
@@ -75,7 +75,7 @@ final class Outer_BasicNestedRegistration implements CommandRegistration<Outer.B
     public void build() {
         commandManager.register("noArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of());
             b.action(this::cmd$noArgument);
         });

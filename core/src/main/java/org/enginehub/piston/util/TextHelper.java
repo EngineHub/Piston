@@ -20,10 +20,13 @@
 package org.enginehub.piston.util;
 
 import com.google.common.base.Joiner;
-import net.kyori.text.Component;
-import net.kyori.text.KeybindComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.KeybindComponent;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.enginehub.piston.config.ConfigHolder;
 import org.enginehub.piston.config.ConfigRenderer;
 
@@ -32,14 +35,17 @@ import java.util.List;
 
 public class TextHelper {
 
-    private static final PlainComponentSerializer PLAIN_COMPONENT_SERIALIZER = new PlainComponentSerializer(
-        KeybindComponent::keybind,
-        translatableComponent -> {
-            StringBuilder builder = new StringBuilder();
-            appendTranslatableTo(builder, translatableComponent);
-            return builder.toString();
-        }
-    );
+    private static final PlainTextComponentSerializer PLAIN_COMPONENT_SERIALIZER = PlainTextComponentSerializer.builder()
+        .flattener(ComponentFlattener.builder()
+            .mapper(KeybindComponent.class, KeybindComponent::keybind)
+            .mapper(TextComponent.class, TextComponent::content)
+            .mapper(TranslatableComponent.class, translatableComponent -> {
+                StringBuilder builder = new StringBuilder();
+                appendTranslatableTo(builder, translatableComponent);
+                return builder.toString();
+            })
+            .build())
+        .build();
 
     private static final ConfigHolder CONFIG = ConfigHolder.create();
 
@@ -55,7 +61,7 @@ public class TextHelper {
 
     private static void appendTranslatableTo(StringBuilder builder, TranslatableComponent component) {
         builder.append(component.key());
-        List<Component> args = component.args();
+        List<Component> args = ComponentLike.asComponents(component.arguments());
         if (args.size() > 0) {
             builder.append('[');
             for (Iterator<Component> parts = args.iterator(); parts.hasNext(); ) {

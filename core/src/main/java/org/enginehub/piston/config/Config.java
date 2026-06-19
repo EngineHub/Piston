@@ -20,8 +20,8 @@
 package org.enginehub.piston.config;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -76,7 +76,7 @@ public abstract class Config<T> {
     }
 
     protected Component wrapInternal(List<Component> args) {
-        return TranslatableComponent.of(key, args);
+        return Component.translatable(key, args);
     }
 
     protected abstract Component apply(TranslatableComponent placeholder);

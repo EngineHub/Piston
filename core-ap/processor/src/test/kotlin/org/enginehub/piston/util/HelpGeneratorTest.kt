@@ -20,7 +20,7 @@
 package org.enginehub.piston.util
 
 import com.google.common.collect.ImmutableList
-import net.kyori.text.TextComponent
+import net.kyori.adventure.text.Component
 import org.enginehub.piston.TestCommandMetadata
 import org.enginehub.piston.TestCommandParameters
 import org.enginehub.piston.TestParseResult
@@ -98,7 +98,7 @@ class HelpGeneratorTest {
     @Test
     fun singleArgOptionalNotNoneHelp() {
         val command = listOf(newManager().newCommand("single-arg-opt")
-            .description(TextComponent.of("description"))
+            .description(Component.text("description"))
             .addParts(
                 arg("piston.argument.first","First argument") {
                     defaultsTo(ImmutableList.of("a", "b"))
@@ -116,7 +116,7 @@ class HelpGeneratorTest {
     @Test
     fun flagsHelp() {
         val command = listOf(newManager().newCommand("flags")
-            .description(TextComponent.of("description"))
+            .description(Component.text("description"))
             .addParts(
                 flag('f', "Flag"),
                 argFlag('q', "Quibble", "qux"),
@@ -138,12 +138,12 @@ class HelpGeneratorTest {
     @Test
     fun subCommandsHelp() {
         val subCommand = newManager().newCommand("sub-command")
-            .description(TextComponent.of("sub-description"))
+            .description(Component.text("sub-description"))
             .build()
         val interArg = arg("intermediate", "inter-arg")
         val subCommands = subs(subCommand)
         val command = newManager().newCommand("main")
-            .description(TextComponent.of("description"))
+            .description(Component.text("description"))
             .addParts(interArg, subCommands)
             .build()
         assertEquals("""

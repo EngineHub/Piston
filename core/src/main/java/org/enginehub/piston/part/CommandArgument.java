@@ -22,9 +22,8 @@ package org.enginehub.piston.part;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.Key;
 
@@ -46,7 +45,7 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
     public abstract static class Builder {
 
         public final Builder named(String name) {
-            return named(TranslatableComponent.of(name));
+            return named(Component.translatable(name));
         }
 
         public final Builder named(TranslatableComponent name) {
@@ -56,7 +55,7 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
         abstract Builder argumentName(TranslatableComponent name);
 
         public final Builder describedBy(String description) {
-            return describedBy(TextComponent.of(description));
+            return describedBy(Component.text(description));
         }
 
         public final Builder describedBy(Component description) {
@@ -105,12 +104,12 @@ public abstract class CommandArgument implements ArgAcceptingCommandPart {
     @Override
     public Component getTextRepresentation() {
         ImmutableList.Builder<Component> builder = ImmutableList.builder();
-        builder.add(TextComponent.of(isRequired() ? "<" : "["));
+        builder.add(Component.text(isRequired() ? "<" : "["));
         builder.add(ColorConfig.mainText().wrap(getArgumentName()));
         if (isVariable()) {
             builder.add(ColorConfig.textModifier().wrap("..."));
         }
-        builder.add(TextComponent.of(isRequired() ? ">" : "]"));
+        builder.add(Component.text(isRequired() ? ">" : "]"));
         return ColorConfig.partWrapping().wrap(builder.build());
     }
 

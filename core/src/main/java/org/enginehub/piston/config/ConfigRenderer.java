@@ -20,10 +20,11 @@
 package org.enginehub.piston.config;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.renderer.ComponentRenderer;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.renderer.ComponentRenderer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class ConfigRenderer implements ComponentRenderer<ConfigHolder> {
     }
 
     @Override
-    public @NonNull Component render(@NonNull Component component, @NonNull ConfigHolder context) {
+    public @NotNull Component render(@NotNull Component component, @NotNull ConfigHolder context) {
         component = replaceSubcomponents(component, context);
         if (component instanceof TranslatableComponent) {
             // check if replacing
@@ -61,10 +62,10 @@ public class ConfigRenderer implements ComponentRenderer<ConfigHolder> {
     private Component replaceSubcomponents(Component component, ConfigHolder context) {
         if (component instanceof TranslatableComponent) {
             TranslatableComponent tc = (TranslatableComponent) component;
-            List<Component> originalArgs = tc.args();
+            List<Component> originalArgs = ComponentLike.asComponents(tc.arguments());
             List<Component> replacementArgs = renderList(originalArgs, context);
             if (originalArgs != replacementArgs) {
-                component = tc.args(replacementArgs);
+                component = tc.arguments(replacementArgs);
             }
             // fall-through to replace children if needed
         }

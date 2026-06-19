@@ -19,7 +19,7 @@
 
 package org.enginehub.piston.converter;
 
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
 import java.util.Collections;

@@ -20,8 +20,7 @@
 package org.enginehub.piston.exception;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.util.TextHelper;
 
@@ -33,7 +32,7 @@ public class CommandException extends RuntimeException {
     protected final ImmutableList<Command> commands;
 
     public CommandException(ImmutableList<Command> commands) {
-        this.message = TextComponent.empty();
+        this.message = Component.empty();
         this.commands = commands;
     }
 
@@ -51,7 +50,7 @@ public class CommandException extends RuntimeException {
 
     public CommandException(Throwable cause, ImmutableList<Command> commands) {
         super(cause);
-        this.message = TextComponent.empty();
+        this.message = Component.empty();
         this.commands = commands;
     }
 
