@@ -64,7 +64,7 @@ public class ConstructionTest {
         Component message = Component.text("stop");
         ImmutableList<Command> commands = ImmutableList.of(mock(Command.class));
         StopExecutionException ex = new StopExecutionException(message, commands);
-        assertSame(message, ex.getRichMessage());
+        assertSame(message, ex.componentMessage());
         assertEquals("stop", ex.getMessage());
         assertSame(commands, ex.getCommands());
     }
@@ -73,7 +73,7 @@ public class ConstructionTest {
     void stopExecutionExceptionNoCommands() {
         Component message = Component.text("stop");
         StopExecutionException ex = new StopExecutionException(message);
-        assertSame(message, ex.getRichMessage());
+        assertSame(message, ex.componentMessage());
         assertEquals("stop", ex.getMessage());
         assertEquals(ImmutableList.of(), ex.getCommands());
     }
@@ -130,7 +130,7 @@ public class ConstructionTest {
         UsageException ex = new UsageException(mock);
         assertSame(executionPath, ex.getCommands());
         assertSame(mock, ex.getCommandParseResult());
-        assertEquals(Component.empty(), ex.getRichMessage());
+        assertEquals(Component.empty(), ex.componentMessage());
         assertNull(ex.getMessage());
     }
 
@@ -144,7 +144,7 @@ public class ConstructionTest {
         UsageException ex = new UsageException(message, mock);
         assertSame(executionPath, ex.getCommands());
         assertSame(mock, ex.getCommandParseResult());
-        assertSame(message, ex.getRichMessage());
+        assertSame(message, ex.componentMessage());
         assertEquals("message", ex.getMessage());
     }
 
@@ -159,7 +159,7 @@ public class ConstructionTest {
         UsageException ex = new UsageException(message, cause, mock);
         assertSame(executionPath, ex.getCommands());
         assertSame(mock, ex.getCommandParseResult());
-        assertSame(message, ex.getRichMessage());
+        assertSame(message, ex.componentMessage());
         assertEquals("message", ex.getMessage());
         assertSame(cause, ex.getCause());
     }
@@ -174,7 +174,7 @@ public class ConstructionTest {
         UsageException ex = new UsageException(cause, mock);
         assertSame(executionPath, ex.getCommands());
         assertSame(mock, ex.getCommandParseResult());
-        assertEquals(Component.empty(), ex.getRichMessage());
+        assertEquals(Component.empty(), ex.componentMessage());
         assertEquals(cause.getClass().getName(), ex.getMessage());
         assertSame(cause, ex.getCause());
     }

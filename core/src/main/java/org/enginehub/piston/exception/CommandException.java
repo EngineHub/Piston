@@ -21,13 +21,14 @@ package org.enginehub.piston.exception;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.ComponentMessageThrowable;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.util.TextHelper;
 
 /**
  * Parent class for all command-related exceptions.
  */
-public class CommandException extends RuntimeException {
+public class CommandException extends RuntimeException implements ComponentMessageThrowable {
     private final Component message;
     protected final ImmutableList<Command> commands;
 
@@ -57,7 +58,8 @@ public class CommandException extends RuntimeException {
     /**
      * Get the rich message, with extra formatting.
      */
-    public Component getRichMessage() {
+    @Override
+    public Component componentMessage() {
         return message;
     }
 
