@@ -34,7 +34,7 @@ import java.lang.Throwable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import javax.annotation.processing.Generated;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
@@ -85,20 +85,20 @@ final class NoArgRegistration implements CommandRegistration<NoArg> {
     public void build() {
         commandManager.register("noArgument", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of());
             b.action(this::cmd$noArgument);
         });
         commandManager.register("noArgumentFooter", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
-            b.footer(TextComponent.of("DESC FOOTER"));
+            b.description(Component.text("DESCRIPTION"));
+            b.footer(Component.text("DESC FOOTER"));
             b.parts(ImmutableList.of());
             b.action(this::cmd$noArgumentFooter);
         });
         commandManager.register("noArgumentCondition", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of());
             b.action(this::cmd$noArgumentCondition);
             Method commandMethod = getCommandMethod(NoArg.class, "noArgCondition");
@@ -107,7 +107,7 @@ final class NoArgRegistration implements CommandRegistration<NoArg> {
         });
         commandManager.register("noArgumentStatic", b -> {
             b.aliases(ImmutableList.of());
-            b.description(TextComponent.of("DESCRIPTION"));
+            b.description(Component.text("DESCRIPTION"));
             b.parts(ImmutableList.of());
             b.action(this::cmd$noArgumentStatic);
         });

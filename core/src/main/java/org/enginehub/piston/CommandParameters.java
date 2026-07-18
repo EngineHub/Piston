@@ -23,8 +23,7 @@ import org.enginehub.piston.converter.ArgumentConverterAccess;
 import org.enginehub.piston.inject.InjectedValueAccess;
 import org.enginehub.piston.part.ArgAcceptingCommandPart;
 import org.enginehub.piston.part.CommandPart;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Access to part values derived from user input.

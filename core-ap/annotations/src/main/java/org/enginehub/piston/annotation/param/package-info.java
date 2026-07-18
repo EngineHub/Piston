@@ -18,4 +18,4 @@
  */
 
 @org.jspecify.annotations.NullMarked
-package org.enginehub.piston;
+package org.enginehub.piston.annotation.param;

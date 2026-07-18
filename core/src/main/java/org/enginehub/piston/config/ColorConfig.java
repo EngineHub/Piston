@@ -20,13 +20,15 @@
 package org.enginehub.piston.config;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-import net.kyori.text.format.Style;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -37,15 +39,15 @@ import java.util.Set;
 public class ColorConfig extends Config<TextColor> {
 
     private static final ColorConfig TEXT_MODIFIER =
-        new ColorConfig("piston.style.text.modifier", TextColor.YELLOW);
+        new ColorConfig("piston.style.text.modifier", NamedTextColor.YELLOW);
     private static final ColorConfig MAIN_TEXT =
-        new ColorConfig("piston.style.main.text", TextColor.GOLD);
+        new ColorConfig("piston.style.main.text", NamedTextColor.GOLD);
     private static final ColorConfig HELP_TEXT =
-        new ColorConfig("piston.style.help.text", TextColor.GRAY);
+        new ColorConfig("piston.style.help.text", NamedTextColor.GRAY);
     private static final ColorConfig PART_WRAPPING =
-        new ColorConfig("piston.style.part.wrapping", TextColor.YELLOW);
+        new ColorConfig("piston.style.part.wrapping", NamedTextColor.YELLOW);
 
-    private static final Set<Style.Merge> MERGE_NO_COLOR = Style.Merge.of(
+    private static final Set<Style.Merge> MERGE_NO_COLOR = Style.Merge.merges(
         Style.Merge.DECORATIONS, Style.Merge.INSERTION, Style.Merge.EVENTS
     );
 
@@ -93,7 +95,7 @@ public class ColorConfig extends Config<TextColor> {
     }
 
     public Component wrap(String text) {
-        return wrap(ImmutableList.of(TextComponent.of(text)));
+        return wrap(ImmutableList.of(Component.text(text)));
     }
 
     public Component wrap(Component... args) {
@@ -106,7 +108,7 @@ public class ColorConfig extends Config<TextColor> {
 
     @Override
     protected Component apply(TranslatableComponent placeholder) {
-        return renderFromArgs(placeholder.args())
+        return renderFromArgs(ComponentLike.asComponents(placeholder.arguments()))
             .mergeStyle(placeholder, MERGE_NO_COLOR)
             .append(placeholder.children())
             .build();
@@ -115,12 +117,12 @@ public class ColorConfig extends Config<TextColor> {
     private TextComponent.Builder renderFromArgs(List<Component> args) {
         TextColor color = getValue();
         if (args.isEmpty()) {
-            return TextComponent.builder("", color);
+            return Component.text().color(color);
         }
         if (args.size() == 1 && args.get(0) instanceof TextComponent only) {
             return only.toBuilder().color(color);
         }
-        return TextComponent.builder()
+        return Component.text()
             .color(color)
             .append(args);
     }

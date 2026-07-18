@@ -19,11 +19,10 @@
 
 package org.enginehub.piston.config;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
-
-import javax.annotation.Nullable;
+import com.google.common.base.Strings;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -68,8 +67,9 @@ public class TextConfig extends Config<String> {
 
     @Override
     protected Component apply(TranslatableComponent placeholder) {
-        checkState(placeholder.args().isEmpty(), "TextConfig takes no arguments");
-        return TextComponent.builder(getValue())
+        checkState(placeholder.arguments().isEmpty(), "TextConfig takes no arguments");
+        return Component.text()
+            .content(Strings.nullToEmpty(getValue()))
             .mergeStyle(placeholder)
             .append(placeholder.children())
             .build();

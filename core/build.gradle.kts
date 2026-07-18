@@ -2,9 +2,9 @@ applyCommonConfig()
 
 dependencies {
     "api"(Libs.guava)
-    "api"(Libs.kyoriText)
-    "api"(Libs.javaxAnnotations)
-    "implementation"(Libs.kyoriTextPlain)
+    "api"(Libs.kyoriAdventure)
+    "api"(Libs.jspecify)
+    "implementation"(Libs.kyoriAdventureTextPlain)
     "compileOnly"(Libs.autoValueAnnotations)
     "annotationProcessor"(Libs.autoValueProcessor)
     "testImplementation"(Libs.mockito)

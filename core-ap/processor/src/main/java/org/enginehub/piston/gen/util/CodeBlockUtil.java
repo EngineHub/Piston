@@ -22,11 +22,10 @@ package org.enginehub.piston.gen.util;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
-import net.kyori.text.TextComponent;
-import net.kyori.text.TranslatableComponent;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.internal.RegistrationUtil;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import javax.lang.model.element.ExecutableElement;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
@@ -72,11 +71,11 @@ public class CodeBlockUtil {
     }
 
     public static CodeBlock textCompOf(String text) {
-        return CodeBlock.of("$T.of($S)", TextComponent.class, text);
+        return CodeBlock.of("$T.text($S)", Component.class, text);
     }
 
     public static CodeBlock transCompOf(String text) {
-        return CodeBlock.of("$T.of($S)", TranslatableComponent.class, text);
+        return CodeBlock.of("$T.translatable($S)", Component.class, text);
     }
 
     public static Collector<CodeBlock, ?, CodeBlock> joining(String delimiter) {
@@ -107,8 +106,7 @@ public class CodeBlockUtil {
         private final CodeBlock suffix;
         @Nullable
         private CodeBlock emptyValue;
-        @Nullable
-        private CodeBlock.Builder value;
+        private CodeBlock.@Nullable Builder value;
 
         CodeBlockJoiner(CodeBlock prefix, CodeBlock delimiter, CodeBlock suffix) {
             this.prefix = requireNonNull(prefix);

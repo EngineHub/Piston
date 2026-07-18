@@ -17,23 +17,5 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.enginehub.piston.util;
-
-import javax.annotation.Nonnull;
-import javax.annotation.meta.TypeQualifierDefault;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-/**
- * Marks a package, class, or method as having all elements {@link Nonnull} by default.
- */
-@Documented
-@Nonnull
-@TypeQualifierDefault({ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD})
-public @interface NonnullByDefault {
-}
+@org.jspecify.annotations.NullMarked
+package org.enginehub.piston.gen;

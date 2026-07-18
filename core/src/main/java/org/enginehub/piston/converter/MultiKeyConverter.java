@@ -25,11 +25,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.SetMultimap;
-import net.kyori.text.Component;
+import net.kyori.adventure.text.Component;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.inject.InjectedValueAccess;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;

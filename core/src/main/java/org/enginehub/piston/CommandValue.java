@@ -21,8 +21,7 @@ package org.enginehub.piston;
 
 import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.inject.Key;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
 

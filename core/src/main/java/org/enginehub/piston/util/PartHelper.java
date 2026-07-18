@@ -19,8 +19,8 @@
 
 package org.enginehub.piston.util;
 
-import net.kyori.text.Component;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.config.ColorConfig;
 import org.enginehub.piston.part.CommandPart;
@@ -74,9 +74,9 @@ public class PartHelper {
                 .map(String::valueOf)
                 .collect(Collectors.joining("")))
             .map(text -> ColorConfig.partWrapping().wrap(
-                TextComponent.of("["),
+                Component.text("["),
                 ColorConfig.mainText().wrap("-" + text),
-                TextComponent.of("]")
+                Component.text("]")
             ))
             .map(Stream::of).orElse(Stream.empty());
 
@@ -88,7 +88,7 @@ public class PartHelper {
         while (usages.hasNext()) {
             output.append(usages.next());
             if (usages.hasNext()) {
-                output.append(TextComponent.of(" "));
+                output.append(Component.text(" "));
             }
         }
     }
@@ -96,18 +96,18 @@ public class PartHelper {
     private static Stream<Component> buildOptionalMerging(SubCommandPart optionalSubCommand,
                                                           Stream<Component> postComponents) {
         return Stream.of(ColorConfig.partWrapping().wrap(
-            TextComponent.of("<"),
+            Component.text("<"),
             optionalSubCommand.getCommands().stream()
                 .map(Command::getName)
                 .map(ColorConfig.mainText()::wrap)
                 .collect(ComponentHelper.joiningWithBar()),
-            TextComponent.of("|"),
+            Component.text("|"),
             postComponents.collect(ComponentHelper.joiningTexts(
-                TextComponent.empty(),
-                TextComponent.of(" "),
-                TextComponent.empty()
+                Component.empty(),
+                Component.text(" "),
+                Component.empty()
             )),
-            TextComponent.of(">")
+            Component.text(">")
         ));
     }
 
