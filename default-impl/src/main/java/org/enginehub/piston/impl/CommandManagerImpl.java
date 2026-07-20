@@ -58,6 +58,7 @@ public class CommandManagerImpl implements CommandManager {
     private final Map<Key<?>, ArgumentConverter<?>> converters = new HashMap<>();
     private final CommandInfoCache commandInfoCache = new CommandInfoCache();
 
+    @SuppressWarnings("this-escape")
     public CommandManagerImpl() {
         registerConverter(Key.of(String.class), ArgumentConverters.forString());
         for (Class<?> wrapperType : ImmutableList.of(

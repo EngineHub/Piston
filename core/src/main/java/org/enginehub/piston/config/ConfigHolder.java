@@ -19,6 +19,7 @@
 
 package org.enginehub.piston.config;
 
+import com.google.errorprone.annotations.InlineMe;
 import net.kyori.adventure.text.Component;
 
 import java.util.HashMap;
@@ -64,7 +65,11 @@ public class ConfigHolder {
      * @deprecated Use {@link ConfigRenderer} instead
      */
     @Deprecated
-    public Component replace(Component input) {
+    @InlineMe(
+        replacement = "ConfigRenderer.getInstance().render(input, this)",
+        imports = "org.enginehub.piston.config.ConfigRenderer"
+    )
+    public final Component replace(Component input) {
         return ConfigRenderer.getInstance().render(input, this);
     }
 

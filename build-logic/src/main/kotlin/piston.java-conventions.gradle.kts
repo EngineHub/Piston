@@ -8,8 +8,10 @@ plugins {
 
 crankcaseJava {
     javaRelease = 25
-    // TODO: fix all warnings
-    failOnWarnings = false
+    // AutoValue & JSpecify annotations are never claimed by a processor
+    disabledLints.add("processing")
+    // exceptions are Serializable via Throwable, but we never serialize them
+    disabledLints.add("serial")
 }
 
 tasks.named<Copy>("processTestResources") {

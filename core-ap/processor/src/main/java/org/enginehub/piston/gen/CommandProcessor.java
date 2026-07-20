@@ -36,7 +36,6 @@ import org.enginehub.piston.annotation.CommandCondition;
 import org.enginehub.piston.annotation.CommandContainer;
 import org.enginehub.piston.gen.optimize.CommandInfoOptimization;
 import org.enginehub.piston.gen.optimize.CommandParamInfoOptimization;
-import org.enginehub.piston.gen.optimize.ExtractSpecOptimization;
 import org.enginehub.piston.gen.util.ProcessingException;
 import org.enginehub.piston.gen.value.CommandInfo;
 import org.enginehub.piston.gen.value.CommandParamInfo;
@@ -169,9 +168,7 @@ public class CommandProcessor extends BasicAnnotationProcessor {
 
     private CommandInfoOptimization buildOptimizer(IdentifierTracker identifierTracker) {
         return new CommandInfoOptimization(
-            new CommandParamInfoOptimization(
-                new ExtractSpecOptimization(identifierTracker),
-                identifierTracker),
+            new CommandParamInfoOptimization(identifierTracker),
             identifierTracker);
     }
 

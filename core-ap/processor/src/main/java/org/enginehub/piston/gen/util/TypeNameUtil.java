@@ -29,10 +29,10 @@ public class TypeNameUtil {
     public static TypeName rawType(TypeName typeName) {
         if (typeName instanceof ClassName) {
             return typeName;
-        } else if (typeName instanceof ArrayTypeName) {
-            return ArrayTypeName.of(rawType(((ArrayTypeName) typeName).componentType));
-        } else if (typeName instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) typeName).rawType;
+        } else if (typeName instanceof ArrayTypeName arrayTypeName) {
+            return ArrayTypeName.of(rawType(arrayTypeName.componentType));
+        } else if (typeName instanceof ParameterizedTypeName parameterized) {
+            return parameterized.rawType;
         } else if (typeName.isPrimitive()) {
             return typeName;
         }
@@ -41,8 +41,8 @@ public class TypeNameUtil {
     }
 
     public static TypeName firstTypeArg(TypeName typeName) {
-        if (typeName instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) typeName).typeArguments.get(0);
+        if (typeName instanceof ParameterizedTypeName parameterized) {
+            return parameterized.typeArguments.get(0);
         }
         return TypeName.OBJECT;
     }

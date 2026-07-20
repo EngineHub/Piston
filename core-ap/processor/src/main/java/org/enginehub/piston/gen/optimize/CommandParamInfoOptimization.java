@@ -28,17 +28,11 @@ import java.util.Map;
 
 public class CommandParamInfoOptimization implements CollectionOptimization<CommandParamInfo> {
 
-    private final ExtractSpecOptimization extractSpecOptimization;
-
     private final IdentifierTracker identifierTracker;
     // map from an original param to one with the modified name
     private final Map<CommandParamInfo, CommandParamInfo> newSpecMapping = new HashMap<>();
 
-    public CommandParamInfoOptimization(
-        ExtractSpecOptimization extractSpecOptimization,
-        IdentifierTracker identifierTracker
-    ) {
-        this.extractSpecOptimization = extractSpecOptimization;
+    public CommandParamInfoOptimization(IdentifierTracker identifierTracker) {
         this.identifierTracker = identifierTracker;
     }
 

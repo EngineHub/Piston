@@ -22,7 +22,7 @@ package org.enginehub.piston.converter;
 import com.google.common.collect.ImmutableList;
 import org.enginehub.piston.inject.InjectedValueAccess;
 
-import java.util.Collection;
+import java.util.SequencedCollection;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -74,17 +74,19 @@ public abstract class ConversionResult<T> {
      * @param <U> the new type
      * @return the new result
      */
-    public abstract <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper);
+    public abstract <U> ConversionResult<U> map(
+        Function<? super ImmutableList<T>, ? extends SequencedCollection<U>> mapper
+    );
 
     public final <U> ConversionResult<U> mapSingle(Function<? super T, ? extends U> mapper) {
         return map(many -> {
             checkArgument(many.size() == 1, "Need exactly one result");
-            U result = mapper.apply(many.iterator().next());
+            U result = mapper.apply(many.getFirst());
             return result == null ? null : ImmutableList.of(result);
         });
     }
 
-    public final Collection<T> orElse(Collection<T> other) {
+    public final SequencedCollection<T> orElse(SequencedCollection<T> other) {
         if (isSuccessful()) {
             return get();
         }
@@ -94,6 +96,6 @@ public abstract class ConversionResult<T> {
     /**
      * Get the result, or throw an exception with all collected errors.
      */
-    public abstract Collection<T> get();
+    public abstract ImmutableList<T> get();
 
 }

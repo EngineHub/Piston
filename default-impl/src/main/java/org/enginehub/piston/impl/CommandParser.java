@@ -273,13 +273,6 @@ class CommandParser {
         return perCommandDetails().partIter.next();
     }
 
-    private void unconsumePart() {
-        ListIterator<ArgConsumingCommandPart> partIter = perCommandDetails().partIter;
-        checkState(partIter.hasPrevious(),
-            "Trying to unconsume nothing");
-        partIter.previous();
-    }
-
     private void bind(CommandPart part, boolean exact) {
         argBindings.put(part, exact);
     }

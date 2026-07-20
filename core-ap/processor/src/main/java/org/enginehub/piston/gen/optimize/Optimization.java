@@ -24,7 +24,6 @@ package org.enginehub.piston.gen.optimize;
  *
  * @param <T> the type being optimized
  */
-@FunctionalInterface
 public interface Optimization<T> {
 
     T optimize(T input);

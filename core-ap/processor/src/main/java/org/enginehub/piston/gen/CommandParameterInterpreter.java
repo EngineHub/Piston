@@ -109,10 +109,14 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.arg($L, $L)\n"
-                    + ".defaultsTo($L)\n",
+            .add(
+                """
+                $T.arg($L, $L)
+                .defaultsTo($L)
+                """,
                 CommandParts.class, transCompOf(prefixArgName(env, name)), textCompOf(desc),
-                stringListForGen(defaults.stream()));
+                stringListForGen(defaults.stream())
+            );
         addArgTypes(parameter, construction);
         if (getValue(parameter, arg, "variable", boolean.class)) {
             construction.add(".variable(true)\n");
@@ -138,13 +142,17 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.flag('$L', $L)\n"
-                    + ".withRequiredArg()\n"
-                    + ".argNamed($L)\n"
-                    + ".defaultsTo($L)\n",
+            .add(
+                """
+                $T.flag('$L', $L)
+                .withRequiredArg()
+                .argNamed($L)
+                .defaultsTo($L)
+                """,
                 CommandParts.class, name, textCompOf(desc),
                 transCompOf(prefixArgName(env, argName)),
-                stringListForGen(defaults.stream()));
+                stringListForGen(defaults.stream())
+            );
         addArgTypes(parameter, construction);
         construction.add(".build()");
         return CommandParamInfo.builder()

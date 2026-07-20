@@ -28,6 +28,8 @@ import java.util.Optional;
  */
 public interface InjectedValueAccess {
 
+    // the cycle is only enterable through this field, so two threads can't deadlock on it
+    @SuppressWarnings("ClassInitializationDeadlock")
     InjectedValueAccess EMPTY = EmptyInjectedValueAccess.INSTANCE;
 
     /**

@@ -26,7 +26,6 @@ import com.google.common.collect.Maps;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -135,8 +134,6 @@ class Annotations {
         return value.toString();
     }
 
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-
     static Annotation allDefaultsAnnotation(Class<? extends Annotation> annotationType) {
         Map<String, Object> members = Stream.of(annotationType.getDeclaredMethods())
             .collect(toMap(
@@ -145,7 +142,7 @@ class Annotations {
             ));
         return (Annotation) Proxy.newProxyInstance(
             annotationType.getClassLoader(),
-            new Class[] {annotationType},
+            new Class<?>[] {annotationType},
             (_, method, args) -> {
                 AnnoMethod call = ANNOTATION_METHODS.get(MethodKey.from(method));
                 if (call != null) {

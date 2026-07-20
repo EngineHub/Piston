@@ -133,10 +133,6 @@ class CommandRegistrationGenerator {
         return injectedVariables.stream();
     }
 
-    private static boolean isCommandStatic(CommandInfo info) {
-        return info.getCommandMethod().getModifiers().contains(STATIC);
-    }
-
     private Modifier[] getApiVisibilityModifiers() {
         return info.getClassVisibility() == null
             ? new Modifier[0]

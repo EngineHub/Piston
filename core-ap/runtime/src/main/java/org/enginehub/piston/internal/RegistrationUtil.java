@@ -38,7 +38,7 @@ public class RegistrationUtil {
         );
     }
 
-    public static Method getCommandMethod(Class<?> registrationClass, String methodName, Class... parameterTypes) {
+    public static Method getCommandMethod(Class<?> registrationClass, String methodName, Class<?>... parameterTypes) {
         try {
             return registrationClass.getDeclaredMethod(methodName, parameterTypes);
         } catch (NoSuchMethodException _) {

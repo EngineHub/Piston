@@ -34,9 +34,10 @@ public abstract class RegistrationInfo {
 
     public static Builder builder() {
         Builder builder = new AutoValue_RegistrationInfo.Builder();
-        builder.injectedVariablesBuilder();
-        builder.declaredFieldsBuilder();
-        builder.keyTypesBuilder();
+        // calling the sub-builders initializes them, so the collections default to empty
+        var _ = builder.injectedVariablesBuilder();
+        var _ = builder.declaredFieldsBuilder();
+        var _ = builder.keyTypesBuilder();
         return builder;
     }
 

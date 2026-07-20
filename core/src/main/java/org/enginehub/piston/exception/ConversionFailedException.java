@@ -51,6 +51,7 @@ public class ConversionFailedException extends UsageException {
     private final ArgumentConverter<?> converter;
     private final FailedConversion<?> conversion;
 
+    @SuppressWarnings("this-escape")
     public ConversionFailedException(CommandParseResult parseResult,
                                      Component conversionTarget,
                                      ArgumentConverter<?> converter,
