@@ -88,11 +88,15 @@ public final class FailedConversion<T> extends ConversionResult<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         FailedConversion<?> that = (FailedConversion<?>) o;
-        return error.equals(that.error) &&
-            otherFailures.equals(that.otherFailures);
+        return error.equals(that.error)
+            && otherFailures.equals(that.otherFailures);
     }
 
     @Override

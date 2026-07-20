@@ -22,7 +22,7 @@ package org.enginehub.piston.gen.optimize;
 /**
  * Represents an optimization.
  *
- * @param <T>
+ * @param <T> the type being optimized
  */
 @FunctionalInterface
 public interface Optimization<T> {

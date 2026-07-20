@@ -48,7 +48,7 @@ public class ConfigHolder {
 
     public <T> Config<T> getConfig(Config<T> defaultValue) {
         @SuppressWarnings("unchecked")
-        Config<T> c = (Config<T>) configs.computeIfAbsent(defaultValue.getKey(), k -> defaultValue);
+        Config<T> c = (Config<T>) configs.computeIfAbsent(defaultValue.getKey(), _ -> defaultValue);
         return c;
     }
 

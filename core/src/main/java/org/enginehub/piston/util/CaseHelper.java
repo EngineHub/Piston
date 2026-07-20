@@ -97,4 +97,9 @@ public class CaseHelper {
                 camelCase.length());
         return out.toString();
     }
+
+    private CaseHelper() {
+        throw new RuntimeException();
+    }
+
 }

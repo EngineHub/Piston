@@ -59,7 +59,7 @@ public class ConditionTest {
     @Test
     void as() {
         assertFalse(FALSE.as(ConditionSubtype.class).isPresent());
-        ConditionSubtype st = ctx -> true;
+        ConditionSubtype st = _ -> true;
         assertEquals(st, st.as(ConditionSubtype.class).orElse(null));
     }
 

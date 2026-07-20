@@ -42,7 +42,7 @@ public class ConstructionTest {
     @Test
     void conditionFailedException() {
         Command command = mock(Command.class);
-        Command.Condition uniqCondition = p -> false;
+        Command.Condition uniqCondition = _ -> false;
         when(command.getCondition()).thenReturn(uniqCondition);
         ImmutableList<Command> commands = ImmutableList.of(command);
         ConditionFailedException ex = new ConditionFailedException(commands);

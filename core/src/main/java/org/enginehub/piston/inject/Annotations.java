@@ -61,11 +61,15 @@ class Annotations {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             MethodKey methodKey = (MethodKey) o;
-            return name.equals(methodKey.name) &&
-                signature.equals(methodKey.signature);
+            return name.equals(methodKey.name)
+                && signature.equals(methodKey.signature);
         }
 
         @Override
@@ -85,7 +89,7 @@ class Annotations {
 
     private static final Map<MethodKey, AnnoMethod> ANNOTATION_METHODS =
         ImmutableMap.of(
-            MethodKey.of(Class.class, "annotationType"), (type, members, args) -> type,
+            MethodKey.of(Class.class, "annotationType"), (type, _, _) -> type,
             MethodKey.of(boolean.class, "equals", Object.class), (type, members, args) -> {
                 if (!type.isInstance(args[0])) {
                     return false;
@@ -99,7 +103,7 @@ class Annotations {
                 }
                 return true;
             },
-            MethodKey.of(int.class, "hashCode"), (type, members, args) -> {
+            MethodKey.of(int.class, "hashCode"), (_, members, _) -> {
                 int result = 0;
                 for (String name : members.keySet()) {
                     Object value = members.get(name);
@@ -107,7 +111,7 @@ class Annotations {
                 }
                 return result;
             },
-            MethodKey.of(String.class, "toString"), (type, members, args) -> {
+            MethodKey.of(String.class, "toString"), (type, members, _) -> {
                 StringBuilder output = new StringBuilder("@")
                     .append(type.getName())
                     .append('(');
@@ -142,7 +146,7 @@ class Annotations {
         return (Annotation) Proxy.newProxyInstance(
             annotationType.getClassLoader(),
             new Class[] {annotationType},
-            (proxy, method, args) -> {
+            (_, method, args) -> {
                 AnnoMethod call = ANNOTATION_METHODS.get(MethodKey.from(method));
                 if (call != null) {
                     return call.invoke(annotationType, members, args);
@@ -155,4 +159,9 @@ class Annotations {
             }
         );
     }
+
+    private Annotations() {
+        throw new RuntimeException();
+    }
+
 }

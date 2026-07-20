@@ -26,11 +26,11 @@ import net.kyori.adventure.text.Component;
 import org.enginehub.piston.internal.RegistrationUtil;
 import org.jspecify.annotations.Nullable;
 
-import javax.lang.model.element.ExecutableElement;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
+import javax.lang.model.element.ExecutableElement;
 
 import static java.util.Objects.requireNonNull;
 import static org.enginehub.piston.gen.util.TypeNameUtil.rawType;
@@ -157,4 +157,9 @@ public class CodeBlockUtil {
                 .build();
         }
     }
+
+    private CodeBlockUtil() {
+        throw new RuntimeException();
+    }
+
 }

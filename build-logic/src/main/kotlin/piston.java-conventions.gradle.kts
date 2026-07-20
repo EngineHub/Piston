@@ -1,4 +1,5 @@
 plugins {
+    id("org.enginehub.crankcase.checkstyle")
     id("org.enginehub.crankcase.java-library")
     id("org.enginehub.crankcase.licensing")
     id("org.enginehub.crankcase.publishing")

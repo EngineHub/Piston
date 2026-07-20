@@ -222,13 +222,13 @@ public class CommandProcessor extends BasicAnnotationProcessor {
             .build();
     }
 
-    private final LoadingCache<TypeElement, Boolean> IS_CONDITION =
+    private final LoadingCache<TypeElement, Boolean> isCondition =
         CacheBuilder.newBuilder()
             .weakKeys()
             // take 50 falses, or many more trues
             // we value a positive result more
             .maximumWeight(5000)
-            .<TypeElement, Boolean>weigher((k, v) -> v ? 1 : 100)
+            .<TypeElement, Boolean>weigher((_, v) -> v ? 1 : 100)
             .build(CacheLoader.from((TypeElement element) -> {
                 if (element == null) {
                     return false;
@@ -245,7 +245,7 @@ public class CommandProcessor extends BasicAnnotationProcessor {
 
     private Optional<AnnotationMirror> findCommandCondition(ExecutableElement method) {
         return method.getAnnotationMirrors().stream()
-            .filter(mirror -> IS_CONDITION.getUnchecked(
+            .filter(mirror -> isCondition.getUnchecked(
                 asType(mirror.getAnnotationType().asElement())
             ))
             // reset the generic to just AnnotationMirror, no wildcard

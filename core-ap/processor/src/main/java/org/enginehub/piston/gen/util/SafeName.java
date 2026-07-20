@@ -79,4 +79,9 @@ public class SafeName {
         // just use toString() as a last resort
         return typeName.toString();
     }
+
+    private SafeName() {
+        throw new RuntimeException();
+    }
+
 }

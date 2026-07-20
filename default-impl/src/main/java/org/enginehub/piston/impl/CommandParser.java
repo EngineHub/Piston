@@ -556,8 +556,8 @@ class CommandParser {
             if (flag instanceof ArgAcceptingCommandFlag argPart) {
                 if (i + 1 < flags.length()) {
                     // Only allow argument-flags at the end of flag-combos.
-                    throw usageException(text("Argument-accepting flags must be " +
-                        "at the end of combined flag groups."));
+                    throw usageException(text("Argument-accepting flags must be "
+                        + "at the end of combined flag groups."));
                 }
                 bind(flag, true);
                 if (!hasNextArgument()) {

@@ -52,7 +52,7 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
     }
 
     /**
-     * Is this conversion an exact match for a complete input?
+     * Check if this conversion is an exact match for a complete input.
      *
      * <p>
      * This may be {@code false} if the conversion is a partial match, or if the input was
@@ -102,8 +102,12 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SuccessfulConversion<?> that = (SuccessfulConversion<?>) o;
         return result.equals(that.result);
     }

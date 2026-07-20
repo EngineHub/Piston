@@ -41,7 +41,7 @@ public class RegistrationUtil {
     public static Method getCommandMethod(Class<?> registrationClass, String methodName, Class... parameterTypes) {
         try {
             return registrationClass.getDeclaredMethod(methodName, parameterTypes);
-        } catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException _) {
             throw new IllegalStateException("Missing command method: " + methodName);
         }
     }

@@ -46,12 +46,16 @@ class GenerationSupportImpl implements GenerationSupport {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             ShareKey shareKey1 = (ShareKey) o;
-            return type.equals(shareKey1.type) &&
-                name.equals(shareKey1.name) &&
-                shareKey.equals(shareKey1.shareKey);
+            return type.equals(shareKey1.type)
+                && name.equals(shareKey1.name)
+                && shareKey.equals(shareKey1.shareKey);
         }
 
         @Override
@@ -65,7 +69,7 @@ class GenerationSupportImpl implements GenerationSupport {
     private final Map<ShareKey, String> sharedDepNames = new HashMap<>();
     private final Map<ShareKey, String> sharedFieldNames = new HashMap<>();
 
-    public GenerationSupportImpl(IdentifierTracker identifierTracker,
+    GenerationSupportImpl(IdentifierTracker identifierTracker,
                                  RegistrationInfo.Builder builder) {
         this.identifierTracker = identifierTracker;
         this.builder = builder;
@@ -76,7 +80,7 @@ class GenerationSupportImpl implements GenerationSupport {
         ShareKey hashKey = shareKey == null ? null : new ShareKey(type, name, shareKey);
         if (hashKey != null) {
             return sharedDepNames.computeIfAbsent(hashKey,
-                k -> requestDependencyUnshared(type, name)
+                _ -> requestDependencyUnshared(type, name)
             );
         }
         return requestDependencyUnshared(type, name);
@@ -96,7 +100,7 @@ class GenerationSupportImpl implements GenerationSupport {
         ShareKey hashKey = shareKey == null ? null : new ShareKey(type, name, shareKey);
         if (hashKey != null) {
             return sharedFieldNames.computeIfAbsent(hashKey,
-                k -> requestFieldUnshared(type, name)
+                _ -> requestFieldUnshared(type, name)
             );
         }
         return requestFieldUnshared(type, name);

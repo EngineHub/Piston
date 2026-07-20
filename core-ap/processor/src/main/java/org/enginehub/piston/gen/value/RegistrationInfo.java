@@ -25,9 +25,9 @@ import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import java.util.Collection;
 
 @AutoValue
 public abstract class RegistrationInfo {

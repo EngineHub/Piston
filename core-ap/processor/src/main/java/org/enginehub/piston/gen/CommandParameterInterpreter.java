@@ -43,6 +43,10 @@ import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandParts;
 import org.enginehub.piston.part.NoArgCommandFlag;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -50,10 +54,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
@@ -81,7 +81,7 @@ class CommandParameterInterpreter {
         return env.getTypeUtils().isAssignable(parameter.asType(), commandValue);
     }
 
-    private final Map<Class<? extends Annotation>, ParamTransform> ANNOTATION_TRANSFORMS = ImmutableMap.of(
+    private final Map<Class<? extends Annotation>, ParamTransform> annotationTransforms = ImmutableMap.of(
         Arg.class, this::argTransform,
         ArgFlag.class, this::argFlagTransform,
         Switch.class, this::switchTransform
@@ -109,8 +109,8 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.arg($L, $L)\n" +
-                    ".defaultsTo($L)\n",
+            .add("$T.arg($L, $L)\n"
+                    + ".defaultsTo($L)\n",
                 CommandParts.class, transCompOf(prefixArgName(env, name)), textCompOf(desc),
                 stringListForGen(defaults.stream()));
         addArgTypes(parameter, construction);
@@ -138,10 +138,10 @@ class CommandParameterInterpreter {
         String desc = getValue(parameter, arg, "desc", String.class);
         List<String> defaults = getList(parameter, arg, "def", String.class);
         CodeBlock.Builder construction = CodeBlock.builder()
-            .add("$T.flag('$L', $L)\n" +
-                    ".withRequiredArg()\n" +
-                    ".argNamed($L)\n" +
-                    ".defaultsTo($L)\n",
+            .add("$T.flag('$L', $L)\n"
+                    + ".withRequiredArg()\n"
+                    + ".argNamed($L)\n"
+                    + ".defaultsTo($L)\n",
                 CommandParts.class, name, textCompOf(desc),
                 transCompOf(prefixArgName(env, argName)),
                 stringListForGen(defaults.stream()));
@@ -243,7 +243,7 @@ class CommandParameterInterpreter {
             .extractSpec(ExtractSpec.builder()
                 .name("extract$" + parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(var ->
+                .extractMethodBody(_ ->
                     CodeBlock.of("$[return $L;\n$]", ReservedNames.PARAMETERS))
                 .build())
             .build();
@@ -254,7 +254,7 @@ class CommandParameterInterpreter {
             .extractSpec(ExtractSpec.builder()
                 .name("extract$" + parameter.getSimpleName().toString())
                 .type(TypeName.get(parameter.asType()))
-                .extractMethodBody(var -> {
+                .extractMethodBody(_ -> {
                     CodeBlock paramKey = asKeyType(parameter);
                     return CodeBlock.builder()
                         .addStatement("return $T.requireOptional($L, $S, $L.injectedValue($L))",
@@ -298,7 +298,7 @@ class CommandParameterInterpreter {
 
     private CommandParamInfo getParam(VariableElement parameter) {
         ImmutableList<ParamTransform> transforms =
-            ANNOTATION_TRANSFORMS.entrySet().stream()
+            annotationTransforms.entrySet().stream()
                 .filter(e -> isAnnotationPresent(parameter, e.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(toImmutableList());

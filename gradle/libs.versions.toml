@@ -7,6 +7,7 @@ kyoriAdventure = "5.1.1"
 log4j = "2.26.0"
 
 [libraries]
+crankcase-checkstyle = { module = "org.enginehub.crankcase:checkstyle", version.ref = "crankcase" }
 crankcase-java = { module = "org.enginehub.crankcase:java", version.ref = "crankcase" }
 crankcase-javaLibrary = { module = "org.enginehub.crankcase:java-library", version.ref = "crankcase" }
 crankcase-licensing = { module = "org.enginehub.crankcase:licensing", version.ref = "crankcase" }
