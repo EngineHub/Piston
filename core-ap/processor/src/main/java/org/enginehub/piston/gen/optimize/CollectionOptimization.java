@@ -25,9 +25,8 @@ import java.util.Collection;
 /**
  * Represents an optimization over a collection.
  *
- * @param <T>
+ * @param <T> the element type of the optimized collection
  */
-@FunctionalInterface
 public interface CollectionOptimization<T> extends Optimization<Collection<T>> {
 
     @Override

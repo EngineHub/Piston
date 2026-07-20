@@ -26,11 +26,11 @@ import net.kyori.adventure.text.Component;
 import org.enginehub.piston.internal.RegistrationUtil;
 import org.jspecify.annotations.Nullable;
 
-import javax.lang.model.element.ExecutableElement;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
+import javax.lang.model.element.ExecutableElement;
 
 import static java.util.Objects.requireNonNull;
 import static org.enginehub.piston.gen.util.TypeNameUtil.rawType;
@@ -114,7 +114,7 @@ public class CodeBlockUtil {
             this.suffix = requireNonNull(suffix);
         }
 
-        public CodeBlockJoiner setEmptyValue(@Nullable CodeBlock emptyValue) {
+        CodeBlockJoiner setEmptyValue(@Nullable CodeBlock emptyValue) {
             this.emptyValue = emptyValue;
             return this;
         }
@@ -128,11 +128,11 @@ public class CodeBlockUtil {
             return value;
         }
 
-        public void add(CodeBlock block) {
+        void add(CodeBlock block) {
             prepareBuilder().add(block);
         }
 
-        public CodeBlockJoiner merge(CodeBlockJoiner joiner) {
+        CodeBlockJoiner merge(CodeBlockJoiner joiner) {
             // do not inline -- want to finish the joiner before adding,
             // in case `joiner` == `this`
             CodeBlock content = joiner.finishRaw().build();
@@ -147,7 +147,7 @@ public class CodeBlockUtil {
             return value == null ? CodeBlock.builder() : value;
         }
 
-        public CodeBlock finish() {
+        CodeBlock finish() {
             if (value == null && emptyValue != null) {
                 return emptyValue;
             }
@@ -157,4 +157,9 @@ public class CodeBlockUtil {
                 .build();
         }
     }
+
+    private CodeBlockUtil() {
+        throw new RuntimeException();
+    }
+
 }

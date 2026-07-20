@@ -111,4 +111,8 @@ public class PartHelper {
         ));
     }
 
+    private PartHelper() {
+        throw new RuntimeException();
+    }
+
 }

@@ -52,7 +52,7 @@ class ConditionGenerator {
         TypeName generatorClassName = getAnnotationValue(conditionMirror, "value")
             .accept(new SimpleAnnotationValueVisitor8<TypeName, Void>() {
                 @Override
-                public TypeName visitType(TypeMirror t, Void aVoid) {
+                public TypeName visitType(TypeMirror t, Void unused) {
                     return TypeName.get(t);
                 }
             }, null);

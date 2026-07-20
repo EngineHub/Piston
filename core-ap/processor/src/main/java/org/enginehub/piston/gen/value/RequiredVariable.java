@@ -54,7 +54,7 @@ public abstract class RequiredVariable {
     }
 
     /**
-     * Is this variable inherited from another interface?
+     * Check if this variable is inherited from another interface.
      */
     public abstract boolean isInherited();
 

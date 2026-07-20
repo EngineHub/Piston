@@ -51,7 +51,7 @@ public interface Command {
          * An action that does nothing, and returns 0. Useful for
          * commands that only have subcommands, and do nothing.
          */
-        Action NULL_ACTION = params -> 0;
+        Action NULL_ACTION = _ -> 0;
 
         /**
          * Run the action.
@@ -71,12 +71,12 @@ public interface Command {
         /**
          * An condition that always returns true.
          */
-        Condition TRUE = p -> true;
+        Condition TRUE = _ -> true;
 
         /**
          * An condition that always returns false.
          */
-        Condition FALSE = p -> false;
+        Condition FALSE = _ -> false;
 
         /**
          * Determine if the condition is satisfied.

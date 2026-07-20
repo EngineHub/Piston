@@ -19,11 +19,13 @@
 
 package org.enginehub.piston.converter;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.SequencedCollection;
 import java.util.function.Function;
 
 public final class FailedConversion<T> extends ConversionResult<T> {
@@ -69,7 +71,9 @@ public final class FailedConversion<T> extends ConversionResult<T> {
     }
 
     @Override
-    public <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper) {
+    public <U> ConversionResult<U> map(
+        Function<? super ImmutableList<T>, ? extends SequencedCollection<U>> mapper
+    ) {
         return failureAsAny();
     }
 
@@ -82,17 +86,21 @@ public final class FailedConversion<T> extends ConversionResult<T> {
     }
 
     @Override
-    public Collection<T> get() {
+    public ImmutableList<T> get() {
         throw FailedConversionMapper.mapOnto(NoSuchElementException::new, this);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         FailedConversion<?> that = (FailedConversion<?>) o;
-        return error.equals(that.error) &&
-            otherFailures.equals(that.otherFailures);
+        return error.equals(that.error)
+            && otherFailures.equals(that.otherFailures);
     }
 
     @Override

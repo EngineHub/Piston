@@ -49,4 +49,9 @@ public class ReservedNames {
             BUILDER
         );
     }
+
+    private ReservedNames() {
+        throw new RuntimeException();
+    }
+
 }

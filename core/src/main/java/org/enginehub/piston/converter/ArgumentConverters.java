@@ -46,7 +46,7 @@ import static java.lang.invoke.MethodType.methodType;
 public class ArgumentConverters {
 
     private static final ArgumentConverter<String> STRING_ARGUMENT_CONVERTER =
-        SimpleArgumentConverter.from((s, c) -> SuccessfulConversion.fromSingle(s), "any text");
+        SimpleArgumentConverter.from((s, _) -> SuccessfulConversion.fromSingle(s), "any text");
 
     public static ArgumentConverter<String> forString() {
         return STRING_ARGUMENT_CONVERTER;
@@ -63,7 +63,7 @@ public class ArgumentConverters {
             handle = MethodHandles.publicLookup().findStatic(
                 c, "valueOf", methodType(c, String.class)
             );
-        } catch (NoSuchMethodException | IllegalAccessException e) {
+        } catch (NoSuchMethodException | IllegalAccessException _) {
             return Optional.empty();
         }
 
@@ -83,7 +83,7 @@ public class ArgumentConverters {
             handle = MethodHandles.publicLookup().findConstructor(
                 c, methodType(void.class, String.class)
             );
-        } catch (NoSuchMethodException | IllegalAccessException e) {
+        } catch (NoSuchMethodException | IllegalAccessException _) {
             return Optional.empty();
         }
 
@@ -188,7 +188,7 @@ public class ArgumentConverters {
         type -> {
             if (Objects.equals(type.wrap().getRawType(), Character.class)) {
                 return Optional.of(SimpleArgumentConverter.from(
-                    (s, c) -> SuccessfulConversion.fromSingle(s.charAt(0)),
+                    (s, _) -> SuccessfulConversion.fromSingle(s.charAt(0)),
                     "any character"
                 ));
             }

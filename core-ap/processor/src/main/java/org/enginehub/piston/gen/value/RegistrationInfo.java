@@ -25,18 +25,19 @@ import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import java.util.Collection;
 
 @AutoValue
 public abstract class RegistrationInfo {
 
     public static Builder builder() {
         Builder builder = new AutoValue_RegistrationInfo.Builder();
-        builder.injectedVariablesBuilder();
-        builder.declaredFieldsBuilder();
-        builder.keyTypesBuilder();
+        // calling the sub-builders initializes them, so the collections default to empty
+        var _ = builder.injectedVariablesBuilder();
+        var _ = builder.declaredFieldsBuilder();
+        var _ = builder.keyTypesBuilder();
         return builder;
     }
 

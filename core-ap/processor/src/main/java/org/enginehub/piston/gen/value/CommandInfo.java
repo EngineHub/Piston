@@ -23,9 +23,9 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import org.jspecify.annotations.Nullable;
 
-import javax.lang.model.element.ExecutableElement;
 import java.util.Collection;
 import java.util.Optional;
+import javax.lang.model.element.ExecutableElement;
 
 @AutoValue
 public abstract class CommandInfo {

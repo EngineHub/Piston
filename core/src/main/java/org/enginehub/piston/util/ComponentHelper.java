@@ -75,18 +75,18 @@ public class ComponentHelper {
             return value;
         }
 
-        public void add(Component component) {
+        void add(Component component) {
             initBuilder().append(component);
         }
 
-        public ComponentJoiner merge(ComponentJoiner other) {
+        ComponentJoiner merge(ComponentJoiner other) {
             if (other.value != null) {
                 initBuilder().append(other.value.build());
             }
             return this;
         }
 
-        public Component finish() {
+        Component finish() {
             if (value == null) {
                 if (nullValue != null) {
                     return nullValue;

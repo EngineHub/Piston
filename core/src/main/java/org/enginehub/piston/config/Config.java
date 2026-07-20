@@ -38,6 +38,7 @@ public abstract class Config<T> {
     private final String key;
     private @Nullable T value;
 
+    @SuppressWarnings("this-escape")
     protected Config(String key, @Nullable T defaultValue) {
         this.key = key;
         checkValue(defaultValue);
@@ -53,8 +54,7 @@ public abstract class Config<T> {
         return key;
     }
 
-    public @Nullable
-    T getValue() {
+    public @Nullable T getValue() {
         return value;
     }
 

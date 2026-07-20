@@ -63,12 +63,12 @@ public abstract class KeyInfo {
 
     public final String getVariableName() {
         AnnotationSpec spec = annotationSpec();
-        return SafeName.getNameAsIdentifier(typeName()) +
-            "_" +
-            (spec == null
+        return SafeName.getNameAsIdentifier(typeName())
+            + "_"
+            + (spec == null
                 ? ""
-                : getSpecName(spec) + "_") +
-            "Key";
+                : getSpecName(spec) + "_")
+            + "Key";
     }
 
     private String getSpecName(AnnotationSpec spec) {
@@ -143,11 +143,11 @@ public abstract class KeyInfo {
                 .beginControlFlow("try")
                 .addStatement(
                     // from this class
-                    "return getClass()" +
+                    "return getClass()"
                         // retrieve this method
-                        ".getDeclaredMethod(\"a\", $T.class)" +
+                        + ".getDeclaredMethod(\"a\", $T.class)"
                         // and get its first parameter's first annotation (again, only one)
-                        ".getParameterAnnotations()[0][0]", Object.class)
+                        + ".getParameterAnnotations()[0][0]", Object.class)
                 .nextControlFlow("catch ($T e)", NoSuchMethodException.class)
                 .addStatement("throw new $T(e)", RuntimeException.class)
                 .endControlFlow()

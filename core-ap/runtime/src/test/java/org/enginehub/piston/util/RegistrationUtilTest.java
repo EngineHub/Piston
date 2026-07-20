@@ -91,6 +91,7 @@ public class RegistrationUtilTest {
         verify(listener).beforeCall(fakeCommandMethod, parameters);
         verifyNoMoreInteractions(listener);
     }
+
     @Test
     void listenersAfterCall() {
         RegistrationUtil.listenersAfterCall(ImmutableList.of(listener), fakeCommandMethod, parameters);
@@ -98,6 +99,7 @@ public class RegistrationUtilTest {
         verify(listener).afterCall(fakeCommandMethod, parameters);
         verifyNoMoreInteractions(listener);
     }
+
     @Test
     void listenersAfterThrow() {
         Throwable ex = new RuntimeException();

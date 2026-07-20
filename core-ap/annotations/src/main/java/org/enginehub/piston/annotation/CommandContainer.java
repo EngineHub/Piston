@@ -42,11 +42,13 @@ public @interface CommandContainer {
      * but if you add an interface that matches existing methods, then
      * those will be overriden, allowing for more generic configuration.
      * </p>
+     *
      * <p>
      * For example, you could add an interface representing the addition
      * of a {@link CommandConditionGenerator} to the registration builder,
      * and then you will be able to inject all builders using a single method.
      * </p>
+     *
      * <p>
      * N.B.: The registration class always implements {@link CommandRegistration},
      * regardless of the content of this array.

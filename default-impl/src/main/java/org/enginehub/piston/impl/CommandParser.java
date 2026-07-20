@@ -273,13 +273,6 @@ class CommandParser {
         return perCommandDetails().partIter.next();
     }
 
-    private void unconsumePart() {
-        ListIterator<ArgConsumingCommandPart> partIter = perCommandDetails().partIter;
-        checkState(partIter.hasPrevious(),
-            "Trying to unconsume nothing");
-        partIter.previous();
-    }
-
     private void bind(CommandPart part, boolean exact) {
         argBindings.put(part, exact);
     }
@@ -556,8 +549,8 @@ class CommandParser {
             if (flag instanceof ArgAcceptingCommandFlag argPart) {
                 if (i + 1 < flags.length()) {
                     // Only allow argument-flags at the end of flag-combos.
-                    throw usageException(text("Argument-accepting flags must be " +
-                        "at the end of combined flag groups."));
+                    throw usageException(text("Argument-accepting flags must be "
+                        + "at the end of combined flag groups."));
                 }
                 bind(flag, true);
                 if (!hasNextArgument()) {

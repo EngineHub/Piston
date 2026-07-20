@@ -91,10 +91,9 @@ public abstract class ExtractSpec {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ExtractSpec)) {
+        if (!(obj instanceof ExtractSpec spec)) {
             return false;
         }
-        ExtractSpec spec = (ExtractSpec) obj;
         boolean fastChecks = Objects.equals(getName(), spec.getName())
             && Objects.equals(getType(), spec.getType());
         if (!fastChecks) {

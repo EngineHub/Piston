@@ -30,7 +30,7 @@ public interface ValueProvider<C, T> {
 
     static <C, T> ValueProvider<C, T> constant(@Nullable T value) {
         Optional<T> opt = Optional.ofNullable(value);
-        return context -> opt;
+        return _ -> opt;
     }
 
     /**

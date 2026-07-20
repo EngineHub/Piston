@@ -23,14 +23,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
 import org.jspecify.annotations.Nullable;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.Element;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import static com.google.auto.common.AnnotationMirrors.getAnnotationValue;
 
@@ -46,7 +46,7 @@ public class AnnoValueExtraction {
         @Nullable
         private final Object bad;
 
-        public GeneralResult(@Nullable Object good, @Nullable Object bad) {
+        GeneralResult(@Nullable Object good, @Nullable Object bad) {
             this.good = good;
             this.bad = bad;
         }
@@ -106,6 +106,10 @@ public class AnnoValueExtraction {
                     return builder.build();
                 }
             }, null);
+    }
+
+    private AnnoValueExtraction() {
+        throw new RuntimeException();
     }
 
 }

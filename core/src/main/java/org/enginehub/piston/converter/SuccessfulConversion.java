@@ -20,9 +20,10 @@
 package org.enginehub.piston.converter;
 
 import com.google.common.collect.ImmutableList;
+import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Objects;
+import java.util.SequencedCollection;
 import java.util.function.Function;
 
 public final class SuccessfulConversion<T> extends ConversionResult<T> {
@@ -35,24 +36,24 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
         return from(ImmutableList.of(result), exactMatch);
     }
 
-    public static <T> SuccessfulConversion<T> from(Collection<T> result) {
+    public static <T> SuccessfulConversion<T> from(SequencedCollection<T> result) {
         return new SuccessfulConversion<>(result, true);
     }
 
-    public static <T> SuccessfulConversion<T> from(Collection<T> result, boolean exactMatch) {
+    public static <T> SuccessfulConversion<T> from(SequencedCollection<T> result, boolean exactMatch) {
         return new SuccessfulConversion<>(result, exactMatch);
     }
 
-    private final Collection<T> result;
+    private final ImmutableList<T> result;
     private final boolean exactMatch;
 
-    private SuccessfulConversion(Collection<T> result, boolean exactMatch) {
-        this.result = result;
+    private SuccessfulConversion(SequencedCollection<T> result, boolean exactMatch) {
+        this.result = ImmutableList.copyOf(result);
         this.exactMatch = exactMatch;
     }
 
     /**
-     * Is this conversion an exact match for a complete input?
+     * Check if this conversion is an exact match for a complete input.
      *
      * <p>
      * This may be {@code false} if the conversion is a partial match, or if the input was
@@ -82,8 +83,10 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
     }
 
     @Override
-    public <U> ConversionResult<U> map(Function<? super Collection<T>, ? extends Collection<U>> mapper) {
-        Collection<U> mapped;
+    public <U> ConversionResult<U> map(
+        Function<? super ImmutableList<T>, ? extends SequencedCollection<U>> mapper
+    ) {
+        SequencedCollection<U> mapped;
         try {
             mapped = mapper.apply(get());
         } catch (Throwable t) {
@@ -96,14 +99,18 @@ public final class SuccessfulConversion<T> extends ConversionResult<T> {
     }
 
     @Override
-    public Collection<T> get() {
+    public ImmutableList<T> get() {
         return result;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SuccessfulConversion<?> that = (SuccessfulConversion<?>) o;
         return result.equals(that.result);
     }
