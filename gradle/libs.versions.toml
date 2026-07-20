@@ -1,0 +1,31 @@
+[versions]
+crankcase = "0.1.2"
+kotlin = "2.4.0"
+autoValue = "1.11.1"
+kyoriAdventure = "5.1.1"
+# Sync with Mojang's Log4j
+log4j = "2.26.0"
+
+[libraries]
+crankcase-java = { module = "org.enginehub.crankcase:java", version.ref = "crankcase" }
+crankcase-javaLibrary = { module = "org.enginehub.crankcase:java-library", version.ref = "crankcase" }
+crankcase-licensing = { module = "org.enginehub.crankcase:licensing", version.ref = "crankcase" }
+crankcase-publishing = { module = "org.enginehub.crankcase:publishing", version.ref = "crankcase" }
+
+guava = "com.google.guava:guava:33.6.0-jre"
+kyoriAdventure = { module = "net.kyori:adventure-api", version.ref = "kyoriAdventure" }
+kyoriAdventureTextPlain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "kyoriAdventure" }
+autoCommon = "com.google.auto:auto-common:1.2.2"
+autoValueAnnotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "autoValue" }
+autoValueProcessor = { module = "com.google.auto.value:auto-value", version.ref = "autoValue" }
+autoService = "com.google.auto.service:auto-service:1.1.1"
+javapoet = "com.squareup:javapoet:1.13.0"
+log4jApi = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4jCore = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+jspecify = "org.jspecify:jspecify:1.0.0"
+compileTesting = "com.google.testing.compile:compile-testing:0.23.0"
+mockito = "org.mockito:mockito-core:5.23.0"
+
+[plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }

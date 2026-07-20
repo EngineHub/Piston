@@ -1,6 +1,4 @@
 pluginManagement {
-    // pluginManagement repositories resolve plugins before repo-reconfiguration can apply, so they
-    // must point at EngineHub mirrors directly rather than upstream URLs.
     repositories {
         maven {
             name = "EngineHub"
@@ -18,19 +16,13 @@ pluginManagement {
 }
 plugins {
     id("org.enginehub.crankcase.repo-reconfiguration") version "0.1.2"
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }
 
-rootProject.name = "piston"
-
-includeBuild("build-logic")
-
-include(":core", ":default-impl")
-listOf("annotations", "processor", "runtime").forEach {
-    include(":core-ap:$it")
-}
+rootProject.name = "build-logic"

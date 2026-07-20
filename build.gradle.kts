@@ -3,12 +3,6 @@ plugins {
     jacoco
 }
 
-configureArtifactory()
-
-repositories {
-    mavenCentral()
-}
-
 release {
     tagTemplate = "v\${version}"
     buildTasks = listOf<String>()

@@ -1,7 +1,9 @@
-applyCoreApConfig()
+plugins {
+    id("piston.core-ap-conventions")
+}
 
 dependencies {
-    "api"(project(":core"))
+    api(project(":core"))
 
-    "testImplementation"(Libs.mockito)
+    testImplementation(libs.mockito)
 }
