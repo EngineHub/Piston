@@ -57,7 +57,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -129,7 +128,7 @@ class CommandParser {
     @Nullable
     private PerCommandDetails perCommandDetails;
     @Nullable
-    private CommandArgument lastFailedOptional;
+    private RejectedArgument lastFailedOptional;
     @Nullable
     private CommandParseResult result;
     private boolean justUnconsumed;
@@ -177,25 +176,35 @@ class CommandParser {
         return usageException(text("Too many arguments."));
     }
 
-    private UsageException rejectedArgumentException(ArgAcceptingCommandPart nextArg, String token) {
+    private UsageException rejectedArgumentException(
+            ArgAcceptingCommandPart nextArg,
+            String token,
+            AcceptInfo acceptInfo
+    ) {
         if (token.isEmpty()) {
             // an empty token is an absent value, not a value that failed conversion
             return notEnoughArgumentsException();
         }
-        return conversionFailedException(nextArg, token);
+        return conversionFailedException(nextArg, acceptInfo);
     }
 
-    private ConversionFailedException conversionFailedException(ArgAcceptingCommandPart nextArg, String token) {
-        // TODO: Make this print all converters
-        ArgumentConverter<?> converter = nextArg.getTypes().stream()
-            .map(k -> converters.getConverter(k).orElse(null))
-            .filter(Objects::nonNull)
-            .findFirst().orElseThrow(IllegalStateException::new);
+    private ConversionFailedException conversionFailedException(
+            ArgAcceptingCommandPart nextArg,
+            AcceptInfo acceptInfo
+    ) {
+        ArgumentConverter<?> converter = checkNotNull(
+            acceptInfo.failedConverter,
+            "Rejected argument has no converter"
+        );
+        FailedConversion<?> failedConversion = checkNotNull(
+            acceptInfo.failedConversion,
+            "Rejected argument has no failed conversion"
+        );
         buildParseResult();
         return new ConversionFailedException(getResult(),
             nextArg.getTextRepresentation(),
             converter,
-            (FailedConversion<?>) converter.convert(token, context));
+            failedConversion);
     }
 
     private ConditionFailedException conditionFailed() {
@@ -352,7 +361,11 @@ class CommandParser {
                 // Hit end of parts, this cannot be parsed
                 if (lastFailedOptional != null) {
                     // fail on type-conversion to this instead
-                    throw rejectedArgumentException(lastFailedOptional, token);
+                    throw rejectedArgumentException(
+                        lastFailedOptional.argument,
+                        token,
+                        lastFailedOptional.acceptInfo
+                    );
                 }
                 throw tooManyArgumentsException();
             }
@@ -415,7 +428,7 @@ class CommandParser {
         if (!hasNextPart()) {
             log("parseRegularArgument: no arguments to attempt matching");
         }
-        CommandArgument lastFailedOptionalLocal = null;
+        RejectedArgument lastFailedOptionalLocal = null;
         while (hasNextPart()) {
             ArgConsumingCommandPart nextArg = nextPart();
             if (nextArg instanceof SubCommandPart subCommandPart) {
@@ -438,11 +451,11 @@ class CommandParser {
                 // good, we can just satisfy it
                 AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(argPart, token);
                 if (!acceptInfo.isAccepted()) {
-                    throw rejectedArgumentException(argPart, token);
+                    throw rejectedArgumentException(argPart, token, acceptInfo);
                 }
                 details.remainingRequiredParts--;
                 addValueFull(nextArg, v -> v.values(consumeArguments(
-                    argPart, token, acceptInfo == AcceptInfo.ACCEPTED_EXACT
+                    argPart, token, acceptInfo.isExactMatch()
                 )));
                 return true;
             } else {
@@ -462,12 +475,12 @@ class CommandParser {
                 if (acceptInfo.isAccepted()) {
                     details.defaultsNeeded.remove(nextArg);
                     addValueFull(nextArg, v -> v.values(consumeArguments(
-                        argPart, token, acceptInfo == AcceptInfo.ACCEPTED_EXACT
+                        argPart, token, acceptInfo.isExactMatch()
                     )));
                     return true;
                 }
                 // store it in case no required arguments match
-                lastFailedOptionalLocal = argPart;
+                lastFailedOptionalLocal = new RejectedArgument(argPart, acceptInfo);
             }
         }
         lastFailedOptional = lastFailedOptionalLocal;
@@ -483,7 +496,7 @@ class CommandParser {
                 String next = nextArgument();
                 AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(nextArg, next);
                 if (acceptInfo.isAccepted()) {
-                    bind(nextArg, acceptInfo == AcceptInfo.ACCEPTED_EXACT);
+                    bind(nextArg, acceptInfo.isExactMatch());
                     result.add(next);
                 } else {
                     unconsumeArgument();
@@ -494,15 +507,58 @@ class CommandParser {
         return result.build();
     }
 
-    private enum AcceptInfo {
-        REJECTED,
-        ACCEPTED_INEXACT,
-        ACCEPTED_EXACT,
-        ;
+    private static final class RejectedArgument {
+
+        private final CommandArgument argument;
+        private final AcceptInfo acceptInfo;
+
+        private RejectedArgument(CommandArgument argument, AcceptInfo acceptInfo) {
+            this.argument = argument;
+            this.acceptInfo = acceptInfo;
+        }
+
+    }
+
+    private static final class AcceptInfo {
+
+        private static final AcceptInfo REJECTED = new AcceptInfo(false, false, null, null);
+        private static final AcceptInfo ACCEPTED_INEXACT = new AcceptInfo(true, false, null, null);
+        private static final AcceptInfo ACCEPTED_EXACT = new AcceptInfo(true, true, null, null);
+
+        private final boolean accepted;
+        private final boolean exactMatch;
+        @Nullable
+        private final ArgumentConverter<?> failedConverter;
+        @Nullable
+        private final FailedConversion<?> failedConversion;
+
+        private AcceptInfo(
+                boolean accepted,
+                boolean exactMatch,
+                @Nullable ArgumentConverter<?> failedConverter,
+                @Nullable FailedConversion<?> failedConversion
+        ) {
+            this.accepted = accepted;
+            this.exactMatch = exactMatch;
+            this.failedConverter = failedConverter;
+            this.failedConversion = failedConversion;
+        }
+
+        private static AcceptInfo rejected(
+                ArgumentConverter<?> failedConverter,
+                FailedConversion<?> failedConversion
+        ) {
+            return new AcceptInfo(false, false, failedConverter, failedConversion);
+        }
 
         boolean isAccepted() {
-            return this != REJECTED;
+            return accepted;
         }
+
+        boolean isExactMatch() {
+            return exactMatch;
+        }
+
     }
 
     /**
@@ -521,6 +577,8 @@ class CommandParser {
         }
 
         boolean acceptedInexact = false;
+        ArgumentConverter<?> failedConverter = null;
+        FailedConversion<?> failedConversion = null;
         for (Key<?> type : types) {
             Optional<? extends ArgumentConverter<?>> argumentConverter = converters.getConverter(type);
             if (!argumentConverter.isPresent()) {
@@ -533,9 +591,18 @@ class CommandParser {
                 } else {
                     acceptedInexact = true;
                 }
+            } else if (failedConversion == null) {
+                failedConverter = argumentConverter.get();
+                failedConversion = (FailedConversion<?>) result;
             }
         }
-        return acceptedInexact ? AcceptInfo.ACCEPTED_INEXACT : AcceptInfo.REJECTED;
+        if (acceptedInexact) {
+            return AcceptInfo.ACCEPTED_INEXACT;
+        }
+        return AcceptInfo.rejected(
+            checkNotNull(failedConverter, "Rejected argument has no converter"),
+            checkNotNull(failedConversion, "Rejected argument has no failed conversion")
+        );
     }
 
     private void parseFlags(String flags) {
@@ -566,10 +633,10 @@ class CommandParser {
                 String nextToken = nextArgument();
                 AcceptInfo acceptInfo = getAcceptInfoFromTypeParsers(argPart, nextToken);
                 if (!acceptInfo.isAccepted()) {
-                    throw rejectedArgumentException(argPart, nextToken);
+                    throw rejectedArgumentException(argPart, nextToken, acceptInfo);
                 }
                 addValueFull(flag, v -> v.value(nextToken));
-                bind(flag, acceptInfo == AcceptInfo.ACCEPTED_EXACT);
+                bind(flag, acceptInfo.isExactMatch());
                 perCommandDetails().defaultsNeeded.remove(flag);
                 perCommandDetails().argFlagsNeeded.remove(flag);
             } else {

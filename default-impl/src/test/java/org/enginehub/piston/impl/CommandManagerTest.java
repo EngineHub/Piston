@@ -23,12 +23,23 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.enginehub.piston.Command;
 import org.enginehub.piston.CommandManager;
+import org.enginehub.piston.converter.ArgumentConverter;
+import org.enginehub.piston.converter.ConversionResult;
+import org.enginehub.piston.converter.FailedConversion;
+import org.enginehub.piston.converter.SuccessfulConversion;
 import org.enginehub.piston.exception.ConditionFailedException;
+import org.enginehub.piston.exception.ConversionFailedException;
 import org.enginehub.piston.inject.InjectedValueAccess;
+import org.enginehub.piston.inject.Key;
+import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.SubCommandPart;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("A CommandManager")
@@ -68,4 +79,49 @@ public class CommandManagerTest {
             manager.parse(InjectedValueAccess.EMPTY, ImmutableList.of("test", "sub"))
         );
     }
+
+    @Test
+    @DisplayName("reuses a rejected converter result when reporting the parse failure")
+    void parseReusesRejectedConverterResult() {
+        CommandManager manager = new CommandManagerImpl();
+        Key<ChangingConversion> key = Key.of(ChangingConversion.class);
+        AtomicInteger conversionCount = new AtomicInteger();
+        FailedConversion<ChangingConversion> rejected = FailedConversion.from(
+            new IllegalArgumentException("rejected on first conversion")
+        );
+        manager.registerConverter(key, new ArgumentConverter<>() {
+            @Override
+            public ConversionResult<ChangingConversion> convert(
+                    String argument,
+                    InjectedValueAccess context
+            ) {
+                if (conversionCount.getAndIncrement() == 0) {
+                    return rejected;
+                }
+                return SuccessfulConversion.fromSingle(new ChangingConversion());
+            }
+
+            @Override
+            public Component describeAcceptableArguments() {
+                return Component.text("a changing value");
+            }
+        });
+        manager.register("test", command -> command
+            .description(Component.text("Test"))
+            .addPart(CommandArgument.builder(
+                Component.translatable("value"),
+                Component.text("A changing value")
+            ).ofTypes(ImmutableList.of(key)).build()));
+
+        ConversionFailedException exception = assertThrows(ConversionFailedException.class, () ->
+            manager.parse(InjectedValueAccess.EMPTY, ImmutableList.of("test", "value"))
+        );
+
+        assertSame(rejected, exception.getConversion());
+        assertEquals(1, conversionCount.get());
+    }
+
+    private static final class ChangingConversion {
+    }
+
 }
